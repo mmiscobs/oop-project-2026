@@ -6,17 +6,23 @@ abstract class Buildable {
     getX(): int
     getY(): int
     {abstract} int getPrice()
+
+    -int crimeRate
+    int getCrimeRate()
+    {abstract} void setCrimeRate(int crimeRateReduction)
 }
 Buildable <-- PrivateBuilding
 abstract class PrivateBuilding {
   #isBuilt: boolean 
-  {abstract} getIsBuilt(): boolean
+  {abstract} boolean getIsBuilt()
   {abstract} int calculateProfitPerTick()
 }
 PrivateBuilding <-- ResidentialBuilding
 abstract class ResidentialBuilding {
-  {abstract} capacity: int
-  residents: int
+  {abstract} int getCapacity()
+  {static} int calculateDemand()
+  int getResidents()
+  void addResident()
 }
 ResidentialBuilding <-- SmallHouse 
 class SmallHouse {}
@@ -24,12 +30,19 @@ ResidentialBuilding <-- Condominium
 class Condominium {}
 PrivateBuilding <-- WorkplaceBuilding
 abstract class WorkplaceBuilding {
-  {abstract} currentWorkers: int
-  {abstract} workersHired: int
-  {abstract} workersCapacity: int
+  -currentWorkers: int
+  int getCurrentWorkers()
+  void addCurrentWorker()
+  void removeCurrentWorker()
+
+  -workersHired: int
+  void addHiredWorker()
+  void removeHiredWorker()
+  {abstract} int getWorkersCapacity()
 }
 WorkplaceBuilding <-- IndustrialBuilding
 abstract class IndustrialBuilding {
+  {static} int calculateDemand()
 }
 IndustrialBuilding <-- Factory
 class Factory {}
@@ -37,6 +50,7 @@ IndustrialBuilding <-- Warehouse
 class Warehouse {}
 WorkplaceBuilding <-- OfficeBuilding
 abstract class OfficeBuilding {
+  {static} int calculateDemand()
 }
 OfficeBuilding <-- Skyrise
 class Skyrise {}
@@ -44,8 +58,12 @@ OfficeBuilding <-- BankBranch
 class BankBranch {}
 WorkplaceBuilding <-- CommercialBuilding
 abstract class CommercialBuilding {
-    {abstract} visitorsCapacity: int
-    visitors: int
+    {abstract} int getVisitorsCapacity()
+    -visitors: int
+    int getVisitors()
+    void addVisitor()
+    void removeVisitor()
+    {static} int calculateDemand()
 }
 CommercialBuilding <-- Mall
 class Mall {}
@@ -89,6 +107,7 @@ abstract class PublicServiceBuilding {
 }
 PublicServiceBuilding <-- PoliceStation
 abstract class PoliceStation {
+    {abstract} int getCrimeReduction(int x, int y)
 }
 PoliceStation <-- SmallPoliceStation
 class SmallPoliceStation {
@@ -106,53 +125,103 @@ class BigPoliceStation {
 }
 PublicServiceBuilding <-- HealthcareBuilding
 abstract class HealthcareBuilding {
+    {abstract} int getHealthIncrease(int x, int y)
 }
 HealthcareBuilding <-- Clinic
-class SmallPoliceStation {
-
+class Clinic {
+    hasAmbulanceGarage: boolean
+    boolean getHasAmbulanceGarage()
+    void buildAmbulanceGarage()
+    void removeAmbulanceGarage()
 }
 HealthcareBuilding<-- Hospital
-class BigPoliceStation {
-
+class Hospital {
+    hasHelipad: boolean
+    boolean getHasHelipad()
+    void buildHelipad()
+    void removeHelipad()
 }
 class City {
     -money: int
     int getMoney()
     grid: CityGrid
     -citizens: Citizen[]
+    -loans: Loans[]
+    void takeOutLoan(Loan loan)
 }
+City ..> Loan
+abstract class Loan {
+    #paymentLeft: int
+    {abstract} int getLoanSize()
+    int getPaymentLeft()
+    {abstract} int getLoanRate()
+    void payOutLoan(int money)
+}
+Loan <-- FederalLoan
+class FederalLoan {
+}
+Loan <-- PrivateLoan
+class PrivateLoan {
+}
+City <..> CityGrid
 class CityGrid {
     -city: City
     Buildable getBuildingAt(int x, int y)
     -buildings: Buildable[]
-    placeBuildingAt(int x, int y, building Buildable)
-    removeBuildingAt(int x, int y)
+    void placeBuildingAt(int x, int y, building Buildable)
+    void removeBuildingAt(int x, int y)
+
+    Citizen[] getCitizensAt(int x, int y)
 }
+CityGrid <..> Buildable
 class Citizen {
     -location: Buildable
     setLocation(location: Buildable)
     Buildable getLocation()
+    
     -home: ResidentialBuilding
     setHome(home: ResidentialBuilding)
     ResidentialBuilding getHome()
+    
     -workplace: WorkplaceBuilding
     setWorkplace(workplace: WorksplaceBuilding)
     WorksplaceBuilding getWorkplace()
+    
     CitizenState getCurrentCitizenState()
+
+    -int currentHealth
+    int getCurrentHealth()
+    void setCurrentHealth()
+    
     int getSatisfaction()
     String getCurrentThoughts()
 }
 class Simulator {
     -city: City
     Citizen getRandomCitizen()
+    -gameSpeed: GameSpeed
+    void setGameSpeed(GameSpeed speed)
     void runSimulationTick()
     -cityDatum: CityDatum
+}
+Simulator ..> City
+Simulator ..> GameSpeed
+Simulator ..> CityDatum
+CityDatum ..> City
+enum GameSpeed {
+    Stopped
+    Slow
+    Normal
+    Fast
 }
 class CityDatum {
     -city: City
     int[][] getCongestionMap()
     int[][] getNoiseMap()
     int[][] getProfitabilityMap()
+
+    int getTotalTaxes()
+    int getTotalExpenditures()
 }
 class Game {
     -simulator: Simulator
@@ -162,6 +231,10 @@ class Game {
     void createSave(String saveName)
     void saveGame()
 }
+Game ..> Simulator
+Citizen ..> CitizenState
+City ..> Citizen
+
 enum CitizenState {
     Working
     Residing
