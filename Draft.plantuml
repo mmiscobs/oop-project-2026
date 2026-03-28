@@ -1,0 +1,172 @@
+@startuml CitySimulatorDraft
+abstract class Buildable {
+    #city: City
+    #x: int
+    #y: int
+    getX(): int
+    getY(): int
+    {abstract} int getPrice()
+}
+Buildable <-- PrivateBuilding
+abstract class PrivateBuilding {
+  #isBuilt: boolean 
+  {abstract} getIsBuilt(): boolean
+  {abstract} int calculateProfitPerTick()
+}
+PrivateBuilding <-- ResidentialBuilding
+abstract class ResidentialBuilding {
+  {abstract} capacity: int
+  residents: int
+}
+ResidentialBuilding <-- SmallHouse 
+class SmallHouse {}
+ResidentialBuilding <-- Condominium
+class Condominium {}
+PrivateBuilding <-- WorkplaceBuilding
+abstract class WorkplaceBuilding {
+  {abstract} currentWorkers: int
+  {abstract} workersHired: int
+  {abstract} workersCapacity: int
+}
+WorkplaceBuilding <-- IndustrialBuilding
+abstract class IndustrialBuilding {
+}
+IndustrialBuilding <-- Factory
+class Factory {}
+IndustrialBuilding <-- Warehouse
+class Warehouse {}
+WorkplaceBuilding <-- OfficeBuilding
+abstract class OfficeBuilding {
+}
+OfficeBuilding <-- Skyrise
+class Skyrise {}
+OfficeBuilding <-- BankBranch
+class BankBranch {}
+WorkplaceBuilding <-- CommercialBuilding
+abstract class CommercialBuilding {
+    {abstract} visitorsCapacity: int
+    visitors: int
+}
+CommercialBuilding <-- Mall
+class Mall {}
+CommercialBuilding <-- GroceryStore
+class GroceryStore {}
+Buildable <-- PublicBuilding
+abstract class PublicBuilding {
+  {abstract} int getMaintanenceCostPerDay()
+}
+PublicBuilding <-- PublicTransportation
+abstract class PublicTransportation {
+    {abstract} int getCapacity()
+    -congestion: int
+    int getCongestion()
+    void increaseCongestion()
+    void decreaseCongestion()
+    {abstract} int computeNoiseLevel()
+}
+PublicTransportation <-- Street
+class Street {
+    hasSpeedLimiters: boolean
+    boolean getHasSpeedLimiters()
+    void buildSpeedLimiters()
+    void removeSpeedLimiters()
+}
+PublicTransportation <-- Road
+class Road {
+    hasPlantedTrees: boolean
+    boolean getHasPlantedTrees()
+    void buildPlantedTrees()
+}
+PublicTransportation <-- Highway
+class Highway {
+    hasNoiseBarriers: boolean
+    boolean getHasNoiseBarriers()
+    void buildNoiseBarriers()
+}
+PublicBuilding <-- PublicServiceBuilding
+abstract class PublicServiceBuilding {
+    {abstract} int getRange()
+}
+PublicServiceBuilding <-- PoliceStation
+abstract class PoliceStation {
+}
+PoliceStation <-- SmallPoliceStation
+class SmallPoliceStation {
+    hasExtraPoliceCarsGarage: boolean
+    boolean getHasExtraPoliceCarsGarage()
+    void buildExtraPoliceCarsGarage()
+    void removeExtraPoliceCarsGarage()
+}
+PoliceStation <-- BigPoliceStation
+class BigPoliceStation {
+    hasHelipad: boolean
+    boolean getHasHelipad()
+    void buildHelipad()
+    void removeHelipad()
+}
+PublicServiceBuilding <-- HealthcareBuilding
+abstract class HealthcareBuilding {
+}
+HealthcareBuilding <-- Clinic
+class SmallPoliceStation {
+
+}
+HealthcareBuilding<-- Hospital
+class BigPoliceStation {
+
+}
+class City {
+    -money: int
+    int getMoney()
+    grid: CityGrid
+    -citizens: Citizen[]
+}
+class CityGrid {
+    -city: City
+    Buildable getBuildingAt(int x, int y)
+    -buildings: Buildable[]
+    placeBuildingAt(int x, int y, building Buildable)
+    removeBuildingAt(int x, int y)
+}
+class Citizen {
+    -location: Buildable
+    setLocation(location: Buildable)
+    Buildable getLocation()
+    -home: ResidentialBuilding
+    setHome(home: ResidentialBuilding)
+    ResidentialBuilding getHome()
+    -workplace: WorkplaceBuilding
+    setWorkplace(workplace: WorksplaceBuilding)
+    WorksplaceBuilding getWorkplace()
+    CitizenState getCurrentCitizenState()
+    int getSatisfaction()
+    String getCurrentThoughts()
+}
+class Simulator {
+    -city: City
+    Citizen getRandomCitizen()
+    void runSimulationTick()
+    -cityDatum: CityDatum
+}
+class CityDatum {
+    -city: City
+    int[][] getCongestionMap()
+    int[][] getNoiseMap()
+    int[][] getProfitabilityMap()
+}
+class Game {
+    -simulator: Simulator
+    -loadedGame: String
+    String[] getSaves()
+    void loadSave(String saveName)
+    void createSave(String saveName)
+    void saveGame()
+}
+enum CitizenState {
+    Working
+    Residing
+    Commuting
+    Shopping
+}
+
+@enduml
