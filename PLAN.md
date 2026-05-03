@@ -1,0 +1,15 @@
+- [ ] - Create isometric renderer
+- Create walking mode
+- [ ] - Implement the buildings hierarchy
+- [ ] - Implement tick based time flow
+- [ ] - Implement UI
+  - Placing buildings
+  - Looking at the stats
+    - Graphs
+    - HeatMaps
+    - Picker Info Dialog
+- [ ] - Implement start menu
+  - Create game
+  - Load game
+  - Exit
+  - Settings
