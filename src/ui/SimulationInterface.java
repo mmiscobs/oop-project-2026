@@ -51,6 +51,13 @@ public class SimulationInterface {
 
         this.view = new CityView(city, COLS, ROWS);
 
+        this.simulator.startSimulation();
+
+        this.simulator.onTick = (tick) -> {
+            view.tick = tick;
+            view.render();
+        };
+
         view.render();
         final int ZOOM = 4;
         view.setOrigin(TILE_W * COLS / 2 * ZOOM, 2 * TILE_H * ZOOM);

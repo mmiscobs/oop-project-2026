@@ -64,8 +64,14 @@ public class IsometricMapView extends JComponent {
         public final int anchorRow;
         public final int footprintCols;
         public final int footprintRows;
+        public final boolean isOverlay;
 
         public Sprite(Image image, int anchorCol, int anchorRow, int footprintCols, int footprintRows) {
+            this(image, anchorCol, anchorRow, footprintCols, footprintRows, false);
+        }
+
+        public Sprite(Image image, int anchorCol, int anchorRow, int footprintCols, int footprintRows,
+                boolean isOverlay) {
             if (image == null)
                 throw new IllegalArgumentException("image is null");
             if (footprintCols <= 0 || footprintRows <= 0)
@@ -75,6 +81,7 @@ public class IsometricMapView extends JComponent {
             this.anchorRow = anchorRow;
             this.footprintCols = footprintCols;
             this.footprintRows = footprintRows;
+            this.isOverlay = isOverlay;
         }
 
         int frontDepth() {
@@ -761,13 +768,19 @@ public class IsometricMapView extends JComponent {
                 drawTile(g2, c, d - c);
             }
             while (spriteIdx < sorted.size() && sorted.get(spriteIdx).frontDepth() == d) {
-                drawSprite(g2, sorted.get(spriteIdx));
+                if (!sorted.get(spriteIdx).isOverlay)
+                    drawSprite(g2, sorted.get(spriteIdx));
                 spriteIdx++;
             }
         }
         while (spriteIdx < sorted.size()) {
             drawSprite(g2, sorted.get(spriteIdx));
             spriteIdx++;
+        }
+        for (Sprite sprite : sorted) {
+            if (!sprite.isOverlay)
+                continue;
+            drawSprite(g2, sprite);
         }
     }
 

@@ -1,8 +1,8 @@
 - [x] Create isometric renderer
 - [ ] Create walking mode
 - [x] Implement the buildings hierarchy
-- [ ] Implement tick based time flow
-  - [ ] Draw movable translucent clouds
+- [x] Implement tick based time flow
+  - [x] Draw movable translucent clouds
   - [ ] Money income per citizen associated with building
   - [ ] Expendatures per building
   - [ ] Expendatures per policy

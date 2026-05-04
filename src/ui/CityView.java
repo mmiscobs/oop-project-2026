@@ -1,6 +1,7 @@
 package ui;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class CityView extends IsometricMapView {
     private static final int TILE_W = 34;
@@ -38,13 +40,22 @@ public class CityView extends IsometricMapView {
         buildView();
     }
 
+    public int tick;
+
     public void render() {
         Image[][] grid = new Image[ROWS][COLS];
 
         this.clearSprites();
 
         try {
+            Image cloud = loadImage(getClass(), "./clouds.png");
+            Random rng = new Random(42);
+            for (int i = -ROWS; i < ROWS * 2; i++) {
+                this.addSprite(
+                        new Sprite(cloud, (tick + rng.nextInt(0, COLS * 3)) % (COLS * 3) - COLS, i, 1, 1, true));
+            }
             Image grass1 = loadImage(getClass(), "./grass.png");
+
             for (int r = 0; r < ROWS; r++) {
                 for (int c = 0; c < COLS; c++) {
                     grid[r][c] = grass1;
