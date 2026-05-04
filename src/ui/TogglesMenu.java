@@ -1,13 +1,16 @@
 package ui;
 
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JButton;
 
-public class TogglesMenu extends JMenu {
+public class TogglesMenu extends JPanel {
     public interface Action {
         String getName();
 
@@ -17,11 +20,13 @@ public class TogglesMenu extends JMenu {
     }
 
     public TogglesMenu(String name, List<Action> actions) {
-        super(name);
-        ArrayList<JMenuItem> buttons = new ArrayList<>();
+        super(new GridLayout(0, 1));
+        ArrayList<JButton> buttons = new ArrayList<>();
         for (Action action : actions) {
-            JMenuItem button = new JMenuItem(action.getName());
+            JButton button = new JButton(action.getName());
+            button.setPreferredSize(new Dimension(550, 0));
 
+            Runnable rerender = () -> this.revalidate();
             button.addActionListener(new ActionListener() {
                 private boolean clicked = false;
                 private Runnable stopAction = null;
@@ -29,20 +34,22 @@ public class TogglesMenu extends JMenu {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (clicked) {
                         stopAction.run();
+                        clicked = false;
 
                         return;
                     }
                     clicked = true;
-                    for (JMenuItem otherButton : buttons) {
+                    for (JButton otherButton : buttons) {
                         if (otherButton == button)
                             continue;
                         otherButton.setEnabled(false);
                     }
                     button.setText(action.getStopName());
+                    rerender.run();
                     Runnable revertButtons = () -> {
                         clicked = false;
                         button.setText(action.getName());
-                        for (JMenuItem otherButton : buttons) {
+                        for (JButton otherButton : buttons) {
                             if (otherButton == button)
                                 continue;
                             otherButton.setEnabled(true);
@@ -55,6 +62,7 @@ public class TogglesMenu extends JMenu {
                     };
                 };
             });
+            buttons.add(button);
             this.add(button);
         }
     }

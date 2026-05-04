@@ -25,12 +25,14 @@ import java.util.List;
 public class CityView extends IsometricMapView {
     private static final int TILE_W = 34;
     private static final int TILE_H = 17;
-    private static final int COLS = 10;
-    private static final int ROWS = 10;
+    private final int COLS;
+    private final int ROWS;
     private City city;
 
-    public CityView(City city) {
+    public CityView(City city, int cols, int rows) {
         super();
+        this.COLS = cols;
+        this.ROWS = rows;
         this.city = city;
 
         buildView();
@@ -184,8 +186,8 @@ public class CityView extends IsometricMapView {
             Point loc;
 
             boolean isWithinGrid() {
-                return !(loc == null || loc.x < 0 || loc.x + w > COLS
-                        || loc.y + l > ROWS);
+                return !(loc == null || loc.x < 0 || loc.x + w > view.COLS
+                        || loc.y + l > view.ROWS);
             }
         }
         HoverLoc currentHoverLoc = new HoverLoc();

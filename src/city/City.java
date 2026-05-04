@@ -13,8 +13,8 @@ public class City {
     private ArrayList<Citizen> citizens;
     private ArrayList<Loan> loans;
 
-    public City() {
-        this.grid = new CityGrid(this, 10, 10);
+    public City(int sizeX, int sizeY) {
+        this.grid = new CityGrid(this, sizeX, sizeY);
     }
 
     public void build(Buildable building, Point place) {

@@ -1,15 +1,11 @@
 package ui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Desktop.Action;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import buildings.Buildable;
@@ -21,19 +17,19 @@ import utils.Point;
 public class IsometricMapDemo {
     private static final int TILE_W = 34;
     private static final int TILE_H = 16;
-    private static final int COLS = 10;
-    private static final int ROWS = 10;
-    private static final int FRAME_W = TILE_W * (COLS + 3) * 3;
-    private static final int FRAME_H = TILE_H * (ROWS * 2) * 3;
+    private static final int COLS = 15;
+    private static final int ROWS = 15;
+    private static final int FRAME_W = 2000;
+    private static final int FRAME_H = 900;
 
     public static void main(String[] args) throws Exception {
         SwingUtilities.invokeLater(IsometricMapDemo::showWindow);
     }
 
     private static void showWindow() {
-        City city = new City();
+        City city = new City(COLS, ROWS);
 
-        CityView view = new CityView(city);
+        CityView view = new CityView(city, COLS, ROWS);
 
         view.render();
         final int ZOOM = 4;
@@ -95,12 +91,12 @@ public class IsometricMapDemo {
                 }
             });
         }
-        JMenu top = new TogglesMenu("Build", actions);
+        JPanel top = new TogglesMenu("Build", actions);
 
+        root.add(top, BorderLayout.WEST);
         root.add(view, BorderLayout.CENTER);
 
         JMenuBar menuBar = new JMenuBar();
-        menuBar.add(top);
         f.setJMenuBar(menuBar);
         f.setContentPane(root);
         f.setSize(FRAME_W, FRAME_H);
