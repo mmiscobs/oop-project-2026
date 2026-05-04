@@ -3,10 +3,18 @@
 - [x] Implement the buildings hierarchy
 - [ ] Implement tick based time flow
   - [ ] Money income per citizen associated with building
+  - [ ] Expendatures per building
+  - [ ] Expendatures per policy
+    - [ ] Curfue (reduces crime rate)
+    - [ ] Mandatory Bicycle Usage (increases health and reduces traffic congestion)
+    - [ ] Subsidised Muzzle Silencers (decreases noise on roads)
   - [ ] Citizens moving through city
     - [ ] Traffic congestion
 - [ ] Implement UI
   - [x] Placing buildings
+    - [ ] Charging for placement
+  - [x] Demolishing buildings
+    - [ ] Charging for demolishment
   - [ ] Looking at the stats
     - [ ] Graphs
     - [ ] HeatMaps

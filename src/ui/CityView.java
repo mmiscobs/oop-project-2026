@@ -41,6 +41,8 @@ public class CityView extends IsometricMapView {
     public void render() {
         Image[][] grid = new Image[ROWS][COLS];
 
+        this.clearSprites();
+
         try {
             Image grass1 = loadImage(getClass(), "./grass.png");
             for (int r = 0; r < ROWS; r++) {
@@ -219,6 +221,79 @@ public class CityView extends IsometricMapView {
             for (Point t : Point.allPointsWithin(currentHoverLoc.loc, l, w)) {
                 v.drawTileDiamond(g, t.x, t.y, fill, stroke);
             }
+        };
+        view.setOverlay(routeOverlay);
+        cleanup[0] = () -> {
+            SwingUtilities.invokeLater(() -> {
+                view.detachComponent(info);
+                view.removeTileClickListener(onClick);
+                view.removeTileHoverListener(onHover);
+                view.setOverlay(null);
+            });
+        };
+        return cleanup[0];
+    }
+
+    public static Runnable enableDemolishAction(CityView view,
+            TileListener onTile) {
+        JLabel info = makeInfoLabel();
+        view.attachComponent(info, 0, 0, IsometricMapView.TileAnchor.ABOVE, 0, -8);
+        class HoverLoc {
+            Point loc;
+
+            boolean isWithinGrid() {
+                return !(loc == null || loc.x < 0 || loc.x > view.COLS
+                        || loc.y > view.ROWS);
+            }
+        }
+        HoverLoc currentHoverLoc = new HoverLoc();
+
+        FloatingHoverLabelCreator labelCreator = (loc) -> {
+            Buildable existingBuilding = view.city.grid.getBuildingAt(loc);
+            if (existingBuilding != null) {
+                return "Demolish " + existingBuilding.getClass().getSimpleName();
+            }
+            return null;
+        };
+
+        TileHoverListener onHover = (loc) -> {
+            currentHoverLoc.loc = loc;
+            view.moveAttachment(info, loc.x, loc.y);
+            String label = labelCreator.produceLabelHTML(loc);
+            if (label != null && currentHoverLoc.isWithinGrid()) {
+                info.setVisible(true);
+                info.setText(label);
+            } else
+                info.setVisible(false);
+        };
+        view.addTileHoverListener(onHover);
+
+        Runnable[] cleanup = new Runnable[1];
+
+        TileClickListener onClick = (loc, ev) -> {
+            if (!currentHoverLoc.isWithinGrid())
+                return;
+            onTile.actOnTile(loc, cleanup[0]);
+            cleanup[0].run();
+        };
+        view.addTileClickListener(onClick);
+
+        OverlayPainter routeOverlay = (g, v) -> {
+            if (!currentHoverLoc.isWithinGrid())
+                return;
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            Color fill = new Color(255, 220, 90, 110);
+            Color demolishFill = new Color(178, 34, 34, 110);
+            Color stroke = new Color(255, 200, 40, 230);
+            Buildable existingBuilding = view.city.grid.getBuildingAt(currentHoverLoc.loc);
+            if (existingBuilding != null)
+                for (Point t : Point.allPointsWithin(view.city.grid.getBuildingOrigin(existingBuilding),
+                        existingBuilding.getLength(),
+                        existingBuilding.getWidth())) {
+                    v.drawTileDiamond(g, t.x, t.y, demolishFill, stroke);
+                }
+            else
+                v.drawTileDiamond(g, currentHoverLoc.loc.x, currentHoverLoc.loc.y, fill, stroke);
         };
         view.setOverlay(routeOverlay);
         cleanup[0] = () -> {

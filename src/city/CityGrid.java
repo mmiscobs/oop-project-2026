@@ -28,6 +28,13 @@ public class CityGrid {
         return null;
     }
 
+    public Point getBuildingOrigin(Buildable building) {
+        for (Entry<Point, Buildable> entry : buildings.entrySet())
+            if (entry.getValue() == building)
+                return entry.getKey();
+        return null;
+    }
+
     public void placeBuildingAt(Point place, Buildable building) {
         if (place.x > sizeX || place.y > sizeY)
             return;

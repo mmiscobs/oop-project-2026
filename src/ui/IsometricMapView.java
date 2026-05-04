@@ -576,6 +576,12 @@ public class IsometricMapView extends JComponent {
         return removed;
     }
 
+    public void removeSprites() {
+        sprites.clear();
+        spriteChunks.clear();
+        repaint();
+    }
+
     public void clearSprites() {
         if (sprites.isEmpty())
             return;
