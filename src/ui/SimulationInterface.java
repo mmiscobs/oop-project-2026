@@ -24,9 +24,10 @@ import buildings.publicbuilding.service.police.PoliceStation;
 import buildings.publicbuilding.transportation.PublicTransportation;
 import city.City;
 import simulation.GameSpeed;
+import simulation.Simulator;
 import utils.Point;
 
-public class CityInterface {
+public class SimulationInterface {
     private static final int TILE_W = 34;
     private static final int TILE_H = 16;
     private static final int COLS = 15;
@@ -36,15 +37,19 @@ public class CityInterface {
 
     public static void main(String[] args) throws Exception {
         SwingUtilities.invokeLater(() -> {
-            CityInterface ui = new CityInterface();
+            SimulationInterface ui = new SimulationInterface();
             ui.showWindow();
         });
     }
 
+    private CityView view;
+    private Simulator simulator;
+
     private void showWindow() {
         City city = new City(COLS, ROWS);
+        this.simulator = new Simulator(city);
 
-        CityView view = new CityView(city, COLS, ROWS);
+        this.view = new CityView(city, COLS, ROWS);
 
         view.render();
         final int ZOOM = 4;
@@ -56,7 +61,7 @@ public class CityInterface {
 
         JPanel root = new JPanel(new BorderLayout());
 
-        JPanel left = getBuildActionsPanel(city, view);
+        JPanel left = getBuildActionsPanel(city);
         JPanel bottom = new BottomPanel();
 
         root.add(left, BorderLayout.WEST);
@@ -71,7 +76,7 @@ public class CityInterface {
         f.setVisible(true);
     }
 
-    private JPanel getBuildActionsPanel(City city, CityView view) {
+    private JPanel getBuildActionsPanel(City city) {
         ArrayList<Class<? extends Buildable>> BuildableClasses = getBuildableClassesSortedByType();
 
         ArrayList<TogglesMenu.Action> actions = new ArrayList<>();
@@ -177,8 +182,20 @@ public class CityInterface {
                 super(new GridLayout(0, 1));
                 // this.setPreferredSize(new Dimension(150, 0));
                 this.add(new JLabel("Simulation Speed"));
+                ArrayList<JButton> buttons = new ArrayList<>();
                 for (GameSpeed speed : GameSpeed.values()) {
-                    this.add(new JButton(speed.toString()));
+                    JButton button = new JButton(speed.toString());
+                    if (simulator.gameSpeed == speed)
+                        button.setEnabled(false);
+                    this.add(button);
+                    buttons.add(button);
+                    button.addActionListener(e -> {
+                        for (JButton b : buttons) {
+                            b.setEnabled(true);
+                        }
+                        button.setEnabled(false);
+                        simulator.gameSpeed = speed;
+                    });
                 }
             }
         }
