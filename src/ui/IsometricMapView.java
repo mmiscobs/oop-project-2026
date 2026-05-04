@@ -23,29 +23,31 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 public class IsometricMapView extends JComponent {
 
     public interface TileHoverListener {
-        void onHover(int col, int row);
+        void onHover(utils.Point loc);
     }
 
     public interface TileClickListener {
-        void onClick(int col, int row, MouseEvent e);
+        void onClick(utils.Point loc, MouseEvent e);
     }
 
     public interface TileDragListener {
-        void onDragStart(int col, int row);
+        void onDragStart(utils.Point loc);
 
-        void onDragMove(int startCol, int startRow, int currentCol, int currentRow);
+        void onDragMove(utils.Point from, utils.Point to);
 
-        void onDragEnd(int startCol, int startRow, int endCol, int endRow);
+        void onDragEnd(utils.Point from, utils.Point to);
     }
 
     public interface OverlayPainter {
@@ -96,10 +98,10 @@ public class IsometricMapView extends JComponent {
     private int hoverRow = -1;
     private boolean drawHoverHighlight = true;
 
-    private final List<TileHoverListener> hoverListeners = new ArrayList<>();
-    private final List<TileClickListener> clickListeners = new ArrayList<>();
-    private final List<TileDragListener> dragListeners = new ArrayList<>();
-    private ArrayList<OverlayPainter> overlays = new ArrayList<>();
+    private final List<TileHoverListener> hoverListeners = new Vector<>();
+    private final List<TileClickListener> clickListeners = new Vector<>();
+    private final List<TileDragListener> dragListeners = new Vector<>();
+    private OverlayPainter overlay;
 
     private static final int DRAG_IDLE = 0;
     private static final int DRAG_ARMED = 1;
@@ -126,12 +128,13 @@ public class IsometricMapView extends JComponent {
 
     private final Map<Component, Attachment> attachments = new LinkedHashMap<>();
     private final List<Sprite> sprites = new ArrayList<>();
+    private final Map<Sprite, List<Sprite>> spriteChunks = new java.util.HashMap<>();
 
     private JPanel controls;
     private boolean controlsVisible = true;
     private double minZoom = 0.25;
     private double maxZoom = 8.0;
-    private double zoomStep = 1.25;
+    private double zoomStep = 2;
 
     public IsometricMapView() {
         setLayout(null);
@@ -156,7 +159,7 @@ public class IsometricMapView extends JComponent {
                 if (cr == null)
                     return;
                 for (TileClickListener l : clickListeners)
-                    l.onClick(cr[0], cr[1], e);
+                    l.onClick(new utils.Point(cr[0], cr[1]), e);
             }
 
             @Override
@@ -186,12 +189,12 @@ public class IsometricMapView extends JComponent {
                 if (dragState == DRAG_ARMED) {
                     dragState = DRAG_ACTIVE;
                     for (TileDragListener l : dragListeners)
-                        l.onDragStart(dragStartCol, dragStartRow);
+                        l.onDragStart(new utils.Point(dragStartCol, dragStartRow));
                 }
                 dragCurCol = cr[0];
                 dragCurRow = cr[1];
                 for (TileDragListener l : dragListeners)
-                    l.onDragMove(dragStartCol, dragStartRow, cr[0], cr[1]);
+                    l.onDragMove(new utils.Point(dragStartCol, dragStartRow), new utils.Point(cr[0], cr[1]));
             }
 
             @Override
@@ -200,7 +203,8 @@ public class IsometricMapView extends JComponent {
                     return;
                 if (dragState == DRAG_ACTIVE) {
                     for (TileDragListener l : dragListeners)
-                        l.onDragEnd(dragStartCol, dragStartRow, dragCurCol, dragCurRow);
+                        l.onDragEnd(new utils.Point(dragStartCol, dragStartRow),
+                                new utils.Point(dragCurCol, dragCurRow));
                 }
                 dragState = DRAG_IDLE;
             }
@@ -399,6 +403,7 @@ public class IsometricMapView extends JComponent {
         }
         this.tileW = tileWidth;
         this.tileH = tileHeight;
+        spriteChunks.clear();
         revalidate();
         repaint();
     }
@@ -499,12 +504,7 @@ public class IsometricMapView extends JComponent {
     }
 
     public void setOverlay(OverlayPainter o) {
-        this.overlays.add(o);
-        repaint();
-    }
-
-    public void removeOverlay(OverlayPainter o) {
-        this.overlays.remove(o);
+        this.overlay = o;
         repaint();
     }
 
@@ -569,8 +569,10 @@ public class IsometricMapView extends JComponent {
 
     public boolean removeSprite(Sprite s) {
         boolean removed = sprites.remove(s);
-        if (removed)
+        if (removed) {
+            spriteChunks.remove(s);
             repaint();
+        }
         return removed;
     }
 
@@ -578,7 +580,77 @@ public class IsometricMapView extends JComponent {
         if (sprites.isEmpty())
             return;
         sprites.clear();
+        spriteChunks.clear();
         repaint();
+    }
+
+    private List<Sprite> chunksFor(Sprite s) {
+        if (s.footprintCols == 1 && s.footprintRows == 1)
+            return Collections.singletonList(s);
+        if (s.footprintCols == 2 && s.footprintRows == 2) {
+            List<Sprite> cached = spriteChunks.get(s);
+            if (cached != null)
+                return cached;
+            List<Sprite> chunks = splitTwoByTwo(s);
+            spriteChunks.put(s, chunks);
+            return chunks;
+        }
+        return Collections.singletonList(s);
+    }
+
+    private List<Sprite> splitTwoByTwo(Sprite s) {
+        BufferedImage src = toBufferedImage(s.image);
+        int imgW = src.getWidth();
+        int imgH = src.getHeight();
+        int hW = tileW / 2;
+        int hH = tileH / 2;
+        int diamondW = 4 * hW;
+        int padLeft = (imgW - diamondW) / 2;
+
+        int sideH = Math.max(1, imgH - hH);
+
+        BufferedImage left = new BufferedImage(2 * hW, sideH, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D gl = left.createGraphics();
+        gl.drawImage(src,
+                0, 0, hW, sideH,
+                Math.max(0, padLeft), 0, padLeft + hW, sideH,
+                null);
+        gl.dispose();
+
+        BufferedImage middle = new BufferedImage(2 * hW, imgH, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D gm = middle.createGraphics();
+        gm.drawImage(src,
+                0, 0, 2 * hW, imgH,
+                padLeft + hW, 0, padLeft + 3 * hW, imgH,
+                null);
+        gm.dispose();
+
+        BufferedImage right = new BufferedImage(2 * hW, sideH, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D gr = right.createGraphics();
+        gr.drawImage(src,
+                hW, 0, 2 * hW, sideH,
+                padLeft + 3 * hW, 0, padLeft + 4 * hW - 3, sideH,
+                null);
+        gr.dispose();
+
+        int aCol = s.anchorCol;
+        int aRow = s.anchorRow;
+        return java.util.Arrays.asList(
+                new Sprite(left, aCol, aRow + 1, 1, 1),
+                new Sprite(middle, aCol + 1, aRow + 1, 1, 1),
+                new Sprite(right, aCol + 1, aRow, 1, 1));
+    }
+
+    private static BufferedImage toBufferedImage(Image img) {
+        if (img instanceof BufferedImage)
+            return (BufferedImage) img;
+        int w = img.getWidth(null);
+        int h = img.getHeight(null);
+        BufferedImage bi = new BufferedImage(Math.max(1, w), Math.max(1, h), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = bi.createGraphics();
+        g.drawImage(img, 0, 0, null);
+        g.dispose();
+        return bi;
     }
 
     public List<Sprite> getSprites() {
@@ -628,7 +700,7 @@ public class IsometricMapView extends JComponent {
         hoverCol = col;
         hoverRow = row;
         for (TileHoverListener l : hoverListeners)
-            l.onHover(col, row);
+            l.onHover(new utils.Point(col, row));
         if (drawHoverHighlight)
             repaint();
     }
@@ -657,9 +729,8 @@ public class IsometricMapView extends JComponent {
             if (drawHoverHighlight && hoverCol >= 0 && hoverRow >= 0) {
                 drawHoverDiamond(g2, hoverCol, hoverRow);
             }
-            for (OverlayPainter overlay : overlays) {
+            if (overlay != null)
                 overlay.paint(g2, this);
-            }
         } finally {
             g2.dispose();
         }
@@ -670,7 +741,9 @@ public class IsometricMapView extends JComponent {
         if (sprites.isEmpty()) {
             sorted = Collections.emptyList();
         } else {
-            sorted = new ArrayList<>(sprites);
+            sorted = new ArrayList<>(sprites.size());
+            for (Sprite s : sprites)
+                sorted.addAll(chunksFor(s));
             sorted.sort(Comparator.comparingInt(Sprite::frontDepth));
         }
         int spriteIdx = 0;

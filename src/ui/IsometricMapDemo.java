@@ -1,12 +1,20 @@
 package ui;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Desktop.Action;
+import java.util.ArrayList;
+
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
-import buildings.privatebuilding.residential.Condominium;
-import buildings.privatebuilding.residential.SmallHouse;
-import buildings.publicbuilding.service.healthcare.Clinic;
-import buildings.publicbuilding.service.police.SmallPoliceStation;
+import buildings.Buildable;
+import buildings.Buildable.UnregisteredBuildingType;
+import buildings.publicbuilding.transportation.PublicTransportation;
 import city.City;
 import utils.Point;
 
@@ -24,18 +32,77 @@ public class IsometricMapDemo {
 
     private static void showWindow() {
         City city = new City();
-        city.grid.placeBuildingAt(new Point(1, 1), new SmallHouse());
-        city.grid.placeBuildingAt(new Point(3, 3), new Condominium());
-        city.grid.placeBuildingAt(new Point(5, 5), new Clinic());
-        city.grid.placeBuildingAt(new Point(6, 6), new SmallPoliceStation());
 
         CityView view = new CityView(city);
 
         view.render();
+        final int ZOOM = 4;
+        view.setOrigin(TILE_W * COLS / 2 * ZOOM, 2 * TILE_H * ZOOM);
+        view.setZoom(ZOOM);
 
         JFrame f = new JFrame("City Map Demo");
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.setContentPane(view);
+
+        JPanel root = new JPanel(new BorderLayout());
+        ArrayList<TogglesMenu.Action> actions = new ArrayList<>();
+
+        for (Class<? extends Buildable> BuildableClass : Buildable.registry.keySet()) {
+            actions.add(new TogglesMenu.Action() {
+                private String getPrettyName() {
+                    return BuildableClass.getSimpleName().replaceAll("[A-Z]", " $0").trim();
+                }
+
+                public String getName() {
+                    return "Build " + getPrettyName();
+                }
+
+                public String getStopName() {
+                    return "Stop building " + getPrettyName();
+                }
+
+                public Runnable enable(Runnable onEnd) {
+                    if (PublicTransportation.class.isAssignableFrom(BuildableClass))
+                        return CityView.enableManhattanDragAction(view,
+                                (dragInfo) -> "<html><b>" + getPrettyName() + " preview</b><br/>"
+                                        + CityView.manhattanPath(dragInfo.from, dragInfo.to).size()
+                                        + " tiles &rarr; ("
+                                        + dragInfo.to.x + ", " + dragInfo.to.y + ")</html>",
+                                (tiles, cleanup) -> {
+                                    try {
+                                        for (Point point : tiles) {
+                                            city.grid.placeBuildingAt(point, Buildable.createBuilding(BuildableClass));
+                                        }
+                                    } catch (UnregisteredBuildingType e) {
+                                    }
+                                    cleanup.run();
+                                    onEnd.run();
+                                    view.render();
+                                });
+                    try {
+                        Buildable building = Buildable.createBuilding(BuildableClass);
+                        return CityView.enableBuildAction(view, (loc) -> loc.x + " " + loc.y, building.getLength(),
+                                building.getWidth(), (tile, cleanup) -> {
+                                    city.grid.placeBuildingAt(tile, building);
+                                    onEnd.run();
+                                    view.render();
+                                });
+                    } catch (UnregisteredBuildingType e) {
+                        System.err.print(e);
+                        onEnd.run();
+                        return () -> {
+                        };
+                    }
+                }
+            });
+        }
+        JMenu top = new TogglesMenu("Build", actions);
+
+        root.add(view, BorderLayout.CENTER);
+
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.add(top);
+        f.setJMenuBar(menuBar);
+        f.setContentPane(root);
         f.setSize(FRAME_W, FRAME_H);
         f.setLocationRelativeTo(null);
         f.setVisible(true);

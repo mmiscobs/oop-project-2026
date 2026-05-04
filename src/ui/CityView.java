@@ -2,14 +2,13 @@ package ui;
 
 import javax.imageio.ImageIO;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import buildings.Buildable;
 import buildings.publicbuilding.transportation.PublicTransportation;
-import buildings.publicbuilding.transportation.Road;
-import buildings.publicbuilding.transportation.Street;
 import city.City;
 import utils.Point;
 
@@ -35,16 +34,6 @@ public class CityView extends IsometricMapView {
         this.city = city;
 
         buildView();
-        JLabel info = makeInfoLabel();
-        info.setVisible(false);
-        this.attachComponent(info, 0, 0, IsometricMapView.TileAnchor.ABOVE, 0, -8);
-        enableManhattanDragAction(this, info, tiles -> {
-            for (Point point : tiles) {
-                city.grid.placeBuildingAt(point, new Street());
-            }
-            this.render();
-        });
-        this.addTileClickListener((c, r, e) -> System.out.println("click " + c + "," + r));
     }
 
     public void render() {
@@ -69,13 +58,13 @@ public class CityView extends IsometricMapView {
                         Buildable buildingEast = city.grid.buildings.get(new Point(r + 1, c));
                         Buildable buildingWest = city.grid.buildings.get(new Point(r - 1, c));
                         boolean hasNorthAdjacent = buildingNorth != null
-                                && buildingNorth.getClass() == building.getClass();
+                                && buildingNorth instanceof PublicTransportation;
                         boolean hasSouthAdjacent = buildingSouth != null
-                                && buildingSouth.getClass() == building.getClass();
+                                && buildingSouth instanceof PublicTransportation;
                         boolean hasEastAdjacent = buildingEast != null
-                                && buildingEast.getClass() == building.getClass();
+                                && buildingEast instanceof PublicTransportation;
                         boolean hasWestAdjacent = buildingWest != null
-                                && buildingWest.getClass() == building.getClass();
+                                && buildingWest instanceof PublicTransportation;
                         boolean isNorthSouth = hasNorthAdjacent || hasSouthAdjacent;
                         boolean isWestEast = hasEastAdjacent || hasWestAdjacent;
                         suffix = "Intersection";
@@ -100,53 +89,64 @@ public class CityView extends IsometricMapView {
         super.setTiles(grid);
     }
 
-    private static class DragVisual {
+    public static class DragVisual {
         boolean active;
-        int sc, sr, cc, cr;
+        Point from;
+        Point to;
     }
 
     interface TilesListener {
-        void actOnTiles(List<Point> tiles);
+        void actOnTiles(List<Point> tiles, Runnable cleanup);
     }
 
-    private static Runnable enableManhattanDragAction(CityView view, JLabel info, TilesListener onRoute) {
+    interface TileListener {
+        void actOnTile(Point tile, Runnable cleanup);
+    }
+
+    interface FloatingDragLabelCreator {
+        String produceLabelHTML(DragVisual dragInfo);
+    }
+
+    interface FloatingHoverLabelCreator {
+        String produceLabelHTML(Point loc);
+    }
+
+    public static Runnable enableManhattanDragAction(CityView view, FloatingDragLabelCreator labelCreator,
+            TilesListener onRoute) {
+        JLabel info = makeInfoLabel();
+        info.setVisible(false);
+        view.attachComponent(info, 0, 0, IsometricMapView.TileAnchor.ABOVE, 0, -8);
         DragVisual drag = new DragVisual();
 
-        TileHoverListener onHover = (c, r) -> {
-            if (c < 0) {
-                info.setVisible(false);
-            } else {
-                info.setVisible(true);
-                info.setText(infoHtml(c, r, drag));
-                view.moveAttachment(info, c, r);
-            }
+        TileHoverListener onHover = (loc) -> {
+            view.moveAttachment(info, loc.x, loc.y);
         };
         view.addTileHoverListener(onHover);
 
+        Runnable[] cleanup = new Runnable[1];
         TileDragListener onDrag = new IsometricMapView.TileDragListener() {
             @Override
-            public void onDragStart(int c, int r) {
+            public void onDragStart(Point loc) {
+                info.setVisible(true);
                 drag.active = true;
-                drag.sc = c;
-                drag.sr = r;
-                drag.cc = c;
-                drag.cr = r;
+                drag.from = loc;
+                drag.to = loc;
                 view.repaint();
             }
 
             @Override
-            public void onDragMove(int sc, int sr, int cc, int cr) {
-                drag.cc = cc;
-                drag.cr = cr;
+            public void onDragMove(Point from, Point to) {
+                drag.to = to;
                 if (info.isVisible())
-                    info.setText(infoHtml(cc, cr, drag));
+                    info.setText(labelCreator.produceLabelHTML(drag));
                 view.repaint();
             }
 
             @Override
-            public void onDragEnd(int sc, int sr, int ec, int er) {
-                onRoute.actOnTiles(manhattanPath(sc, sr, ec, er));
+            public void onDragEnd(Point from, Point to) {
+                onRoute.actOnTiles(manhattanPath(from, to), cleanup[0]);
                 drag.active = false;
+                info.setVisible(false);
                 view.repaint();
             }
         };
@@ -158,31 +158,89 @@ public class CityView extends IsometricMapView {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             Color fill = new Color(255, 220, 90, 110);
             Color stroke = new Color(255, 200, 40, 230);
-            for (Point t : manhattanPath(drag.sc, drag.sr, drag.cc, drag.cr)) {
+            for (Point t : manhattanPath(drag.from, drag.to)) {
                 v.drawTileDiamond(g, t.x, t.y, fill, stroke);
             }
-            v.drawTileDiamond(g, drag.sc, drag.sr, null, new Color(60, 200, 255, 240));
-            v.drawTileDiamond(g, drag.cc, drag.cr, null, new Color(255, 80, 80, 240));
+            v.drawTileDiamond(g, drag.from.x, drag.from.y, null, new Color(60, 200, 255, 240));
+            v.drawTileDiamond(g, drag.to.x, drag.from.y, null, new Color(255, 80, 80, 240));
         };
         view.setOverlay(routeOverlay);
-        return () -> {
-            view.removeTileHoverListener(onHover);
-            view.removeTileDragListener(onDrag);
-            view.removeOverlay(routeOverlay);
+        cleanup[0] = () -> {
+            SwingUtilities.invokeLater(() -> {
+                view.detachComponent(info);
+                view.removeTileDragListener(onDrag);
+                view.removeTileHoverListener(onHover);
+                view.setOverlay(null);
+            });
         };
+        return cleanup[0];
     }
 
-    private static List<Point> manhattanPath(int sc, int sr, int ec, int er) {
+    public static Runnable enableBuildAction(CityView view, FloatingHoverLabelCreator labelCreator, int l, int w,
+            TileListener onTile) {
+        JLabel info = makeInfoLabel();
+        view.attachComponent(info, 0, 0, IsometricMapView.TileAnchor.ABOVE, 0, -8);
+        class HoverLoc {
+            Point loc;
+
+            boolean isWithinGrid() {
+                return !(loc == null || loc.x < 0 || loc.x + w > COLS
+                        || loc.y + l > ROWS);
+            }
+        }
+        HoverLoc currentHoverLoc = new HoverLoc();
+
+        TileHoverListener onHover = (loc) -> {
+            currentHoverLoc.loc = loc;
+            info.setVisible(currentHoverLoc.isWithinGrid());
+            view.moveAttachment(info, loc.x, loc.y);
+            info.setText(labelCreator.produceLabelHTML(loc));
+        };
+        view.addTileHoverListener(onHover);
+
+        Runnable[] cleanup = new Runnable[1];
+
+        TileClickListener onClick = (loc, ev) -> {
+            if (!currentHoverLoc.isWithinGrid())
+                return;
+            onTile.actOnTile(loc, cleanup[0]);
+            cleanup[0].run();
+        };
+        view.addTileClickListener(onClick);
+
+        OverlayPainter routeOverlay = (g, v) -> {
+            if (!currentHoverLoc.isWithinGrid())
+                return;
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            Color fill = new Color(255, 220, 90, 110);
+            Color stroke = new Color(255, 200, 40, 230);
+            for (Point t : Point.allPointsWithin(currentHoverLoc.loc, l, w)) {
+                v.drawTileDiamond(g, t.x, t.y, fill, stroke);
+            }
+        };
+        view.setOverlay(routeOverlay);
+        cleanup[0] = () -> {
+            SwingUtilities.invokeLater(() -> {
+                view.detachComponent(info);
+                view.removeTileClickListener(onClick);
+                view.removeTileHoverListener(onHover);
+                view.setOverlay(null);
+            });
+        };
+        return cleanup[0];
+    }
+
+    public static List<Point> manhattanPath(Point from, Point to) {
         List<Point> path = new ArrayList<>();
-        int c = sc, r = sr;
-        int dc = Integer.signum(ec - sc);
-        int dr = Integer.signum(er - sr);
+        int c = from.x, r = from.y;
+        int dc = Integer.signum(to.x - from.x);
+        int dr = Integer.signum(to.y - from.y);
         path.add(new Point(c, r));
-        while (c != ec) {
+        while (c != to.x) {
             c += dc;
             path.add(new Point(c, r));
         }
-        while (r != er) {
+        while (r != to.y) {
             r += dr;
             path.add(new Point(c, r));
         }
@@ -194,7 +252,7 @@ public class CityView extends IsometricMapView {
         super.setBackground(new Color(18, 22, 30));
         super.setTileSurfaceOffset(4);
 
-        super.setZoom(5);
+        super.setZoom(1);
     }
 
     private static JLabel makeInfoLabel() {
@@ -207,17 +265,6 @@ public class CityView extends IsometricMapView {
                 new LineBorder(new Color(40, 40, 40)),
                 new EmptyBorder(4, 8, 4, 8)));
         return info;
-    }
-
-    private static String infoHtml(int c, int r, DragVisual drag) {
-        if (drag != null && drag.active) {
-            int len = manhattanPath(drag.sc, drag.sr, drag.cc, drag.cr).size();
-            return "<html><b>Road preview</b><br/>" + len + " tiles &rarr; (" + c + ", " + r + ")</html>";
-        }
-        boolean isBuilding = (c == 4 && r == 3) || (c == 6 && r == 5) || (c == 2 && r == 6)
-                || (c == 7 && r == 2) || (c == 7 && r == 7) || (c == 2 && r == 4);
-        String label = isBuilding ? "Building" : "Ground";
-        return "<html><b>" + label + "</b><br/>tile (" + c + ", " + r + ")</html>";
     }
 
     public static BufferedImage loadImage(Class<?> Class, String filename) throws IOException {

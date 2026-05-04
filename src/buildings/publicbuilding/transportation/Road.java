@@ -1,6 +1,11 @@
 package buildings.publicbuilding.transportation;
 
+import buildings.Buildable;
+
 public class Road extends PublicTransportation {
+    static {
+        Buildable.registry.put(Road.class, Road::new);
+    }
     public boolean hasPlantedTrees;
 
     public boolean getHasPlantedTrees() {

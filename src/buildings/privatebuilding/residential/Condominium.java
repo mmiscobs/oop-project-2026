@@ -1,6 +1,12 @@
 package buildings.privatebuilding.residential;
 
+import buildings.Buildable;
+
 public class Condominium extends ResidentialBuilding {
+    static {
+        Buildable.registry.put(Condominium.class, Condominium::new);
+    }
+
     public int getPrice() {
         return 0;
     }

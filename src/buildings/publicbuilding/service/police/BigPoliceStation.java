@@ -1,6 +1,11 @@
 package buildings.publicbuilding.service.police;
 
+import buildings.Buildable;
+
 public class BigPoliceStation extends PoliceStation {
+    static {
+        Buildable.registry.put(BigPoliceStation.class, BigPoliceStation::new);
+    }
     public boolean hasHelipad;
 
     public boolean getHasHelipad() {

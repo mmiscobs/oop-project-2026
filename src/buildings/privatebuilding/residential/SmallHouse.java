@@ -1,6 +1,12 @@
 package buildings.privatebuilding.residential;
 
+import buildings.Buildable;
+
 public class SmallHouse extends ResidentialBuilding {
+    static {
+        Buildable.registry.put(SmallHouse.class, SmallHouse::new);
+    }
+
     public int getPrice() {
         return 0;
     }

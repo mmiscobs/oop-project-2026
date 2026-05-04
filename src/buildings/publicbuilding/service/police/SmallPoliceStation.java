@@ -1,6 +1,11 @@
 package buildings.publicbuilding.service.police;
 
+import buildings.Buildable;
+
 public class SmallPoliceStation extends PoliceStation {
+    static {
+        Buildable.registry.put(SmallPoliceStation.class, SmallPoliceStation::new);
+    }
     public boolean hasExtraPoliceCarsGarage;
 
     public boolean getHasExtraPoliceCarsGarage() {

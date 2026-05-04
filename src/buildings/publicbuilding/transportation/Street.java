@@ -1,6 +1,11 @@
 package buildings.publicbuilding.transportation;
 
+import buildings.Buildable;
+
 public class Street extends PublicTransportation {
+    static {
+        Buildable.registry.put(Street.class, Street::new);
+    }
     public boolean hasSpeedLimiters;
 
     public boolean getHasSpeedLimiters() {

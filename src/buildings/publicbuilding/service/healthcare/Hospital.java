@@ -1,6 +1,11 @@
 package buildings.publicbuilding.service.healthcare;
 
+import buildings.Buildable;
+
 public class Hospital extends HealthcareBuilding {
+    static {
+        Buildable.registry.put(Hospital.class, Hospital::new);
+    }
     public boolean hasHelipad;
 
     public boolean getHasHelipad() {
@@ -34,11 +39,11 @@ public class Hospital extends HealthcareBuilding {
 
     @Override
     public int getWidth() {
-        return 1;
+        return 2;
     }
 
     @Override
     public int getLength() {
-        return 1;
+        return 2;
     }
 }

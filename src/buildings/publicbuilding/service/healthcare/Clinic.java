@@ -1,6 +1,11 @@
 package buildings.publicbuilding.service.healthcare;
 
+import buildings.Buildable;
+
 public class Clinic extends HealthcareBuilding {
+    static {
+        Buildable.registry.put(Clinic.class, Clinic::new);
+    }
     public boolean hasAmbulanceGarage;
 
     public boolean getHasAmbulanceGarage() {
