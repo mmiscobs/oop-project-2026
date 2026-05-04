@@ -3,13 +3,42 @@ package buildings.publicbuilding.service.healthcare;
 public class Hospital extends HealthcareBuilding {
     public boolean hasHelipad;
 
-    public boolean getHasHelipad() { return hasHelipad; }
-    public void buildHelipad() {}
-    public void removeHelipad() {}
+    public boolean getHasHelipad() {
+        return hasHelipad;
+    }
 
-    public int getPrice() { return 0; }
-    public void setCrimeRate(int crimeRateReduction) {}
-    public int getMaintanenceCostPerDay() { return 0; }
-    public int getRange() { return 0; }
-    public int getHealthIncrease(int x, int y) { return 0; }
+    public void buildHelipad() {
+    }
+
+    public void removeHelipad() {
+    }
+
+    public int getPrice() {
+        return 0;
+    }
+
+    public void setCrimeRate(int crimeRateReduction) {
+    }
+
+    public int getMaintanenceCostPerDay() {
+        return 0;
+    }
+
+    public int getRange() {
+        return 0;
+    }
+
+    public int getHealthIncrease(int x, int y) {
+        return 0;
+    }
+
+    @Override
+    public int getWidth() {
+        return 1;
+    }
+
+    @Override
+    public int getLength() {
+        return 1;
+    }
 }

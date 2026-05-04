@@ -10,20 +10,47 @@ public class Citizen {
     private WorkplaceBuilding workplace;
     private int currentHealth;
 
-    public void setLocation(Buildable location) {}
-    public Buildable getLocation() { return location; }
+    public void setLocation(Buildable location) {
+        this.location = location;
+    }
 
-    public void setHome(ResidentialBuilding home) {}
-    public ResidentialBuilding getHome() { return home; }
+    public Buildable getLocation() {
+        return location;
+    }
 
-    public void setWorkplace(WorkplaceBuilding workplace) {}
-    public WorkplaceBuilding getWorkplace() { return workplace; }
+    public void setHome(ResidentialBuilding home) {
+        this.home = home;
+    }
 
-    public CitizenState getCurrentCitizenState() { return null; }
+    public ResidentialBuilding getHome() {
+        return home;
+    }
 
-    public int getCurrentHealth() { return currentHealth; }
-    public void setCurrentHealth(int health) {}
+    public void setWorkplace(WorkplaceBuilding workplace) {
+        this.workplace = workplace;
+    }
 
-    public int getSatisfaction() { return 0; }
-    public String getCurrentThoughts() { return null; }
+    public WorkplaceBuilding getWorkplace() {
+        return workplace;
+    }
+
+    public CitizenState getCurrentCitizenState() {
+        return null;
+    }
+
+    public int getCurrentHealth() {
+        return currentHealth;
+    }
+
+    public void setCurrentHealth(int health) {
+        this.currentHealth = health;
+    }
+
+    public int getSatisfaction() {
+        return 0;
+    }
+
+    public String getCurrentThoughts() {
+        return null;
+    }
 }

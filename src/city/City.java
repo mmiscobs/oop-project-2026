@@ -1,13 +1,38 @@
 package city;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import buildings.Buildable;
 import loans.Loan;
+import utils.Point;
 
 public class City {
     private int money;
     public CityGrid grid;
-    private Citizen[] citizens;
-    private Loan[] loans;
+    private ArrayList<Citizen> citizens;
+    private ArrayList<Loan> loans;
 
-    public int getMoney() { return money; }
-    public void takeOutLoan(Loan loan) {}
+    public City() {
+        this.grid = new CityGrid(this, 10, 10);
+    }
+
+    public void build(Buildable building, Point place) {
+        if (building.getPrice() > money)
+            return;
+        money -= building.getPrice();
+        grid.placeBuildingAt(place, building);
+    }
+
+    public int getMoney() {
+        return money;
+    }
+
+    public List<Citizen> getCitizens() {
+        return List.copyOf(citizens);
+    }
+
+    public void takeOutLoan(Loan loan) {
+        this.loans.add(loan);
+    }
 }
