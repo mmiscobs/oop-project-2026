@@ -598,6 +598,8 @@ public class IsometricMapView extends JComponent {
     }
 
     private List<Sprite> chunksFor(Sprite s) {
+        if (s.isOverlay)
+            return List.of();
         if (s.footprintCols == 1 && s.footprintRows == 1)
             return Collections.singletonList(s);
         if (s.footprintCols == 2 && s.footprintRows == 2) {
@@ -754,7 +756,7 @@ public class IsometricMapView extends JComponent {
         if (sprites.isEmpty()) {
             sorted = Collections.emptyList();
         } else {
-            sorted = new ArrayList<>(sprites.size());
+            sorted = new ArrayList<>(sprites.stream().filter(s -> !s.isOverlay).toList().size());
             for (Sprite s : sprites)
                 sorted.addAll(chunksFor(s));
             sorted.sort(Comparator.comparingInt(Sprite::frontDepth));
@@ -777,7 +779,7 @@ public class IsometricMapView extends JComponent {
             drawSprite(g2, sorted.get(spriteIdx));
             spriteIdx++;
         }
-        for (Sprite sprite : sorted) {
+        for (Sprite sprite : sprites) {
             if (!sprite.isOverlay)
                 continue;
             drawSprite(g2, sprite);
