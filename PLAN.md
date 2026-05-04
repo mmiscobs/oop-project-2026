@@ -1,15 +1,27 @@
-- [ ] - Create isometric renderer
-- Create walking mode
-- [ ] - Implement the buildings hierarchy
-- [ ] - Implement tick based time flow
-- [ ] - Implement UI
-  - Placing buildings
-  - Looking at the stats
-    - Graphs
-    - HeatMaps
-    - Picker Info Dialog
-- [ ] - Implement start menu
-  - Create game
-  - Load game
-  - Exit
-  - Settings
+- [x] Create isometric renderer
+- [ ] Create walking mode
+- [x] Implement the buildings hierarchy
+- [ ] Implement tick based time flow
+  - [ ] Money income per citizen associated with building
+  - [ ] Citizens moving through city
+    - [ ] Traffic congestion
+- [ ] Implement UI
+  - [x] Placing buildings
+  - [ ] Looking at the stats
+    - [ ] Graphs
+    - [ ] HeatMaps
+      - [ ] Profit
+      - [ ] Noise
+      - [ ] Satisfaction
+      - [ ] Health
+      - [ ] Traffic Congestion
+      - [ ] Crime Level
+    - [ ] Picker Info Dialog
+- [ ] Implement start menu
+  - [ ] Create game
+    - [ ] Size of a map
+    - [ ] Difficulty (starting money)
+  - [ ] Load game
+  - [ ] Save game
+  - [ ] Exit
+  - [ ] Settings
