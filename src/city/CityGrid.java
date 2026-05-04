@@ -1,6 +1,7 @@
 package city;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,9 +50,12 @@ public class CityGrid {
     }
 
     public void removeBuildingAt(Point place) {
-        for (Entry<Point, Buildable> entry : buildings.entrySet())
+        Iterator<Entry<Point, Buildable>> iterator = buildings.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Entry<Point, Buildable> entry = iterator.next();
             if (place.isWithin(entry.getKey(), entry.getValue().getLength(), entry.getValue().getWidth()))
-                buildings.remove(entry.getKey());
+                iterator.remove();
+        }
     }
 
     public List<Citizen> getCitizensAt(Point place) {

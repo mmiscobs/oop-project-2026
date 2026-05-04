@@ -12,6 +12,7 @@
     - [ ] Traffic congestion
 - [ ] Implement UI
   - [x] Placing buildings
+    - [x] Show obstructing tiles
     - [ ] Charging for placement
   - [x] Demolishing buildings
     - [ ] Charging for demolishment

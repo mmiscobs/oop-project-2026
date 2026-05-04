@@ -218,8 +218,10 @@ public class CityView extends IsometricMapView {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             Color fill = new Color(255, 220, 90, 110);
             Color stroke = new Color(255, 200, 40, 230);
+            Color prohibitedFill = new Color(178, 34, 34, 110);
             for (Point t : Point.allPointsWithin(currentHoverLoc.loc, l, w)) {
-                v.drawTileDiamond(g, t.x, t.y, fill, stroke);
+                Buildable existingBuilding = view.city.grid.getBuildingAt(t);
+                v.drawTileDiamond(g, t.x, t.y, existingBuilding != null ? prohibitedFill : fill, stroke);
             }
         };
         view.setOverlay(routeOverlay);
