@@ -3,6 +3,9 @@ package buildings.privatebuilding.workplace.office;
 import buildings.Buildable;
 
 public class Skyrise extends OfficeBuilding {
+    static {
+        Buildable.registry.put(Skyrise.class, Skyrise::new);
+    }
 
     public int getPrice() {
         return 0;
