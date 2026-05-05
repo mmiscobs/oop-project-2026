@@ -13,12 +13,17 @@ public class CityGrid {
     public Map<Point, Buildable> buildings;
     public final int sizeX;
     public final int sizeY;
+    private PathFinder pathFinder = new PathFinder(this);
 
     public CityGrid(City city, int sizeX, int sizeY) {
         this.city = city;
         this.buildings = new HashMap<>();
         this.sizeX = sizeX;
         this.sizeY = sizeY;
+    }
+
+    public Buildable getNextStepFromTo(Buildable from, Buildable to) {
+        return pathFinder.nextStep(from, to);
     }
 
     public Buildable getBuildingAt(Point place) {
@@ -46,6 +51,7 @@ public class CityGrid {
                 return;
         }
         buildings.put(place, building);
+        pathFinder.invalidateCache();
     }
 
     public void removeBuildingAt(Point place) {
@@ -55,5 +61,6 @@ public class CityGrid {
             if (place.isWithin(entry.getKey(), entry.getValue().getLength(), entry.getValue().getWidth()))
                 iterator.remove();
         }
+        pathFinder.invalidateCache();
     }
 }

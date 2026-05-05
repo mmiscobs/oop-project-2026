@@ -1,5 +1,6 @@
 package buildings;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,12 +20,27 @@ import buildings.publicbuilding.service.police.BigPoliceStation;
 import buildings.publicbuilding.service.police.SmallPoliceStation;
 import buildings.publicbuilding.transportation.Road;
 import buildings.publicbuilding.transportation.Street;
+import city.Citizen;
 import city.City;
 
 public abstract class Buildable {
     protected City city;
 
     private int crimeRate;
+
+    protected List<Citizen> visitors = new ArrayList<>();
+
+    public List<Citizen> getVisitors() {
+        return visitors;
+    }
+
+    public void addVisitor(Citizen citizen) {
+        visitors.add(citizen);
+    }
+
+    public void removeVisitor(Citizen citizen) {
+        visitors.remove(citizen);
+    }
 
     abstract public int getWidth();
 
@@ -54,6 +70,7 @@ public abstract class Buildable {
         details.put("length", Integer.toString(this.getLength()));
         details.put("crime rate", Integer.toString(this.getCrimeRate()));
         details.put("price", Integer.toString(this.getPrice()));
+        details.put("present citizens", Integer.toString(getVisitors().size()));
         return details;
     }
 

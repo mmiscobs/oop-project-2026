@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Supplier;
 
 public class CityView extends IsometricMapView {
     private static final int TILE_W = 34;
@@ -40,6 +41,8 @@ public class CityView extends IsometricMapView {
     }
 
     public int tick;
+
+    private ArrayList<Runnable> renderListeners = new ArrayList<>();
 
     public void render() {
         Image[][] grid = new Image[ROWS][COLS];
@@ -100,6 +103,9 @@ public class CityView extends IsometricMapView {
             System.err.print(e);
         }
 
+        for (Runnable listener : renderListeners) {
+            listener.run();
+        }
         super.setTiles(grid);
     }
 
@@ -118,21 +124,20 @@ public class CityView extends IsometricMapView {
     }
 
     interface FloatingDragLabelCreator {
-        String produceLabelHTML(DragVisual dragInfo);
+        Supplier<String> produceLabelHTML(DragVisual dragInfo);
     }
 
     interface FloatingHoverLabelCreator {
-        String produceLabelHTML(Point loc);
+        Supplier<String> produceLabelHTML(Point loc);
     }
 
     interface FloatingBuildingHoverLabelCreator {
-        String produceLabelHTML(Buildable building);
+        Supplier<String> produceLabelHTML(Buildable building);
     }
 
     public static Runnable enableManhattanDragAction(CityView view, FloatingDragLabelCreator labelCreator,
             TilesListener onRoute) {
-        JLabel info = makeInfoLabel();
-        info.setVisible(false);
+        ReactiveInfoLabel info = view.new ReactiveInfoLabel(null);
         view.attachComponent(info, 0, 0, IsometricMapView.TileAnchor.ABOVE, 0, -8);
         DragVisual drag = new DragVisual();
 
@@ -145,18 +150,17 @@ public class CityView extends IsometricMapView {
         TileDragListener onDrag = new IsometricMapView.TileDragListener() {
             @Override
             public void onDragStart(Point loc) {
-                info.setVisible(true);
                 drag.active = true;
                 drag.from = loc;
                 drag.to = loc;
+                info.setLabelCreator(labelCreator.produceLabelHTML(drag));
                 view.repaint();
             }
 
             @Override
             public void onDragMove(Point from, Point to) {
                 drag.to = to;
-                if (info.isVisible())
-                    info.setText(labelCreator.produceLabelHTML(drag));
+                info.setLabelCreator(labelCreator.produceLabelHTML(drag));
                 view.repaint();
             }
 
@@ -164,6 +168,7 @@ public class CityView extends IsometricMapView {
             public void onDragEnd(Point from, Point to) {
                 onRoute.actOnTiles(manhattanPath(from, to), cleanup[0]);
                 drag.active = false;
+                info.setLabelCreator(null);
                 info.setVisible(false);
                 view.repaint();
             }
@@ -196,7 +201,7 @@ public class CityView extends IsometricMapView {
 
     public static Runnable enableBuildAction(CityView view, FloatingHoverLabelCreator labelCreator, int l, int w,
             TileListener onTile) {
-        JLabel info = makeInfoLabel();
+        ReactiveInfoLabel info = view.new ReactiveInfoLabel(null);
         view.attachComponent(info, 0, 0, IsometricMapView.TileAnchor.ABOVE, 0, -8);
         class HoverLoc {
             Point loc;
@@ -210,9 +215,8 @@ public class CityView extends IsometricMapView {
 
         TileHoverListener onHover = (loc) -> {
             currentHoverLoc.loc = loc;
-            info.setVisible(currentHoverLoc.isWithinGrid());
             view.moveAttachment(info, loc.x, loc.y);
-            info.setText(labelCreator.produceLabelHTML(loc));
+            info.setLabelCreator(currentHoverLoc.isWithinGrid() ? labelCreator.produceLabelHTML(loc) : null);
         };
         view.addTileHoverListener(onHover);
 
@@ -252,7 +256,7 @@ public class CityView extends IsometricMapView {
 
     public static Runnable enableBuildingHoverAction(CityView view,
             FloatingBuildingHoverLabelCreator onBuilding) {
-        JLabel info = makeInfoLabel();
+        ReactiveInfoLabel info = view.new ReactiveInfoLabel(null);
         view.attachComponent(info, 0, 0, IsometricMapView.TileAnchor.ABOVE, 0, -8);
         class HoverLoc {
             Point loc;
@@ -275,12 +279,7 @@ public class CityView extends IsometricMapView {
         TileHoverListener onHover = (loc) -> {
             currentHoverLoc.loc = loc;
             view.moveAttachment(info, loc.x, loc.y);
-            String label = labelCreator.produceLabelHTML(loc);
-            if (label != null && currentHoverLoc.isWithinGrid()) {
-                info.setVisible(true);
-                info.setText(label);
-            } else
-                info.setVisible(false);
+            info.setLabelCreator(currentHoverLoc.isWithinGrid() ? labelCreator.produceLabelHTML(loc) : null);
         };
         view.addTileHoverListener(onHover);
 
@@ -316,7 +315,7 @@ public class CityView extends IsometricMapView {
     public static Runnable enableDemolishAction(CityView view,
 
             TileListener onTile) {
-        JLabel info = makeInfoLabel();
+        ReactiveInfoLabel info = view.new ReactiveInfoLabel(null);
         view.attachComponent(info, 0, 0, IsometricMapView.TileAnchor.ABOVE, 0, -8);
         class HoverLoc {
             Point loc;
@@ -331,7 +330,7 @@ public class CityView extends IsometricMapView {
         FloatingHoverLabelCreator labelCreator = (loc) -> {
             Buildable existingBuilding = view.city.grid.getBuildingAt(loc);
             if (existingBuilding != null) {
-                return "Demolish " + existingBuilding.getClass().getSimpleName() + "("
+                return () -> "Demolish " + existingBuilding.getClass().getSimpleName() + "("
                         + existingBuilding.getPrice() * City.DEMOLISHMENT_COEF + "$)";
             }
             return null;
@@ -340,12 +339,7 @@ public class CityView extends IsometricMapView {
         TileHoverListener onHover = (loc) -> {
             currentHoverLoc.loc = loc;
             view.moveAttachment(info, loc.x, loc.y);
-            String label = labelCreator.produceLabelHTML(loc);
-            if (label != null && currentHoverLoc.isWithinGrid()) {
-                info.setVisible(true);
-                info.setText(label);
-            } else
-                info.setVisible(false);
+            info.setLabelCreator(currentHoverLoc.isWithinGrid() ? labelCreator.produceLabelHTML(loc) : null);
         };
         view.addTileHoverListener(onHover);
 
@@ -413,16 +407,38 @@ public class CityView extends IsometricMapView {
         super.setZoom(1);
     }
 
-    private static JLabel makeInfoLabel() {
-        JLabel info = new JLabel();
-        info.setOpaque(true);
-        info.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        info.setBackground(new Color(255, 252, 230));
-        info.setForeground(new Color(30, 30, 30));
-        info.setBorder(new CompoundBorder(
-                new LineBorder(new Color(40, 40, 40)),
-                new EmptyBorder(4, 8, 4, 8)));
-        return info;
+    private class ReactiveInfoLabel extends JLabel {
+        private Supplier<String> labelCreator;
+
+        private Runnable render;
+
+        public void setLabelCreator(Supplier<String> labelCreator) {
+            this.labelCreator = labelCreator;
+            this.render.run();
+        }
+
+        ReactiveInfoLabel(Supplier<String> labelCreator) {
+            this.labelCreator = labelCreator;
+            this.setOpaque(true);
+            this.setFont(new Font("SansSerif", Font.PLAIN, 12));
+            this.setBackground(new Color(255, 252, 230));
+            this.setForeground(new Color(30, 30, 30));
+            this.setBorder(new CompoundBorder(
+                    new LineBorder(new Color(40, 40, 40)),
+                    new EmptyBorder(4, 8, 4, 8)));
+            this.render = () -> {
+                if (this.labelCreator != null) {
+                    String res = this.labelCreator.get();
+                    if (res != null)
+                        this.setText(res);
+                    this.setVisible(res != null);
+                } else {
+                    this.setVisible(false);
+                }
+            };
+            render.run();
+            renderListeners.add(render);
+        }
     }
 
     public static BufferedImage loadImage(Class<?> Class, String filename) throws IOException {

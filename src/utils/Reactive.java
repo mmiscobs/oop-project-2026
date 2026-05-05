@@ -27,10 +27,9 @@ public class Reactive<T> {
         }
     }
 
-    /** Returns a Runnable to unsubscribe. */
     public Runnable subscribe(Consumer<T> listener) {
         listeners.add(listener);
-        listener.accept(value); // optional: emit current value immediately
+        listener.accept(value);
         return () -> listeners.remove(listener);
     }
 

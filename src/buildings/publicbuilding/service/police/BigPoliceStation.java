@@ -21,22 +21,22 @@ public class BigPoliceStation extends PoliceStation {
     }
 
     public int getPrice() {
-        return 1000;
+        return 25000;
     }
 
     public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getMaintanenceCostPerDay() {
-        return 100;
+        return 1000;
     }
 
     public int getRange() {
-        return 0;
+        return 10 + (hasHelipad ? 2 : 0);
     }
 
     public int getCrimeReduction(int x, int y) {
-        return 0;
+        return 3;
     }
 
     @Override

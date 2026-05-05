@@ -18,16 +18,12 @@ public class GroceryStore extends CommercialBuilding {
         return false;
     }
 
-    public int calculateProfitPerTick() {
-        return 0;
-    }
-
     public int getWorkersCapacity() {
-        return 0;
+        return 3;
     }
 
     public int getVisitorsCapacity() {
-        return 0;
+        return 10;
     }
 
     @Override

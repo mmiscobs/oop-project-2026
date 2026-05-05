@@ -5,6 +5,8 @@ import java.util.Iterator;
 
 import buildings.Buildable;
 import buildings.privatebuilding.residential.ResidentialBuilding;
+import buildings.privatebuilding.workplace.WorkplaceBuilding;
+import buildings.privatebuilding.workplace.commercial.CommercialBuilding;
 import buildings.publicbuilding.PublicBuilding;
 import loans.Loan;
 import utils.Point;
@@ -50,15 +52,18 @@ public class City {
         this.loans.add(loan);
     }
 
-    public static final int TICKS_IN_DAY = 100;
+    public static final int TICKS_IN_DAY = 10;
 
-    public void payBuildingsUpkeepPerTick() {
+    public int payBuildingsUpkeepPerTick() {
+        double buildingsUpkeep = 0;
         for (Buildable building : grid.buildings.values()) {
             if (building instanceof PublicBuilding) {
                 PublicBuilding publicBuilding = (PublicBuilding) building;
-                money.set(money.get() - ((double) publicBuilding.getMaintanenceCostPerDay()) / TICKS_IN_DAY);
+                buildingsUpkeep += ((double) publicBuilding.getMaintanenceCostPerDay()) / TICKS_IN_DAY;
             }
         }
+        money.set(money.get() - (int) buildingsUpkeep);
+        return (int) buildingsUpkeep;
     }
 
     public void accomodateHomelessPeople() {
@@ -78,6 +83,42 @@ public class City {
         }
     }
 
+    public int collectTaxesFromResidents() {
+        int residentTax = 0;
+        for (Buildable building : grid.buildings.values()) {
+            if (building instanceof ResidentialBuilding) {
+                ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
+                residentTax += residentialBuilding.getResidentTax();
+            }
+        }
+        money.set(money.get() + residentTax);
+        return residentTax;
+    }
+
+    public int collectTaxesFromPurchases() {
+        int purchaseTax = 0;
+        for (Buildable building : grid.buildings.values()) {
+            if (building instanceof CommercialBuilding) {
+                CommercialBuilding commercialBuilding = (CommercialBuilding) building;
+                purchaseTax += commercialBuilding.calculateSalesTax();
+            }
+        }
+        money.set(money.get() + purchaseTax);
+        return purchaseTax;
+    }
+
+    public int collectTaxesFromBusinesses() {
+        int businessTax = 0;
+        for (Buildable building : grid.buildings.values()) {
+            if (building instanceof WorkplaceBuilding) {
+                WorkplaceBuilding workplaceBuilding = (WorkplaceBuilding) building;
+                businessTax += workplaceBuilding.getBusinessTax();
+            }
+        }
+        money.set(money.get() + businessTax);
+        return businessTax;
+    }
+
     public void evictHomelessPeople() {
         int delta = homelessPeople.size();
         int initialDelta = delta;
@@ -89,6 +130,10 @@ public class City {
         }
     }
 
+    public void employPeople() {
+
+    }
+
     public void accomodateNewImmigrants() {
         for (Buildable building : grid.buildings.values()) {
             if (building instanceof ResidentialBuilding) {
@@ -96,7 +141,7 @@ public class City {
                 int delta = residentialBuilding.getCapacity() - residentialBuilding.getResidents().size();
                 int initialDelta = delta;
                 while (delta > (int) (initialDelta * 0.9)) {
-                    residentialBuilding.addResident(new Citizen());
+                    residentialBuilding.addResident(new Citizen(this, residentialBuilding, null));
                     delta--;
                 }
             }

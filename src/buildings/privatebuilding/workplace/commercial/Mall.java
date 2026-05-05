@@ -18,16 +18,12 @@ public class Mall extends CommercialBuilding {
         return false;
     }
 
-    public int calculateProfitPerTick() {
-        return 0;
-    }
-
     public int getWorkersCapacity() {
-        return 0;
+        return 30;
     }
 
     public int getVisitorsCapacity() {
-        return 0;
+        return 50;
     }
 
     @Override

@@ -5,22 +5,10 @@ import java.util.Map;
 import buildings.publicbuilding.PublicBuilding;
 
 public abstract class PublicTransportation extends PublicBuilding {
-    private int congestion;
-
     public abstract int getCapacity();
 
     public int getCongestion() {
-        return congestion;
-    }
-
-    public int getPresentCitizensAmount() {
-        return 0;
-    }
-
-    public void increaseCongestion() {
-    }
-
-    public void decreaseCongestion() {
+        return (int) ((double) getVisitors().size() / getCapacity() * 100);
     }
 
     public abstract int computeNoiseLevel();
@@ -30,7 +18,6 @@ public abstract class PublicTransportation extends PublicBuilding {
         Map<String, String> details = super.getDetailedInfo();
 
         details.put("congestion", Integer.toString(getCongestion()));
-        details.put("present citizens", Integer.toString(getPresentCitizensAmount()));
         return details;
     }
 }

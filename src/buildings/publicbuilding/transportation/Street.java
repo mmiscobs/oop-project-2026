@@ -38,7 +38,7 @@ public class Street extends PublicTransportation {
     }
 
     public int computeNoiseLevel() {
-        return this.hasSpeedLimiters ? 5 : 10;
+        return (int) ((this.hasSpeedLimiters ? 5 : 10) * (double) Math.min(getCongestion(), 100) / 100);
     }
 
     public int getWidth() {

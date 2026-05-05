@@ -31,6 +31,16 @@ public abstract class ResidentialBuilding extends PrivateBuilding {
             residents.add(citizen);
     }
 
+    private final static int RESIDENT_TAX = 3;
+
+    public int getResidentTax() {
+        return RESIDENT_TAX * getResidents().size();
+    }
+
+    public int calculateProfitPerTick() {
+        return getResidentTax();
+    }
+
     @Override
     public Map<String, String> getDetailedInfo() {
         Map<String, String> details = super.getDetailedInfo();

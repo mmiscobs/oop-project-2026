@@ -21,18 +21,18 @@ public class Clinic extends HealthcareBuilding {
     }
 
     public int getPrice() {
-        return 1000;
+        return 11000;
     }
 
     public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getMaintanenceCostPerDay() {
-        return 0;
+        return 700;
     }
 
     public int getRange() {
-        return 0;
+        return 6;
     }
 
     public int getHealthIncrease(int x, int y) {

@@ -50,17 +50,65 @@ public class Simulator {
     public Observable<Integer> citizensAmountView = citizensAmount.readOnly();
     private Reactive<Integer> homelessCitizensAmount = new Reactive<>(0);
     public Observable<Integer> homelessCitizensAmountView = homelessCitizensAmount.readOnly();
+    private Reactive<Integer> lastResidentTax = new Reactive<>(0);
+    public Observable<Integer> lastResidentTaxView = lastResidentTax.readOnly();
+    private Reactive<Integer> lastBusinessTax = new Reactive<>(0);
+    public Observable<Integer> lastBusinessTaxView = lastBusinessTax.readOnly();
+    private Reactive<Integer> lastPurchaseTax = new Reactive<>(0);
+    public Observable<Integer> lastPurchaseTaxView = lastPurchaseTax.readOnly();
+    private Reactive<Integer> lastBuildingsUpkeep = new Reactive<>(0);
+    public Observable<Integer> lastBuildingsUpkeepView = lastBuildingsUpkeep.readOnly();
+    public Observable<Integer> netIncomeView = new Reactive.Observable<Integer>() {
+        public Integer get() {
+            return lastBusinessTax.get() + lastPurchaseTax.get() + lastResidentTax.get() - lastBuildingsUpkeep.get();
+        }
+
+        public Runnable subscribe(Consumer<Integer> listener) {
+            Consumer<Integer> onUpdate = r -> {
+                listener.accept(get());
+            };
+            Runnable[] cleanups = new Runnable[] {
+                    lastBuildingsUpkeepView.subscribe(onUpdate),
+                    lastPurchaseTax.subscribe(onUpdate),
+                    lastResidentTax.subscribe(onUpdate),
+                    lastBusinessTax.subscribe(onUpdate),
+            };
+            return () -> {
+                for (Runnable runnable : cleanups) {
+                    runnable.run();
+                }
+            };
+        }
+    };
 
     public void runSimulationTick() {
-        city.payBuildingsUpkeepPerTick();
+        lastBuildingsUpkeep.set(city.payBuildingsUpkeepPerTick());
         city.accomodateHomelessPeople();
         city.accomodateNewImmigrants();
         city.evictHomelessPeople();
+        lastResidentTax.set(city.collectTaxesFromResidents());
+        lastBusinessTax.set(city.collectTaxesFromBusinesses());
+        lastPurchaseTax.set(city.collectTaxesFromPurchases());
+        runAllCitizens();
 
         if (onTick != null)
             onTick.accept(currentTick);
 
         updateCitizensAmount();
+    }
+
+    private void runAllCitizens() {
+        for (Buildable building : city.grid.buildings.values()) {
+            if (building instanceof ResidentialBuilding) {
+                ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
+                for (Citizen citizen : residentialBuilding.getResidents()) {
+                    citizen.runSimulationTick(currentTick);
+                }
+            }
+        }
+        for (Citizen homeless : city.homelessPeople) {
+            homeless.runSimulationTick(currentTick);
+        }
     }
 
     private void updateCitizensAmount() {

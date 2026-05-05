@@ -18,10 +18,6 @@ public class Factory extends IndustrialBuilding {
         return false;
     }
 
-    public int calculateProfitPerTick() {
-        return 0;
-    }
-
     public int getWorkersCapacity() {
         return 0;
     }

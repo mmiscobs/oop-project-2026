@@ -21,18 +21,18 @@ public class Hospital extends HealthcareBuilding {
     }
 
     public int getPrice() {
-        return 1000;
+        return 15000;
     }
 
     public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getMaintanenceCostPerDay() {
-        return 0;
+        return 2000;
     }
 
     public int getRange() {
-        return 0;
+        return 11 + (hasHelipad ? 3 : 0);
     }
 
     public int getHealthIncrease(int x, int y) {

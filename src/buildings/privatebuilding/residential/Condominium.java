@@ -18,10 +18,6 @@ public class Condominium extends ResidentialBuilding {
         return false;
     }
 
-    public int calculateProfitPerTick() {
-        return 0;
-    }
-
     public int getCapacity() {
         return 50;
     }

@@ -3,9 +3,13 @@
 - [x] Implement the buildings hierarchy
 - [x] Implement tick based time flow
   - [x] Draw movable translucent clouds
-  - [ ] Money income per citizen associated with building
+  - [x] Money income per citizen associated with building
+    - [x] Residential Tax
+    - [x] Purchases Tax
+    - [ ] Busineses Tax
   - [x] Immigration
   - [ ] Residential demand
+    - [ ] Unbuilt homes
   - [x] Eviction and emmigration
   - [x] Expendatures per building
   - [ ] Expendatures per policy
@@ -15,8 +19,8 @@
       - [ ] Implement health and congestion effect
     - [ ] Subsidised Muzzle Silencers (decreases noise on roads)
       - [ ] Implement noise effect
-  - [ ] Citizens moving through city
-    - [ ] Traffic congestion
+  - [x] Citizens moving through city
+    - [x] Traffic congestion
 - [ ] Implement UI
   - [x] Placing buildings
     - [x] Show obstructing tiles
@@ -27,7 +31,11 @@
     - [x] Show the demolished building outline
     - [x] Charging for demolishment
   - [ ] Looking at the stats
-    - [x] Money amount
+    - [x] Amounts
+      - [x] Taxes
+      - [x] Upkeep
+      - [x] Money
+      - [x] Population + Homeless
     - [ ] Graphs
     - [ ] HeatMaps
       - [ ] Profit

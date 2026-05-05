@@ -38,7 +38,7 @@ public class Road extends PublicTransportation {
     }
 
     public int computeNoiseLevel() {
-        return 30;
+        return (int) (30 * (double) Math.min(getCongestion(), 100) / 100);
     }
 
     public int getWidth() {

@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -24,6 +25,7 @@ import city.City;
 import simulation.GameSpeed;
 import simulation.Simulator;
 import utils.Point;
+import utils.Reactive.Observable;
 
 public class SimulationInterface extends JPanel {
     SimulationInterface(Simulator simulator) {
@@ -76,7 +78,7 @@ public class SimulationInterface extends JPanel {
                         if (PublicTransportation.class.isAssignableFrom(BuildableClass)) {
                             Buildable example = Buildable.createBuilding(BuildableClass);
                             return CityView.enableManhattanDragAction(view,
-                                    (dragInfo) -> {
+                                    (dragInfo) -> () -> {
                                         int totalPrice = 0;
 
                                         for (Point point : CityView.manhattanPath(dragInfo.from, dragInfo.to)) {
@@ -105,7 +107,7 @@ public class SimulationInterface extends JPanel {
                         }
                         Buildable building = Buildable.createBuilding(BuildableClass);
                         return CityView.enableBuildAction(view,
-                                (loc) -> building.getClass().getSimpleName() + " (" + building.getPrice() + "$)",
+                                (loc) -> () -> building.getClass().getSimpleName() + " (" + building.getPrice() + "$)",
                                 building.getLength(),
                                 building.getWidth(), (tile, cleanup) -> {
                                     city.build(building, tile);
@@ -150,7 +152,7 @@ public class SimulationInterface extends JPanel {
             }
 
             public Runnable enable(Runnable onEnd) {
-                return CityView.enableBuildingHoverAction(view, (building) -> {
+                return CityView.enableBuildingHoverAction(view, (building) -> () -> {
                     String html = "<html>";
 
                     for (Entry<String, String> entry : building.getDetailedInfo().entrySet()) {
@@ -193,41 +195,20 @@ public class SimulationInterface extends JPanel {
         class Stats extends JPanel {
             Stats() {
                 super(new GridLayout(0, 1));
-                this.add(new MoneyLabel());
-                this.add(new PopulationLabel());
-                this.add(new HomelessLabel());
+                this.add(new ReactiveLabel<>(simulator.city.moneyView, a -> "Money: " + a.intValue()));
+                this.add(new ReactiveLabel<>(simulator.citizensAmountView, a -> "Population: " + a));
+                this.add(new ReactiveLabel<>(simulator.homelessCitizensAmountView, a -> "Homeless: " + a));
+                this.add(new ReactiveLabel<>(simulator.lastBuildingsUpkeepView, a -> "Upkeep: -" + a + "$"));
+                this.add(new ReactiveLabel<>(simulator.lastBusinessTaxView, a -> "Business Tax: " + a + "$"));
+                this.add(new ReactiveLabel<>(simulator.lastPurchaseTaxView, a -> "Purchase Tax: " + a + "$"));
+                this.add(new ReactiveLabel<>(simulator.lastResidentTaxView, a -> "Resident Tax: " + a + "$"));
+                this.add(new ReactiveLabel<>(simulator.netIncomeView, a -> "Net Income: " + a + "$"));
             }
 
-            class MoneyLabel extends JLabel {
-                MoneyLabel() {
-                    this.update();
-                    simulator.city.moneyView.subscribe(v -> this.update());
-                }
-
-                private void update() {
-                    this.setText("Money: " + simulator.city.moneyView.get().intValue() + "$");
-                }
-            }
-
-            class PopulationLabel extends JLabel {
-                PopulationLabel() {
-                    this.update();
-                    simulator.citizensAmountView.subscribe(v -> this.update());
-                }
-
-                private void update() {
-                    this.setText("Population: " + simulator.citizensAmountView.get().intValue());
-                }
-            }
-
-            class HomelessLabel extends JLabel {
-                HomelessLabel() {
-                    this.update();
-                    simulator.homelessCitizensAmountView.subscribe(v -> this.update());
-                }
-
-                private void update() {
-                    this.setText("Homeless: " + simulator.homelessCitizensAmountView.get().intValue());
+            class ReactiveLabel<T> extends JLabel {
+                ReactiveLabel(Observable<T> observable, Function<T, String> labelFunction) {
+                    this.setText(labelFunction.apply(observable.get()));
+                    observable.subscribe(v -> this.setText(labelFunction.apply(v)));
                 }
             }
         }
