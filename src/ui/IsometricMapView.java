@@ -108,7 +108,7 @@ public class IsometricMapView extends JComponent {
     private final List<TileHoverListener> hoverListeners = new Vector<>();
     private final List<TileClickListener> clickListeners = new Vector<>();
     private final List<TileDragListener> dragListeners = new Vector<>();
-    private OverlayPainter overlay;
+    private ArrayList<OverlayPainter> overlays = new ArrayList<>();
 
     private static final int DRAG_IDLE = 0;
     private static final int DRAG_ARMED = 1;
@@ -510,9 +510,12 @@ public class IsometricMapView extends JComponent {
         dragListeners.remove(l);
     }
 
-    public void setOverlay(OverlayPainter o) {
-        this.overlay = o;
+    public Runnable addOverlay(OverlayPainter o) {
+        this.overlays.add(o);
         repaint();
+        return () -> {
+            this.overlays.remove(o);
+        };
     }
 
     public void drawTileDiamond(Graphics2D g, int col, int row, Color fill, Color stroke) {
@@ -744,8 +747,9 @@ public class IsometricMapView extends JComponent {
             if (drawHoverHighlight && hoverCol >= 0 && hoverRow >= 0) {
                 drawHoverDiamond(g2, hoverCol, hoverRow);
             }
-            if (overlay != null)
+            for (OverlayPainter overlay : overlays) {
                 overlay.paint(g2, this);
+            }
         } finally {
             g2.dispose();
         }

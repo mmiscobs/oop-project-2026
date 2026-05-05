@@ -85,16 +85,12 @@ public class City {
         }
     }
 
-    public List<Buildable> builtBuildings() {
-        ArrayList<Buildable> built = new ArrayList<>();
+    public List<PrivateBuilding> builtBuildings() {
+        ArrayList<PrivateBuilding> built = new ArrayList<>();
 
-        for (Buildable building : grid.buildings.values()) {
-            if (building instanceof PrivateBuilding p) {
-                if (p.getIsBuilt())
-                    built.add(p);
-            } else
-                built.add(building);
-        }
+        for (Buildable building : grid.buildings.values())
+            if (building instanceof PrivateBuilding p && p.getIsBuilt())
+                built.add(p);
         return built;
     }
 

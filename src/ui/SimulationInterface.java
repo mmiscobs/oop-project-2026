@@ -1,10 +1,13 @@
 package ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
@@ -14,6 +17,7 @@ import javax.swing.JPanel;
 
 import buildings.Buildable;
 import buildings.Buildable.UnregisteredBuildingType;
+import buildings.privatebuilding.PrivateBuilding;
 import buildings.privatebuilding.residential.ResidentialBuilding;
 import buildings.privatebuilding.workplace.commercial.CommercialBuilding;
 import buildings.privatebuilding.workplace.industrial.IndustrialBuilding;
@@ -24,6 +28,7 @@ import buildings.publicbuilding.transportation.PublicTransportation;
 import city.City;
 import simulation.GameSpeed;
 import simulation.Simulator;
+import ui.IsometricMapView.OverlayPainter;
 import utils.Point;
 import utils.Reactive.Observable;
 
@@ -124,6 +129,7 @@ public class SimulationInterface extends JPanel {
             });
         }
         actions.add(new TogglesMenu.Action() {
+
             public String getName() {
                 return "Demolish";
             };
@@ -162,7 +168,7 @@ public class SimulationInterface extends JPanel {
                 });
             }
         });
-        JPanel left = new TogglesMenu("Build", actions);
+        JPanel left = new TogglesMenu(actions);
         return left;
     }
 
@@ -191,8 +197,121 @@ public class SimulationInterface extends JPanel {
             this.add(new TimeSpeedButtons(), BorderLayout.WEST);
             JPanel stats = new JPanel(new GridLayout(1, 0));
             this.add(stats, BorderLayout.EAST);
+            stats.add(new Overlays());
             stats.add(new NumberStats());
             stats.add(new DemandStats());
+        }
+
+        class Overlays extends JPanel {
+            Overlays() {
+                super(new GridLayout(0, 1));
+                ArrayList<TogglesMenu.Action> actions = new ArrayList<>();
+                Function<Function<Buildable, Integer>, OverlayPainter> createBuildingsOverlay = (stat) -> (g, v) -> {
+                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    Color stroke = new Color(255, 200, 40, 0);
+                    for (Entry<Point, Buildable> entry : simulator.city.grid.buildings.entrySet()) {
+                        Buildable buildable = entry.getValue();
+                        Point point = entry.getKey();
+                        Integer value = stat.apply(buildable);
+                        if (value != null) {
+                            Color fill = new Color(Math.clamp((int) (2.55 * value), 0, 255),
+                                    Math.clamp((int) (255 - 2.55 * value), 0, 255),
+                                    0, 110);
+                            for (Point p : Point.allPointsWithin(point, buildable.getLength(),
+                                    buildable.getWidth())) {
+                                v.drawTileDiamond(g, p.x, p.y, fill, stroke);
+                            }
+                        }
+                    }
+                };
+                actions.add(new TogglesMenu.Action() {
+                    public String getName() {
+                        return "Congestion overlay";
+                    }
+
+                    public String getStopName() {
+                        return "Disable congestion overlay";
+                    }
+
+                    public Runnable enable(Runnable onEnd) {
+                        return view.addOverlay(createBuildingsOverlay.apply(b -> {
+                            if (b instanceof PublicTransportation p)
+                                return p.getCongestion();
+                            return null;
+                        }));
+                    }
+                });
+                actions.add(new TogglesMenu.Action() {
+                    public String getName() {
+                        return "Health overlay";
+                    }
+
+                    public String getStopName() {
+                        return "Disable health overlay";
+                    }
+
+                    public Runnable enable(Runnable onEnd) {
+                        return view.addOverlay(createBuildingsOverlay.apply(b -> {
+                            if (b instanceof ResidentialBuilding p)
+                                return p.getResidents().stream().map(r -> r.getCurrentHealth()).reduce(0, Integer::sum,
+                                        Integer::sum) / p.getResidents().size();
+                            return null;
+                        }));
+                    }
+                });
+                actions.add(new TogglesMenu.Action() {
+                    public String getName() {
+                        return "Profit overlay";
+                    }
+
+                    public String getStopName() {
+                        return "Disable profit overlay";
+                    }
+
+                    public Runnable enable(Runnable onEnd) {
+                        return view.addOverlay(createBuildingsOverlay.apply(b -> {
+                            Optional<Integer> maxProfit = simulator.city.builtBuildings().stream()
+                                    .map(bu -> bu.calculateProfitPerTick()).reduce(Integer::max);
+                            if (b instanceof PrivateBuilding p)
+                                return 50 - (int) Math.clamp(
+                                        (double) p.calculateProfitPerTick() / maxProfit.orElse(1) * 50,
+                                        0, 50);
+                            return null;
+                        }));
+                    }
+                });
+                actions.add(new TogglesMenu.Action() {
+                    public String getName() {
+                        return "Crime overlay";
+                    }
+
+                    public String getStopName() {
+                        return "Disable crime overlay";
+                    }
+
+                    public Runnable enable(Runnable onEnd) {
+                        return view.addOverlay(createBuildingsOverlay.apply(b -> b.getCrimeRate()));
+                    }
+                });
+                actions.add(new TogglesMenu.Action() {
+                    public String getName() {
+                        return "Noise overlay";
+                    }
+
+                    public String getStopName() {
+                        return "Disable noise overlay";
+                    }
+
+                    public Runnable enable(Runnable onEnd) {
+                        return view.addOverlay(createBuildingsOverlay.apply(b -> {
+                            if (b instanceof PublicTransportation p)
+                                return p.computeNoiseLevel();
+                            return null;
+                        }));
+                    }
+                });
+                this.add(new TogglesMenu(actions));
+            }
         }
 
         class DemandStats extends JPanel {

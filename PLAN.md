@@ -12,16 +12,9 @@
     - [x] Unbuilt homes
   - [x] Eviction and emmigration
   - [x] Expendatures per building
-  - [ ] Expendatures per policy
-    - [ ] Curfue (reduces crime rate)
-      - [ ] Implement crime effect
-    - [ ] Mandatory Bicycle Usage (increases health and reduces traffic congestion)
-      - [ ] Implement health and congestion effect
-    - [ ] Subsidised Muzzle Silencers (decreases noise on roads)
-      - [ ] Implement noise effect
   - [x] Citizens moving through city
     - [x] Traffic congestion
-- [ ] Implement UI
+- [x] Implement UI
   - [x] Placing buildings
     - [x] Show obstructing tiles
     - [x] Charging for placement
@@ -30,20 +23,19 @@
   - [x] Demolishing buildings
     - [x] Show the demolished building outline
     - [x] Charging for demolishment
-  - [ ] Looking at the stats
+  - [x] Looking at the stats
     - [x] Amounts
       - [x] Taxes
       - [x] Upkeep
       - [x] Money
       - [x] Population + Homeless
-    - [ ] Graphs
-    - [ ] HeatMaps
-      - [ ] Profit
-      - [ ] Noise
-      - [ ] Satisfaction
-      - [ ] Health
-      - [ ] Traffic Congestion
-      - [ ] Crime Level
+    - [x] HeatMaps
+      - [x] Profit
+      - [x] Noise
+      - [x] Satisfaction
+      - [x] Health
+      - [x] Traffic Congestion
+      - [x] Crime Level
     - [x] Picker Info Dialog
       - [x] Amount of citizens in building
       - [x] Upkeep cost

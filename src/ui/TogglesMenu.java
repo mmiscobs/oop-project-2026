@@ -19,7 +19,7 @@ public class TogglesMenu extends JPanel {
         Runnable enable(Runnable onEnd);
     }
 
-    public TogglesMenu(String name, List<Action> actions) {
+    public TogglesMenu(List<Action> actions) {
         super(new GridLayout(0, 1));
         ArrayList<JButton> buttons = new ArrayList<>();
         for (Action action : actions) {

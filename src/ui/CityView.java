@@ -70,7 +70,8 @@ public class CityView extends IsometricMapView {
                     if (building == null)
                         continue;
                     String suffix = "";
-                    if (building instanceof PublicTransportation) {
+                    String traffic = null;
+                    if (building instanceof PublicTransportation p) {
                         Buildable buildingNorth = city.grid.buildings.get(new Point(r, c + 1));
                         Buildable buildingSouth = city.grid.buildings.get(new Point(r, c - 1));
                         Buildable buildingEast = city.grid.buildings.get(new Point(r + 1, c));
@@ -91,6 +92,12 @@ public class CityView extends IsometricMapView {
                         } else if (isWestEast && !isNorthSouth) {
                             suffix = "WestEast";
                         }
+                        if (!suffix.equals("Intersection"))
+                            if (p.getCongestion() > 60) {
+                                traffic = "HighTraffic";
+                            } else if (p.getCongestion() > 15) {
+                                traffic = "LowTraffic";
+                            }
                     }
                     if (building instanceof PrivateBuilding privateBuilding && !privateBuilding.getIsBuilt()) {
                         for (Point tileWithin : Point.allPointsWithin(
@@ -104,13 +111,21 @@ public class CityView extends IsometricMapView {
                                     tileWithin.x,
                                     building.getWidth(), building.getLength()));
                         }
-                    } else
+                    } else {
                         this.addSprite(new Sprite(
                                 loadImage(building.getClass(),
                                         "./" + building.getClass().getSimpleName() + suffix + ".png"),
                                 r,
                                 c,
                                 building.getWidth(), building.getLength()));
+                        if (traffic != null)
+                            this.addSprite(new Sprite(
+                                    loadImage(building.getClass(),
+                                            "./" + traffic + suffix + ".png"),
+                                    r,
+                                    c,
+                                    1, 1));
+                    }
                 }
             }
         } catch (IOException e) {
@@ -201,13 +216,13 @@ public class CityView extends IsometricMapView {
             v.drawTileDiamond(g, drag.from.x, drag.from.y, null, new Color(60, 200, 255, 240));
             v.drawTileDiamond(g, drag.to.x, drag.from.y, null, new Color(255, 80, 80, 240));
         };
-        view.setOverlay(routeOverlay);
+        Runnable removeOverlay = view.addOverlay(routeOverlay);
         cleanup[0] = () -> {
             SwingUtilities.invokeLater(() -> {
                 view.detachComponent(info);
                 view.removeTileDragListener(onDrag);
                 view.removeTileHoverListener(onHover);
-                view.setOverlay(null);
+                removeOverlay.run();
             });
         };
         return cleanup[0];
@@ -256,13 +271,13 @@ public class CityView extends IsometricMapView {
                 v.drawTileDiamond(g, t.x, t.y, existingBuilding != null ? prohibitedFill : fill, stroke);
             }
         };
-        view.setOverlay(routeOverlay);
+        Runnable removeOverlay = view.addOverlay(routeOverlay);
         cleanup[0] = () -> {
             SwingUtilities.invokeLater(() -> {
                 view.detachComponent(info);
                 view.removeTileClickListener(onClick);
                 view.removeTileHoverListener(onHover);
-                view.setOverlay(null);
+                removeOverlay.run();
             });
         };
         return cleanup[0];
@@ -315,12 +330,12 @@ public class CityView extends IsometricMapView {
             else
                 v.drawTileDiamond(g, currentHoverLoc.loc.x, currentHoverLoc.loc.y, fill, stroke);
         };
-        view.setOverlay(routeOverlay);
+        Runnable removeOverlay = view.addOverlay(routeOverlay);
         cleanup[0] = () -> {
             SwingUtilities.invokeLater(() -> {
                 view.detachComponent(info);
                 view.removeTileHoverListener(onHover);
-                view.setOverlay(null);
+                removeOverlay.run();
             });
         };
         return cleanup[0];
@@ -384,13 +399,13 @@ public class CityView extends IsometricMapView {
             else
                 v.drawTileDiamond(g, currentHoverLoc.loc.x, currentHoverLoc.loc.y, fill, stroke);
         };
-        view.setOverlay(routeOverlay);
+        Runnable removeOverlay = view.addOverlay(routeOverlay);
         cleanup[0] = () -> {
             SwingUtilities.invokeLater(() -> {
                 view.detachComponent(info);
                 view.removeTileClickListener(onClick);
                 view.removeTileHoverListener(onHover);
-                view.setOverlay(null);
+                removeOverlay.run();
             });
         };
         return cleanup[0];
