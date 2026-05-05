@@ -14,10 +14,6 @@ public class GroceryStore extends CommercialBuilding {
     public void setCrimeRate(int crimeRateReduction) {
     }
 
-    public boolean getIsBuilt() {
-        return false;
-    }
-
     public int getWorkersCapacity() {
         return 3;
     }

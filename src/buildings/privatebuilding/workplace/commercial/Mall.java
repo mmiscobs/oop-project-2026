@@ -8,14 +8,10 @@ public class Mall extends CommercialBuilding {
     }
 
     public int getPrice() {
-        return 1000;
+        return 15000;
     }
 
     public void setCrimeRate(int crimeRateReduction) {
-    }
-
-    public boolean getIsBuilt() {
-        return false;
     }
 
     public int getWorkersCapacity() {

@@ -8,18 +8,14 @@ public class Warehouse extends IndustrialBuilding {
     }
 
     public int getPrice() {
-        return 1000;
+        return 1500;
     }
 
     public void setCrimeRate(int crimeRateReduction) {
     }
 
-    public boolean getIsBuilt() {
-        return false;
-    }
-
     public int getWorkersCapacity() {
-        return 0;
+        return 20;
     }
 
     @Override

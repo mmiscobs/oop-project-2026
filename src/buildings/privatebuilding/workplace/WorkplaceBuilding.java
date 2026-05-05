@@ -8,29 +8,26 @@ import buildings.privatebuilding.PrivateBuilding;
 import city.Citizen;
 
 public abstract class WorkplaceBuilding extends PrivateBuilding {
-    private int currentWorkers;
-    private int workersHired;
-
-    public int getCurrentWorkers() {
-        return currentWorkers;
-    }
-
     private ArrayList<Citizen> hiredWorkers = new ArrayList<>();
 
     public List<Citizen> getHiredWorkers() {
         return List.copyOf(hiredWorkers);
     }
 
-    public void addCurrentWorker() {
+    public void addHiredWorker(Citizen worker) {
+        if (hasOpenJobPositions())
+            hiredWorkers.add(worker);
     }
 
-    public void removeCurrentWorker() {
+    public void removeHiredWorker(Citizen worker) {
+        hiredWorkers.remove(worker);
     }
 
-    public void addHiredWorker() {
-    }
-
-    public void removeHiredWorker() {
+    public void destroy() {
+        super.destroy();
+        for (Citizen worker : hiredWorkers) {
+            worker.work = null;
+        }
     }
 
     private final static int BUSINESS_TAX = 3;
@@ -46,12 +43,15 @@ public abstract class WorkplaceBuilding extends PrivateBuilding {
 
     public abstract int getWorkersCapacity();
 
+    public boolean hasOpenJobPositions() {
+        return getWorkersCapacity() > hiredWorkers.size();
+    }
+
     @Override
     public Map<String, String> getDetailedInfo() {
         Map<String, String> details = super.getDetailedInfo();
 
-        details.put("workers", Integer.toString(getCurrentWorkers()));
-        details.put("workers hired", Integer.toString(workersHired));
+        details.put("workers hired", Integer.toString(hiredWorkers.size()));
         details.put("workers capacity", Integer.toString(getWorkersCapacity()));
         return details;
     }

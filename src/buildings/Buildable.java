@@ -21,11 +21,8 @@ import buildings.publicbuilding.service.police.SmallPoliceStation;
 import buildings.publicbuilding.transportation.Road;
 import buildings.publicbuilding.transportation.Street;
 import city.Citizen;
-import city.City;
 
 public abstract class Buildable {
-    protected City city;
-
     private int crimeRate;
 
     protected List<Citizen> visitors = new ArrayList<>();
@@ -52,6 +49,9 @@ public abstract class Buildable {
 
     public void destroy() {
         this.isDestroyed = true;
+        for (Citizen visitor : visitors) {
+            visitor.location = visitor.home;
+        }
     }
 
     public boolean getIsDestroyed() {

@@ -1,7 +1,6 @@
 package city;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -13,7 +12,7 @@ import buildings.privatebuilding.workplace.commercial.CommercialBuilding;
 import city.IdentityGenerator.Identity;
 
 public class Citizen {
-    private Buildable location;
+    public Buildable location;
     public ResidentialBuilding home;
     public WorkplaceBuilding work;
     private int currentHealth;
@@ -60,17 +59,19 @@ public class Citizen {
     }
 
     private Buildable getNextLocationToGetTo(Buildable target) {
+        if (target == null)
+            return null;
         return city.grid.getNextStepFromTo(location, target);
     }
 
     private void runStateUpdate(int tick) {
-        if (tick - lastStateUpdateTick > new Random().nextInt(5, 10))
+        if (tick - lastStateUpdateTick > new Random().nextInt(5, 15))
             lastStateUpdateTick = tick;
         else
             return;
         outer: switch (new Random().nextInt(0, 3)) {
             case 0: {
-                List<Buildable> shuffled = new ArrayList<>(city.grid.buildings.values());
+                List<Buildable> shuffled = new ArrayList<>(city.builtBuildings());
                 Collections.shuffle(shuffled);
                 for (Buildable building : shuffled) {
                     if (building instanceof CommercialBuilding) {

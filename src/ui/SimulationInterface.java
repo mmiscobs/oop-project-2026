@@ -34,10 +34,10 @@ public class SimulationInterface extends JPanel {
         this.simulator.startSimulation();
         this.view = new CityView(simulator.city);
 
-        this.simulator.onTick = (tick) -> {
+        this.simulator.currentTickView.subscribe((tick) -> {
             view.tick = tick;
             view.render();
-        };
+        });
 
         view.render();
         final int ZOOM = 4;
@@ -189,11 +189,29 @@ public class SimulationInterface extends JPanel {
             this.setPreferredSize(new Dimension(0, 400));
 
             this.add(new TimeSpeedButtons(), BorderLayout.WEST);
-            this.add(new Stats(), BorderLayout.EAST);
+            JPanel stats = new JPanel(new GridLayout(1, 0));
+            this.add(stats, BorderLayout.EAST);
+            stats.add(new NumberStats());
+            stats.add(new DemandStats());
         }
 
-        class Stats extends JPanel {
-            Stats() {
+        class DemandStats extends JPanel {
+            DemandStats() {
+                super(new GridLayout(0, 1));
+                this.add(new ReactiveLabel<>(simulator.currentTickView, t -> "Current tick: " + t));
+                this.add(new ReactiveLabel<>(simulator.currentTickView,
+                        t -> "Residential demand: " + ResidentialBuilding.calculateDemand(simulator.city)));
+                this.add(new ReactiveLabel<>(simulator.currentTickView,
+                        t -> "Commercial demand: " + CommercialBuilding.calculateDemand(simulator.city)));
+                this.add(new ReactiveLabel<>(simulator.currentTickView,
+                        t -> "Office demand: " + OfficeBuilding.calculateDemand(simulator.city)));
+                this.add(new ReactiveLabel<>(simulator.currentTickView,
+                        t -> "Industrial demand: " + IndustrialBuilding.calculateDemand(simulator.city)));
+            }
+        }
+
+        class NumberStats extends JPanel {
+            NumberStats() {
                 super(new GridLayout(0, 1));
                 this.add(new ReactiveLabel<>(simulator.city.moneyView, a -> "Money: " + a.intValue()));
                 this.add(new ReactiveLabel<>(simulator.citizensAmountView, a -> "Population: " + a));
@@ -205,11 +223,12 @@ public class SimulationInterface extends JPanel {
                 this.add(new ReactiveLabel<>(simulator.netIncomeView, a -> "Net Income: " + a + "$"));
             }
 
-            class ReactiveLabel<T> extends JLabel {
-                ReactiveLabel(Observable<T> observable, Function<T, String> labelFunction) {
-                    this.setText(labelFunction.apply(observable.get()));
-                    observable.subscribe(v -> this.setText(labelFunction.apply(v)));
-                }
+        }
+
+        class ReactiveLabel<T> extends JLabel {
+            ReactiveLabel(Observable<T> observable, Function<T, String> labelFunction) {
+                this.setText(labelFunction.apply(observable.get()));
+                observable.subscribe(v -> this.setText(labelFunction.apply(v)));
             }
         }
 

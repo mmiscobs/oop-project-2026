@@ -8,14 +8,10 @@ public class Condominium extends ResidentialBuilding {
     }
 
     public int getPrice() {
-        return 1000;
+        return 20000;
     }
 
     public void setCrimeRate(int crimeRateReduction) {
-    }
-
-    public boolean getIsBuilt() {
-        return false;
     }
 
     public int getCapacity() {

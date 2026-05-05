@@ -7,8 +7,10 @@ import utils.Reactive.Observable;
 import javax.swing.Timer;
 
 import buildings.Buildable;
+import buildings.privatebuilding.PrivateBuilding;
 import buildings.privatebuilding.residential.ResidentialBuilding;
 
+import java.util.Random;
 import java.util.function.Consumer;
 
 import city.Citizen;
@@ -17,8 +19,8 @@ public class Simulator {
     public City city;
     public GameSpeed gameSpeed;
     public CityDatum cityDatum;
-    public int currentTick;
-    public Consumer<Integer> onTick;
+    private Reactive<Integer> currentTick = new Reactive<>(0);
+    public Observable<Integer> currentTickView = currentTick.readOnly();
 
     public Simulator(City city) {
         this.city = city;
@@ -35,8 +37,8 @@ public class Simulator {
         Timer timer = new Timer(timerInterval, e -> {
             ticker.val += timerInterval;
             if (ticker.val % this.gameSpeed.msBetweenTicks == 0) {
-                currentTick++;
                 runSimulationTick();
+                currentTick.set(currentTick.get() + 1);
             }
         });
         timer.start();
@@ -86,13 +88,12 @@ public class Simulator {
         city.accomodateHomelessPeople();
         city.accomodateNewImmigrants();
         city.evictHomelessPeople();
+        city.employPeople();
+        buildPrivateBuildings();
         lastResidentTax.set(city.collectTaxesFromResidents());
         lastBusinessTax.set(city.collectTaxesFromBusinesses());
         lastPurchaseTax.set(city.collectTaxesFromPurchases());
         runAllCitizens();
-
-        if (onTick != null)
-            onTick.accept(currentTick);
 
         updateCitizensAmount();
     }
@@ -102,13 +103,28 @@ public class Simulator {
             if (building instanceof ResidentialBuilding) {
                 ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
                 for (Citizen citizen : residentialBuilding.getResidents()) {
-                    citizen.runSimulationTick(currentTick);
+                    citizen.runSimulationTick(currentTick.get());
                 }
             }
         }
         for (Citizen homeless : city.homelessPeople) {
-            homeless.runSimulationTick(currentTick);
+            homeless.runSimulationTick(currentTick.get());
         }
+    }
+
+    private void buildPrivateBuildings() {
+        for (Buildable building : city.grid.buildings.values()) {
+            if (building instanceof PrivateBuilding privateBuilding && !privateBuilding.getIsBuilt()) {
+                double changeOfBuildingInTick = PrivateBuilding.calculateDemand(privateBuilding, city) * 0.8;
+                if (flipCoinWithChance(changeOfBuildingInTick)) {
+                    privateBuilding.build();
+                }
+            }
+        }
+    }
+
+    private static boolean flipCoinWithChance(double chance) {
+        return new Random().nextFloat(0, 100) < chance;
     }
 
     private void updateCitizensAmount() {

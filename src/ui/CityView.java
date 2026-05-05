@@ -8,6 +8,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import buildings.Buildable;
+import buildings.privatebuilding.PrivateBuilding;
 import buildings.publicbuilding.transportation.PublicTransportation;
 import city.City;
 import utils.Point;
@@ -91,12 +92,25 @@ public class CityView extends IsometricMapView {
                             suffix = "WestEast";
                         }
                     }
-                    this.addSprite(new Sprite(
-                            loadImage(building.getClass(),
-                                    "./" + building.getClass().getSimpleName() + suffix + ".png"),
-                            r,
-                            c,
-                            building.getWidth(), building.getLength()));
+                    if (building instanceof PrivateBuilding privateBuilding && !privateBuilding.getIsBuilt()) {
+                        for (Point tileWithin : Point.allPointsWithin(
+                                new Point(c - building.getWidth() + 1, r - building.getLength() + 1),
+                                building.getLength(),
+                                building.getWidth())) {
+                            this.addSprite(new Sprite(
+                                    loadImage(getClass(),
+                                            "./construction.png"),
+                                    tileWithin.y,
+                                    tileWithin.x,
+                                    building.getWidth(), building.getLength()));
+                        }
+                    } else
+                        this.addSprite(new Sprite(
+                                loadImage(building.getClass(),
+                                        "./" + building.getClass().getSimpleName() + suffix + ".png"),
+                                r,
+                                c,
+                                building.getWidth(), building.getLength()));
                 }
             }
         } catch (IOException e) {

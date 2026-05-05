@@ -14,10 +14,6 @@ public class SmallHouse extends ResidentialBuilding {
     public void setCrimeRate(int crimeRateReduction) {
     }
 
-    public boolean getIsBuilt() {
-        return false;
-    }
-
     public int getCapacity() {
         return 5;
     }

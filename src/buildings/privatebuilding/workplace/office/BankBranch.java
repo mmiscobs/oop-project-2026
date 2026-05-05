@@ -14,12 +14,8 @@ public class BankBranch extends OfficeBuilding {
     public void setCrimeRate(int crimeRateReduction) {
     }
 
-    public boolean getIsBuilt() {
-        return false;
-    }
-
     public int getWorkersCapacity() {
-        return 0;
+        return 30;
     }
 
     @Override

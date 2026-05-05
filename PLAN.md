@@ -6,10 +6,10 @@
   - [x] Money income per citizen associated with building
     - [x] Residential Tax
     - [x] Purchases Tax
-    - [ ] Busineses Tax
+    - [x] Busineses Tax
   - [x] Immigration
-  - [ ] Residential demand
-    - [ ] Unbuilt homes
+  - [x] Residential demand
+    - [x] Unbuilt homes
   - [x] Eviction and emmigration
   - [x] Expendatures per building
   - [ ] Expendatures per policy

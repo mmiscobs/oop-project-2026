@@ -2,8 +2,10 @@ package city;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import buildings.Buildable;
+import buildings.privatebuilding.PrivateBuilding;
 import buildings.privatebuilding.residential.ResidentialBuilding;
 import buildings.privatebuilding.workplace.WorkplaceBuilding;
 import buildings.privatebuilding.workplace.commercial.CommercialBuilding;
@@ -67,7 +69,7 @@ public class City {
     }
 
     public void accomodateHomelessPeople() {
-        for (Buildable building : grid.buildings.values()) {
+        for (Buildable building : builtBuildings()) {
             if (building instanceof ResidentialBuilding) {
                 ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
                 int delta = residentialBuilding.getCapacity() - residentialBuilding.getResidents().size();
@@ -81,6 +83,19 @@ public class City {
                 }
             }
         }
+    }
+
+    public List<Buildable> builtBuildings() {
+        ArrayList<Buildable> built = new ArrayList<>();
+
+        for (Buildable building : grid.buildings.values()) {
+            if (building instanceof PrivateBuilding p) {
+                if (p.getIsBuilt())
+                    built.add(p);
+            } else
+                built.add(building);
+        }
+        return built;
     }
 
     public int collectTaxesFromResidents() {
@@ -130,12 +145,53 @@ public class City {
         }
     }
 
-    public void employPeople() {
+    private List<Citizen> unemployedPeople() {
+        ArrayList<Citizen> unemployed = new ArrayList<>();
 
+        for (Buildable building : grid.buildings.values()) {
+            if (building instanceof ResidentialBuilding) {
+                ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
+                for (Citizen citizen : residentialBuilding.getResidents()) {
+                    if (citizen.work == null) {
+                        unemployed.add(citizen);
+                    }
+                }
+            }
+        }
+        for (Citizen homeless : homelessPeople) {
+            if (homeless.work == null)
+                unemployed.add(homeless);
+        }
+        return unemployed;
+    }
+
+    private List<WorkplaceBuilding> vacantWorkplaces() {
+        ArrayList<WorkplaceBuilding> vacant = new ArrayList<>();
+        for (Buildable building : builtBuildings()) {
+            if (building instanceof WorkplaceBuilding workplace) {
+                if (workplace.hasOpenJobPositions()) {
+                    vacant.add(workplace);
+                }
+            }
+        }
+        return vacant;
+    }
+
+    public void employPeople() {
+        Iterator<Citizen> unemployedIterator = unemployedPeople().iterator();
+        if (!unemployedIterator.hasNext())
+            return;
+        for (WorkplaceBuilding vacantWorkplace : vacantWorkplaces()) {
+            while (vacantWorkplace.hasOpenJobPositions() && unemployedIterator.hasNext()) {
+                Citizen unemployed = unemployedIterator.next();
+                vacantWorkplace.addHiredWorker(unemployed);
+                unemployed.work = vacantWorkplace;
+            }
+        }
     }
 
     public void accomodateNewImmigrants() {
-        for (Buildable building : grid.buildings.values()) {
+        for (Buildable building : builtBuildings()) {
             if (building instanceof ResidentialBuilding) {
                 ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
                 int delta = residentialBuilding.getCapacity() - residentialBuilding.getResidents().size();

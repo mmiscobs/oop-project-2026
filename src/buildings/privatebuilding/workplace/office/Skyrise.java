@@ -8,18 +8,14 @@ public class Skyrise extends OfficeBuilding {
     }
 
     public int getPrice() {
-        return 1000;
+        return 10000;
     }
 
     public void setCrimeRate(int crimeRateReduction) {
     }
 
-    public boolean getIsBuilt() {
-        return false;
-    }
-
     public int getWorkersCapacity() {
-        return 0;
+        return 100;
     }
 
     @Override
