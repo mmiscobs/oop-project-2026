@@ -4,6 +4,9 @@
 - [x] Implement tick based time flow
   - [x] Draw movable translucent clouds
   - [ ] Money income per citizen associated with building
+  - [x] Immigration
+  - [ ] Residential demand
+  - [x] Eviction and emmigration
   - [x] Expendatures per building
   - [ ] Expendatures per policy
     - [ ] Curfue (reduces crime rate)

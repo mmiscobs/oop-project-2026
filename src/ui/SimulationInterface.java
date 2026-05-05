@@ -194,6 +194,8 @@ public class SimulationInterface extends JPanel {
             Stats() {
                 super(new GridLayout(0, 1));
                 this.add(new MoneyLabel());
+                this.add(new PopulationLabel());
+                this.add(new HomelessLabel());
             }
 
             class MoneyLabel extends JLabel {
@@ -204,6 +206,28 @@ public class SimulationInterface extends JPanel {
 
                 private void update() {
                     this.setText("Money: " + simulator.city.moneyView.get().intValue() + "$");
+                }
+            }
+
+            class PopulationLabel extends JLabel {
+                PopulationLabel() {
+                    this.update();
+                    simulator.citizensAmountView.subscribe(v -> this.update());
+                }
+
+                private void update() {
+                    this.setText("Population: " + simulator.citizensAmountView.get().intValue());
+                }
+            }
+
+            class HomelessLabel extends JLabel {
+                HomelessLabel() {
+                    this.update();
+                    simulator.homelessCitizensAmountView.subscribe(v -> this.update());
+                }
+
+                private void update() {
+                    this.setText("Homeless: " + simulator.homelessCitizensAmountView.get().intValue());
                 }
             }
         }

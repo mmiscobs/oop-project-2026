@@ -1,14 +1,16 @@
 package city;
 
 import buildings.Buildable;
-import buildings.privatebuilding.residential.ResidentialBuilding;
-import buildings.privatebuilding.workplace.WorkplaceBuilding;
+import city.IdentityGenerator.Identity;
 
 public class Citizen {
     private Buildable location;
-    private ResidentialBuilding home;
-    private WorkplaceBuilding workplace;
     private int currentHealth;
+    public final Identity identity;
+
+    public Citizen() {
+        this.identity = IdentityGenerator.generator.nextIdentity();
+    }
 
     public void setLocation(Buildable location) {
         this.location = location;
@@ -16,22 +18,6 @@ public class Citizen {
 
     public Buildable getLocation() {
         return location;
-    }
-
-    public void setHome(ResidentialBuilding home) {
-        this.home = home;
-    }
-
-    public ResidentialBuilding getHome() {
-        return home;
-    }
-
-    public void setWorkplace(WorkplaceBuilding workplace) {
-        this.workplace = workplace;
-    }
-
-    public WorkplaceBuilding getWorkplace() {
-        return workplace;
     }
 
     public CitizenState getCurrentCitizenState() {

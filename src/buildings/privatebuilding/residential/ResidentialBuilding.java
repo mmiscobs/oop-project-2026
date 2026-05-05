@@ -1,8 +1,11 @@
 package buildings.privatebuilding.residential;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import buildings.privatebuilding.PrivateBuilding;
+import city.Citizen;
 
 public abstract class ResidentialBuilding extends PrivateBuilding {
     public abstract int getCapacity();
@@ -11,18 +14,28 @@ public abstract class ResidentialBuilding extends PrivateBuilding {
         return 0;
     }
 
-    public int getResidents() {
-        return 0;
+    private ArrayList<Citizen> residents = new ArrayList<>();
+
+    public List<Citizen> getResidents() {
+        return residents;
     }
 
-    public void addResident() {
+    public List<Citizen> evictResidents() {
+        List<Citizen> evictedResidents = List.copyOf(residents);
+        residents.clear();
+        return evictedResidents;
+    }
+
+    public void addResident(Citizen citizen) {
+        if (residents.size() < getCapacity())
+            residents.add(citizen);
     }
 
     @Override
     public Map<String, String> getDetailedInfo() {
         Map<String, String> details = super.getDetailedInfo();
 
-        details.put("residents", Integer.toString(getResidents()));
+        details.put("residents", Integer.toString(getResidents().size()));
         details.put("capacity", Integer.toString(getCapacity()));
         return details;
     }

@@ -1,10 +1,13 @@
 package simulation;
 
 import city.City;
+import utils.Reactive;
+import utils.Reactive.Observable;
 
 import javax.swing.Timer;
 
 import buildings.Buildable;
+import buildings.privatebuilding.residential.ResidentialBuilding;
 
 import java.util.function.Consumer;
 
@@ -43,13 +46,32 @@ public class Simulator {
         return null;
     }
 
-    public void setGameSpeed(GameSpeed speed) {
-    }
+    private Reactive<Integer> citizensAmount = new Reactive<>(0);
+    public Observable<Integer> citizensAmountView = citizensAmount.readOnly();
+    private Reactive<Integer> homelessCitizensAmount = new Reactive<>(0);
+    public Observable<Integer> homelessCitizensAmountView = homelessCitizensAmount.readOnly();
 
     public void runSimulationTick() {
         city.payBuildingsUpkeepPerTick();
+        city.accomodateHomelessPeople();
+        city.accomodateNewImmigrants();
+        city.evictHomelessPeople();
 
         if (onTick != null)
             onTick.accept(currentTick);
+
+        updateCitizensAmount();
+    }
+
+    private void updateCitizensAmount() {
+        int recalculatedCitizensAmount = city.homelessPeople.size();
+        for (Buildable building : city.grid.buildings.values()) {
+            if (building instanceof ResidentialBuilding) {
+                ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
+                recalculatedCitizensAmount += residentialBuilding.getResidents().size();
+            }
+        }
+        citizensAmount.set(recalculatedCitizensAmount);
+        homelessCitizensAmount.set(city.homelessPeople.size());
     }
 }

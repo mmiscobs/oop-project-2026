@@ -32,6 +32,16 @@ public abstract class Buildable {
 
     public abstract int getPrice();
 
+    private boolean isDestroyed = true;
+
+    public void destroy() {
+        this.isDestroyed = true;
+    }
+
+    public boolean getIsDestroyed() {
+        return this.isDestroyed;
+    }
+
     public int getCrimeRate() {
         return crimeRate;
     }

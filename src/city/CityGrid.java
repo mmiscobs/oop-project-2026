@@ -2,7 +2,6 @@ package city;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -56,12 +55,5 @@ public class CityGrid {
             if (place.isWithin(entry.getKey(), entry.getValue().getLength(), entry.getValue().getWidth()))
                 iterator.remove();
         }
-    }
-
-    public List<Citizen> getCitizensAt(Point place) {
-        Buildable building = getBuildingAt(place);
-        if (building == null)
-            return List.of();
-        return city.getCitizens().stream().filter(c -> c.getLocation() == building).toList();
     }
 }
