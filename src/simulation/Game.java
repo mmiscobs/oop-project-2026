@@ -1,11 +1,27 @@
 package simulation;
 
+import city.City;
+
 public class Game {
-    private Simulator simulator;
+    public Simulator simulator;
     private String loadedGame;
 
-    public String[] getSaves() { return null; }
-    public void loadSave(String saveName) {}
-    public void createSave(String saveName) {}
-    public void saveGame() {}
+    public String[] getSaves() {
+        return null;
+    }
+
+    public Game() {
+
+    }
+
+    public void loadSave(String saveName) {
+    }
+
+    public void createSave(String saveName) {
+    }
+
+    public void startNewSimulation(int mapSizeX, int mapSizeY, GameDifficulty difficulty) {
+        City city = new City(mapSizeX, mapSizeY, difficulty.startingMoney);
+        this.simulator = new Simulator(city);
+    }
 }

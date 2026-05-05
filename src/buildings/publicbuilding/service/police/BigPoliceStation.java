@@ -19,14 +19,14 @@ public class BigPoliceStation extends PoliceStation {
     }
 
     public int getPrice() {
-        return 0;
+        return 1000;
     }
 
     public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getMaintanenceCostPerDay() {
-        return 0;
+        return 100;
     }
 
     public int getRange() {

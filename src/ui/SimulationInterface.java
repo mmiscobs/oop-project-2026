@@ -7,11 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import buildings.Buildable;
 import buildings.Buildable.UnregisteredBuildingType;
@@ -27,31 +24,12 @@ import simulation.GameSpeed;
 import simulation.Simulator;
 import utils.Point;
 
-public class SimulationInterface {
-    private static final int TILE_W = 34;
-    private static final int TILE_H = 16;
-    private static final int COLS = 15;
-    private static final int ROWS = 15;
-    private static final int FRAME_W = 2000;
-    private static final int FRAME_H = 1400;
-
-    public static void main(String[] args) throws Exception {
-        SwingUtilities.invokeLater(() -> {
-            SimulationInterface ui = new SimulationInterface();
-            ui.showWindow();
-        });
-    }
-
-    private CityView view;
-    private Simulator simulator;
-
-    private void showWindow() {
-        City city = new City(COLS, ROWS);
-        this.simulator = new Simulator(city);
-
-        this.view = new CityView(city, COLS, ROWS);
-
+public class SimulationInterface extends JPanel {
+    SimulationInterface(Simulator simulator) {
+        super(new BorderLayout());
+        this.simulator = simulator;
         this.simulator.startSimulation();
+        this.view = new CityView(simulator.city);
 
         this.simulator.onTick = (tick) -> {
             view.tick = tick;
@@ -60,28 +38,19 @@ public class SimulationInterface {
 
         view.render();
         final int ZOOM = 4;
-        view.setOrigin(TILE_W * COLS / 2 * ZOOM, 2 * TILE_H * ZOOM);
+        // view.setOrigin(TILE_W * COLS / 2 * ZOOM, 2 * TILE_H * ZOOM);
         view.setZoom(ZOOM);
 
-        JFrame f = new JFrame("City Map Demo");
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        JPanel root = new JPanel(new BorderLayout());
-
-        JPanel left = getBuildActionsPanel(city);
+        JPanel left = getBuildActionsPanel(simulator.city);
         JPanel bottom = new BottomPanel();
 
-        root.add(left, BorderLayout.WEST);
-        root.add(view, BorderLayout.CENTER);
-        root.add(bottom, BorderLayout.SOUTH);
-
-        JMenuBar menuBar = new JMenuBar();
-        f.setJMenuBar(menuBar);
-        f.setContentPane(root);
-        f.setSize(FRAME_W, FRAME_H);
-        f.setLocationRelativeTo(null);
-        f.setVisible(true);
+        this.add(left, BorderLayout.WEST);
+        this.add(view, BorderLayout.CENTER);
+        this.add(bottom, BorderLayout.SOUTH);
     }
+
+    private CityView view;
+    private Simulator simulator;
 
     private JPanel getBuildActionsPanel(City city) {
         ArrayList<Class<? extends Buildable>> BuildableClasses = getBuildableClassesSortedByType();
@@ -111,7 +80,7 @@ public class SimulationInterface {
                                 (tiles, cleanup) -> {
                                     try {
                                         for (Point point : tiles) {
-                                            city.grid.placeBuildingAt(point, Buildable.createBuilding(BuildableClass));
+                                            city.build(Buildable.createBuilding(BuildableClass), point);
                                         }
                                     } catch (UnregisteredBuildingType e) {
                                     }
@@ -123,7 +92,7 @@ public class SimulationInterface {
                         Buildable building = Buildable.createBuilding(BuildableClass);
                         return CityView.enableBuildAction(view, (loc) -> loc.x + " " + loc.y, building.getLength(),
                                 building.getWidth(), (tile, cleanup) -> {
-                                    city.grid.placeBuildingAt(tile, building);
+                                    city.build(building, tile);
                                     onEnd.run();
                                     view.render();
                                 });
@@ -147,7 +116,7 @@ public class SimulationInterface {
 
             public Runnable enable(Runnable onEnd) {
                 return CityView.enableDemolishAction(view, (loc, cleanup) -> {
-                    city.grid.removeBuildingAt(loc);
+                    city.demolish(loc);
 
                     cleanup.run();
                     onEnd.run();
@@ -182,6 +151,25 @@ public class SimulationInterface {
             this.setPreferredSize(new Dimension(0, 400));
 
             this.add(new TimeSpeedButtons(), BorderLayout.WEST);
+            this.add(new Stats(), BorderLayout.EAST);
+        }
+
+        class Stats extends JPanel {
+            Stats() {
+                super(new GridLayout(0, 1));
+                this.add(new MoneyLabel());
+            }
+
+            class MoneyLabel extends JLabel {
+                MoneyLabel() {
+                    this.update();
+                    simulator.city.moneyView.subscribe(v -> this.update());
+                }
+
+                private void update() {
+                    this.setText("Money: " + simulator.city.moneyView.get().intValue() + "$");
+                }
+            }
         }
 
         class TimeSpeedButtons extends JPanel {

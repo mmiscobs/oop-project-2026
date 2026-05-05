@@ -3,6 +3,9 @@ package simulation;
 import city.City;
 
 import javax.swing.Timer;
+
+import buildings.Buildable;
+
 import java.util.function.Consumer;
 
 import city.Citizen;
@@ -25,24 +28,10 @@ public class Simulator {
             int val = 0;
         }
         Ticker ticker = new Ticker();
-        Timer timer = new Timer(500, e -> {
-            ticker.val++;
-            int advancedTicks = 0;
-            switch (gameSpeed) {
-                case GameSpeed.Stopped:
-                    advancedTicks = 0;
-                    break;
-                case GameSpeed.Fast:
-                    advancedTicks = 1;
-                    break;
-                case GameSpeed.Normal:
-                    advancedTicks = 2;
-                    break;
-                case GameSpeed.Slow:
-                    advancedTicks = 3;
-                    break;
-            }
-            if (advancedTicks != 0 && ticker.val % advancedTicks == 0) {
+        int timerInterval = 200;
+        Timer timer = new Timer(timerInterval, e -> {
+            ticker.val += timerInterval;
+            if (ticker.val % this.gameSpeed.msBetweenTicks == 0) {
                 currentTick++;
                 runSimulationTick();
             }
@@ -58,6 +47,8 @@ public class Simulator {
     }
 
     public void runSimulationTick() {
+        city.payBuildingsUpkeepPerTick();
+
         if (onTick != null)
             onTick.accept(currentTick);
     }

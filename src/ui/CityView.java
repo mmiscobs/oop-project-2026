@@ -30,10 +30,10 @@ public class CityView extends IsometricMapView {
     private final int ROWS;
     private City city;
 
-    public CityView(City city, int cols, int rows) {
+    public CityView(City city) {
         super();
-        this.COLS = cols;
-        this.ROWS = rows;
+        this.COLS = city.grid.sizeX;
+        this.ROWS = city.grid.sizeY;
         this.city = city;
 
         buildView();

@@ -4,7 +4,7 @@
 - [x] Implement tick based time flow
   - [x] Draw movable translucent clouds
   - [ ] Money income per citizen associated with building
-  - [ ] Expendatures per building
+  - [x] Expendatures per building
   - [ ] Expendatures per policy
     - [ ] Curfue (reduces crime rate)
     - [ ] Mandatory Bicycle Usage (increases health and reduces traffic congestion)
@@ -18,6 +18,7 @@
   - [x] Demolishing buildings
     - [ ] Charging for demolishment
   - [ ] Looking at the stats
+    - [x] Money amount
     - [ ] Graphs
     - [ ] HeatMaps
       - [ ] Profit

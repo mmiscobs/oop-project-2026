@@ -8,7 +8,7 @@ public class Warehouse extends IndustrialBuilding {
     }
 
     public int getPrice() {
-        return 0;
+        return 1000;
     }
 
     public void setCrimeRate(int crimeRateReduction) {

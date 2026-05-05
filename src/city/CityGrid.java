@@ -12,8 +12,8 @@ import utils.Point;
 public class CityGrid {
     private City city;
     public Map<Point, Buildable> buildings;
-    private int sizeX;
-    private int sizeY;
+    public final int sizeX;
+    public final int sizeY;
 
     public CityGrid(City city, int sizeX, int sizeY) {
         this.city = city;
