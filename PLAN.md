@@ -7,8 +7,11 @@
   - [x] Expendatures per building
   - [ ] Expendatures per policy
     - [ ] Curfue (reduces crime rate)
+      - [ ] Implement crime effect
     - [ ] Mandatory Bicycle Usage (increases health and reduces traffic congestion)
+      - [ ] Implement health and congestion effect
     - [ ] Subsidised Muzzle Silencers (decreases noise on roads)
+      - [ ] Implement noise effect
   - [ ] Citizens moving through city
     - [ ] Traffic congestion
 - [ ] Implement UI
@@ -16,6 +19,7 @@
     - [x] Show obstructing tiles
     - [ ] Charging for placement
   - [x] Demolishing buildings
+    - [x] Show the demolished building outline
     - [ ] Charging for demolishment
   - [ ] Looking at the stats
     - [x] Money amount
@@ -28,6 +32,11 @@
       - [ ] Traffic Congestion
       - [ ] Crime Level
     - [ ] Picker Info Dialog
+      - [ ] Amount of citizens in building
+      - [ ] Upkeep cost
+      - [ ] Current profit
+      - [ ] Amount of workers, residents
+      - [ ] Capacity of workers, residents
 - [ ] Implement start menu
   - [ ] Create game
     - [ ] Size of a map
