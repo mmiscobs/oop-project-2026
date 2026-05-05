@@ -29,7 +29,7 @@ public class City {
         grid.placeBuildingAt(place, building);
     }
 
-    private final static double DEMOLISHMENT_COEF = 0.1;
+    public final static double DEMOLISHMENT_COEF = 0.1;
 
     public void demolish(Point place) {
         Buildable existingBuilding = grid.getBuildingAt(place);

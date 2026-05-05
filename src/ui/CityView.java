@@ -314,6 +314,7 @@ public class CityView extends IsometricMapView {
     }
 
     public static Runnable enableDemolishAction(CityView view,
+
             TileListener onTile) {
         JLabel info = makeInfoLabel();
         view.attachComponent(info, 0, 0, IsometricMapView.TileAnchor.ABOVE, 0, -8);
@@ -330,7 +331,8 @@ public class CityView extends IsometricMapView {
         FloatingHoverLabelCreator labelCreator = (loc) -> {
             Buildable existingBuilding = view.city.grid.getBuildingAt(loc);
             if (existingBuilding != null) {
-                return "Demolish " + existingBuilding.getClass().getSimpleName();
+                return "Demolish " + existingBuilding.getClass().getSimpleName() + "("
+                        + existingBuilding.getPrice() * City.DEMOLISHMENT_COEF + "$)";
             }
             return null;
         };

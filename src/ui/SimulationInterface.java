@@ -72,26 +72,41 @@ public class SimulationInterface extends JPanel {
                 }
 
                 public Runnable enable(Runnable onEnd) {
-                    if (PublicTransportation.class.isAssignableFrom(BuildableClass))
-                        return CityView.enableManhattanDragAction(view,
-                                (dragInfo) -> "<html><b>" + getPrettyName() + " preview</b><br/>"
-                                        + CityView.manhattanPath(dragInfo.from, dragInfo.to).size()
-                                        + " tiles &rarr; ("
-                                        + dragInfo.to.x + ", " + dragInfo.to.y + ")</html>",
-                                (tiles, cleanup) -> {
-                                    try {
-                                        for (Point point : tiles) {
-                                            city.build(Buildable.createBuilding(BuildableClass), point);
-                                        }
-                                    } catch (UnregisteredBuildingType e) {
-                                    }
-                                    cleanup.run();
-                                    onEnd.run();
-                                    view.render();
-                                });
                     try {
+                        if (PublicTransportation.class.isAssignableFrom(BuildableClass)) {
+                            Buildable example = Buildable.createBuilding(BuildableClass);
+                            return CityView.enableManhattanDragAction(view,
+                                    (dragInfo) -> {
+                                        int totalPrice = 0;
+
+                                        for (Point point : CityView.manhattanPath(dragInfo.from, dragInfo.to)) {
+                                            Buildable existingBuilding = city.grid.getBuildingAt(point);
+                                            if (existingBuilding == null)
+                                                totalPrice += example.getPrice();
+                                        }
+                                        return "<html><b>" + getPrettyName() + " preview</b><br/>"
+                                                + CityView.manhattanPath(dragInfo.from, dragInfo.to).size()
+                                                + " tiles &rarr; ("
+                                                + dragInfo.to.x + ", " + dragInfo.to.y + ")<br/>"
+                                                + totalPrice
+                                                + "$ total</html>";
+                                    },
+                                    (tiles, cleanup) -> {
+                                        try {
+                                            for (Point point : tiles) {
+                                                city.build(Buildable.createBuilding(BuildableClass), point);
+                                            }
+                                        } catch (UnregisteredBuildingType e) {
+                                        }
+                                        cleanup.run();
+                                        onEnd.run();
+                                        view.render();
+                                    });
+                        }
                         Buildable building = Buildable.createBuilding(BuildableClass);
-                        return CityView.enableBuildAction(view, (loc) -> loc.x + " " + loc.y, building.getLength(),
+                        return CityView.enableBuildAction(view,
+                                (loc) -> building.getClass().getSimpleName() + " (" + building.getPrice() + "$)",
+                                building.getLength(),
                                 building.getWidth(), (tile, cleanup) -> {
                                     city.build(building, tile);
                                     onEnd.run();

@@ -17,10 +17,12 @@
 - [ ] Implement UI
   - [x] Placing buildings
     - [x] Show obstructing tiles
-    - [ ] Charging for placement
+    - [x] Charging for placement
+  - [x] Placing roads
+    - [x] Charging for placement
   - [x] Demolishing buildings
     - [x] Show the demolished building outline
-    - [ ] Charging for demolishment
+    - [x] Charging for demolishment
   - [ ] Looking at the stats
     - [x] Money amount
     - [ ] Graphs
