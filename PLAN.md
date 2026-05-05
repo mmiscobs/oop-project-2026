@@ -31,12 +31,12 @@
       - [ ] Health
       - [ ] Traffic Congestion
       - [ ] Crime Level
-    - [ ] Picker Info Dialog
-      - [ ] Amount of citizens in building
-      - [ ] Upkeep cost
-      - [ ] Current profit
-      - [ ] Amount of workers, residents
-      - [ ] Capacity of workers, residents
+    - [x] Picker Info Dialog
+      - [x] Amount of citizens in building
+      - [x] Upkeep cost
+      - [x] Current profit
+      - [x] Amount of workers, residents
+      - [x] Capacity of workers, residents
 - [ ] Implement start menu
   - [ ] Create game
     - [ ] Size of a map

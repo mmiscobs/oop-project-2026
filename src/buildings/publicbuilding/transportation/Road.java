@@ -1,5 +1,7 @@
 package buildings.publicbuilding.transportation;
 
+import java.util.Map;
+
 import buildings.Buildable;
 
 public class Road extends PublicTransportation {
@@ -45,5 +47,13 @@ public class Road extends PublicTransportation {
 
     public int getLength() {
         return 1;
+    }
+
+    @Override
+    public Map<String, String> getDetailedInfo() {
+        Map<String, String> details = super.getDetailedInfo();
+
+        details.put("has trees", hasPlantedTrees ? "yes" : "no");
+        return details;
     }
 }

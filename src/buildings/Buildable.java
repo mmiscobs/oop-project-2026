@@ -36,6 +36,17 @@ public abstract class Buildable {
         return crimeRate;
     }
 
+    public Map<String, String> getDetailedInfo() {
+        HashMap<String, String> details = new HashMap<>();
+
+        details.put("name", this.getClass().getSimpleName());
+        details.put("width", Integer.toString(this.getWidth()));
+        details.put("length", Integer.toString(this.getLength()));
+        details.put("crime rate", Integer.toString(this.getCrimeRate()));
+        details.put("price", Integer.toString(this.getPrice()));
+        return details;
+    }
+
     public abstract void setCrimeRate(int crimeRateReduction);
 
     static public List<Class<? extends Buildable>> buildables = List.of(

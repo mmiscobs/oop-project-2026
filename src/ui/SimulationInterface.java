@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -121,6 +122,26 @@ public class SimulationInterface extends JPanel {
                     cleanup.run();
                     onEnd.run();
                     view.render();
+                });
+            }
+        });
+        actions.add(new TogglesMenu.Action() {
+            public String getName() {
+                return "Info Picker";
+            };
+
+            public String getStopName() {
+                return "Close Info Picker";
+            }
+
+            public Runnable enable(Runnable onEnd) {
+                return CityView.enableBuildingHoverAction(view, (building) -> {
+                    String html = "<html>";
+
+                    for (Entry<String, String> entry : building.getDetailedInfo().entrySet()) {
+                        html += "<b>" + entry.getKey() + ":</b> " + entry.getValue() + "<br/>";
+                    }
+                    return html + "</html>";
                 });
             }
         });

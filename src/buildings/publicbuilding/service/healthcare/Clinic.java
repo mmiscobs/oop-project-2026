@@ -1,5 +1,7 @@
 package buildings.publicbuilding.service.healthcare;
 
+import java.util.Map;
+
 import buildings.Buildable;
 
 public class Clinic extends HealthcareBuilding {
@@ -45,5 +47,13 @@ public class Clinic extends HealthcareBuilding {
     @Override
     public int getLength() {
         return 1;
+    }
+
+    @Override
+    public Map<String, String> getDetailedInfo() {
+        Map<String, String> details = super.getDetailedInfo();
+
+        details.put("has ambulances garage", hasAmbulanceGarage ? "yes" : "no");
+        return details;
     }
 }

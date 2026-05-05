@@ -1,5 +1,7 @@
 package buildings.privatebuilding.residential;
 
+import java.util.Map;
+
 import buildings.privatebuilding.PrivateBuilding;
 
 public abstract class ResidentialBuilding extends PrivateBuilding {
@@ -14,5 +16,14 @@ public abstract class ResidentialBuilding extends PrivateBuilding {
     }
 
     public void addResident() {
+    }
+
+    @Override
+    public Map<String, String> getDetailedInfo() {
+        Map<String, String> details = super.getDetailedInfo();
+
+        details.put("residents", Integer.toString(getResidents()));
+        details.put("capacity", Integer.toString(getCapacity()));
+        return details;
     }
 }

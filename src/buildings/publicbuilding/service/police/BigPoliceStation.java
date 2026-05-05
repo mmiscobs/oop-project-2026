@@ -1,5 +1,7 @@
 package buildings.publicbuilding.service.police;
 
+import java.util.Map;
+
 import buildings.Buildable;
 
 public class BigPoliceStation extends PoliceStation {
@@ -45,5 +47,13 @@ public class BigPoliceStation extends PoliceStation {
     @Override
     public int getLength() {
         return 2;
+    }
+
+    @Override
+    public Map<String, String> getDetailedInfo() {
+        Map<String, String> details = super.getDetailedInfo();
+
+        details.put("has helipad", hasHelipad ? "yes" : "no");
+        return details;
     }
 }
