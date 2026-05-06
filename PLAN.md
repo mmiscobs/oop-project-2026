@@ -50,10 +50,10 @@
       - [x] Amount of workers, residents
       - [x] Capacity of workers, residents
 - [ ] Implement start menu
-  - [ ] Create game
-    - [ ] Size of a map
-    - [ ] Difficulty (starting money)
+  - [x] Create game
+    - [x] Size of a map
+    - [x] Difficulty (starting money)
   - [ ] Load game
   - [ ] Save game
-  - [ ] Exit
-  - [ ] Settings
+  - [x] Exit
+  - [x] Credits

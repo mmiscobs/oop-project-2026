@@ -24,9 +24,12 @@ public class City {
     private Reactive<Double> money = new Reactive<>(0.0);
     public Reactive.Observable<Double> moneyView = money.readOnly();
 
-    public City(int sizeX, int sizeY, double startingMoney) {
+    public final String name;
+
+    public City(int sizeX, int sizeY, double startingMoney, String name) {
         this.grid = new CityGrid(sizeX, sizeY);
         this.money.set(startingMoney);
+        this.name = name;
     }
 
     public boolean build(PublicBuilding.Upgrade upgrade) {

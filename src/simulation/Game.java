@@ -1,10 +1,10 @@
 package simulation;
 
 import city.City;
+import utils.Reactive;
 
 public class Game {
-    public Simulator simulator;
-    private String loadedGame;
+    public Reactive<Simulator> simulator = new Reactive<>(null);
 
     public String[] getSaves() {
         return null;
@@ -14,14 +14,16 @@ public class Game {
 
     }
 
-    public void loadSave(String saveName) {
+    public void loadSave(String gameName) {
     }
 
-    public void createSave(String saveName) {
+    public void createSave() {
     }
 
-    public void startNewSimulation(int mapSizeX, int mapSizeY, GameDifficulty difficulty) {
-        City city = new City(mapSizeX, mapSizeY, difficulty.startingMoney);
-        this.simulator = new Simulator(city);
+    public void startNewSimulation(int mapSizeX, int mapSizeY, GameDifficulty difficulty, String cityName) {
+        if (this.simulator.get() != null)
+            return;
+        City city = new City(mapSizeX, mapSizeY, difficulty.startingMoney, cityName);
+        this.simulator.set(new Simulator(city));
     }
 }
