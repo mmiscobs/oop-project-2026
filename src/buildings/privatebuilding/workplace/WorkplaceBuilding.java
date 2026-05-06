@@ -23,6 +23,11 @@ public abstract class WorkplaceBuilding extends PrivateBuilding {
                 .addAll(blob.map().get("hiredWorkers").array().stream().map(b -> Citizen.fromBlob(b, city)).toList());
     }
 
+    public SerializedBlob toBlob() {
+        return super.toBlob().extendMap(
+                Map.of("hiredWorkers", SerializedBlob.array(hiredWorkers.stream().map(w -> w.toBlob()).toList())));
+    }
+
     private ArrayList<Citizen> hiredWorkers = new ArrayList<>();
 
     public List<Citizen> getHiredWorkers() {

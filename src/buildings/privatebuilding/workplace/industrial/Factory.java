@@ -2,10 +2,21 @@ package buildings.privatebuilding.workplace.industrial;
 
 import buildings.Buildable;
 
+import city.City;
+import utils.SerializedBlob;
+
 public class Factory extends IndustrialBuilding {
+    public Factory() {
+        super();
+    }
+
+    protected Factory(SerializedBlob blob, City city) {
+        super(blob, city);
+    }
+
     static {
         Buildable.registry.put(Factory.class, Factory::new);
-        Buildable.blobRegistry.put(Factory.class, Factory::fromBlob);
+        Buildable.blobRegistry.put(Factory.class, Factory::new);
     }
 
     public int getPrice() {

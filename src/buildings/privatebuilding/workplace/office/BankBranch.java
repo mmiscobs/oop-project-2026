@@ -2,10 +2,21 @@ package buildings.privatebuilding.workplace.office;
 
 import buildings.Buildable;
 
+import city.City;
+import utils.SerializedBlob;
+
 public class BankBranch extends OfficeBuilding {
+    public BankBranch() {
+        super();
+    }
+
+    protected BankBranch(SerializedBlob blob, City city) {
+        super(blob, city);
+    }
+
     static {
         Buildable.registry.put(BankBranch.class, BankBranch::new);
-        Buildable.blobRegistry.put(BankBranch.class, BankBranch::fromBlob);
+        Buildable.blobRegistry.put(BankBranch.class, BankBranch::new);
     }
 
     public int getPrice() {

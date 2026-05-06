@@ -18,9 +18,13 @@ public class Clinic extends HealthcareBuilding {
         this.ambulanceGarage = new AmbulanceGarage(blob);
     }
 
+    public SerializedBlob toBlob() {
+        return super.toBlob().extendMap(Map.of("ambulanceGarage", ambulanceGarage.toBlob()));
+    }
+
     static {
         Buildable.registry.put(Clinic.class, Clinic::new);
-        Buildable.blobRegistry.put(Clinic.class, Clinic::fromBlob);
+        Buildable.blobRegistry.put(Clinic.class, Clinic::new);
     }
 
     public int getPrice() {

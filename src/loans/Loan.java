@@ -1,5 +1,7 @@
 package loans;
 
+import java.util.Map;
+
 import utils.Reactive;
 import utils.SerializedBlob;
 import utils.Reactive.Observable;
@@ -24,6 +26,10 @@ public abstract class Loan {
             case "PrivateLoan" -> new PrivateLoan();
             default -> null;
         };
+    }
+
+    public SerializedBlob toBlob() {
+        return SerializedBlob.fromMap(Map.of("type", SerializedBlob.string(getClass().getSimpleName())));
     }
 
     public abstract int getLoanRate();

@@ -1,6 +1,7 @@
 package utils;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 public class Point {
@@ -15,6 +16,10 @@ public class Point {
     public Point(SerializedBlob blob) {
         x = blob.map().get("x").intValue();
         y = blob.map().get("y").intValue();
+    }
+
+    public SerializedBlob toBlob() {
+        return SerializedBlob.fromMap(Map.of("x", SerializedBlob.intValue(x), "y", SerializedBlob.intValue(y)));
     }
 
     public double distFrom(Point other) {

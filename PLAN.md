@@ -49,11 +49,11 @@
       - [x] Current profit
       - [x] Amount of workers, residents
       - [x] Capacity of workers, residents
-- [ ] Implement start menu
+- [x] Implement start menu
   - [x] Create game
     - [x] Size of a map
     - [x] Difficulty (starting money)
-  - [ ] Load game
-  - [ ] Save game
+  - [x] Load game
+  - [x] Save game
   - [x] Exit
   - [x] Credits

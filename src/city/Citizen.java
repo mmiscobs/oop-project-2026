@@ -34,6 +34,10 @@ public class Citizen {
     private int currentThoughtsSeed = new Random().nextInt();
     public CitizenState state = new CitizenState.Residing();
 
+    public void evict() {
+        this.home = new BuildableRef<ResidentialBuilding>((Buildable) null, city);
+    }
+
     public Citizen(City city, ResidentialBuilding home, WorkplaceBuilding work) {
         this.id = UUID.randomUUID().toString();
         this.identity = IdentityGenerator.generator.nextIdentity();
@@ -50,10 +54,26 @@ public class Citizen {
         this.id = blob.map().get("id").string();
         lastStateUpdateTick = blob.map().get("lastStateUpdateTick").intValue();
         currentHealth = blob.map().get("currentHealth").intValue();
+        location = new BuildableRef<>(blob.map().get("location"), city);
+        work = new BuildableRef<>(blob.map().get("work"), city);
+        home = new BuildableRef<>(blob.map().get("home"), city);
         identity = new Identity(blob.map().get("identity"));
         state = CitizenState.fromBlob(blob.map().get("state"), city);
         currentThoughtsSeed = blob.map().get("currentThoughtsSeed").intValue();
         cache.put(id, this);
+    }
+
+    public SerializedBlob toBlob() {
+        return SerializedBlob.fromMap(Map.of(
+                "id", SerializedBlob.string(id),
+                "identity", identity.toBlob(),
+                "home", home.toBlob(),
+                "work", work.toBlob(),
+                "location", location.toBlob(),
+                "state", state.toBlob(),
+                "lastStateUpdateTick", SerializedBlob.intValue(lastStateUpdateTick),
+                "currentHealth", SerializedBlob.intValue(currentHealth),
+                "currentThoughtsSeed", SerializedBlob.intValue(currentThoughtsSeed)));
     }
 
     public static Citizen fromBlob(SerializedBlob blob, City city) {
@@ -197,9 +217,9 @@ public class Citizen {
 
     public String getCurrentThoughts() {
         Supplier<Boolean> coinFlip = () -> new Random(currentThoughtsSeed).nextDouble(0, 1) > 0.5;
-        if (work == null && coinFlip.get())
+        if (work.get() == null && coinFlip.get())
             return "If only I could have a job...";
-        if (home == null && coinFlip.get())
+        if (home.get() == null && coinFlip.get())
             return "I wish I had a nice apartment...";
         if (location.get().getCrimeRate() > 75 && coinFlip.get())
             return "It is dangerous to be here!";

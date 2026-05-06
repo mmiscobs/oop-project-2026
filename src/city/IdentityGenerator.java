@@ -2,6 +2,7 @@ package city;
 
 import java.time.Year;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import utils.SerializedBlob;
@@ -78,6 +79,13 @@ public final class IdentityGenerator {
         Identity(SerializedBlob blob) {
             this(blob.map().get("firstName").string(), blob.map().get("lastName").string(),
                     blob.map().get("birthYear").intValue());
+        }
+
+        public SerializedBlob toBlob() {
+            return SerializedBlob.fromMap(Map.of(
+                    "firstName", SerializedBlob.string(firstName),
+                    "lastName", SerializedBlob.string(lastName),
+                    "birthYear", SerializedBlob.intValue(birthYear)));
         }
     }
 

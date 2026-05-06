@@ -46,6 +46,15 @@ public abstract class Buildable {
         isDestroyed = blob.map().get("isDestroyed").booleanValue();
     }
 
+    public SerializedBlob toBlob() {
+        return SerializedBlob.fromMap(Map.of(
+                "type", SerializedBlob.string(getClass().getSimpleName()),
+                "uuid", SerializedBlob.string(uuid),
+                "visitors", SerializedBlob.array(visitors.stream().map(v -> v.toBlob()).toList()),
+                "crimeRate", SerializedBlob.intValue(crimeRate),
+                "isDestroyed", SerializedBlob.booleanValue(isDestroyed)));
+    }
+
     protected List<Citizen> visitors = new ArrayList<>();
 
     public List<Citizen> getVisitors() {
@@ -167,6 +176,11 @@ public abstract class Buildable {
             cache.put(this, buildable);
         }
 
+        public SerializedBlob toBlob() {
+            return SerializedBlob.fromMap(
+                    Map.of("id", SerializedBlob.string(buildableId), "type", SerializedBlob.string(buildableType)));
+        }
+
         private static Map<BuildableRef<?>, Buildable> cache = new WeakHashMap<>();
 
         public BuildableRef(SerializedBlob blob, City city) {
@@ -181,11 +195,10 @@ public abstract class Buildable {
             if (buildableId == null)
                 return null;
             for (Buildable buildable : city.grid.buildings.values())
-                if (buildable.uuid == buildableId && buildable.getClass().getSimpleName() == buildableType) {
+                if (buildable.uuid.equals(buildableId) && buildable.getClass().getSimpleName().equals(buildableType)) {
                     cache.put(this, buildable);
                     return (T) buildable;
                 }
-            cache.put(this, null);
             return null;
         }
 
@@ -197,7 +210,7 @@ public abstract class Buildable {
     public static Buildable fromBlob(SerializedBlob serializedBlob, City city) {
         for (Entry<Class<? extends Buildable>, BiFunction<SerializedBlob, City, Buildable>> entry : blobRegistry
                 .entrySet()) {
-            if (entry.getKey().getSimpleName() == serializedBlob.map().get("type").string()) {
+            if (entry.getKey().getSimpleName().equals(serializedBlob.map().get("type").string())) {
                 return entry.getValue().apply(serializedBlob, city);
             }
         }

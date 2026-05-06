@@ -17,9 +17,15 @@ public class Road extends PublicTransportation {
         this.plantedTrees = new PlantedTrees(blob.map().get("plantedTrees"));
     }
 
+    public SerializedBlob toBlob() {
+        return super.toBlob()
+                .extendMap(Map.of(
+                        "plantedTrees", plantedTrees.toBlob()));
+    }
+
     static {
         Buildable.registry.put(Road.class, Road::new);
-        Buildable.blobRegistry.put(Road.class, Road::fromBlob);
+        Buildable.blobRegistry.put(Road.class, Road::new);
     }
 
     public Upgrade[] getUpgrades() {

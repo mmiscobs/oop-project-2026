@@ -21,6 +21,11 @@ public abstract class PrivateBuilding extends Buildable {
         isBuilt = blob.map().get("isBuilt").booleanValue();
     }
 
+    @Override
+    public SerializedBlob toBlob() {
+        return super.toBlob().extendMap(Map.of("isBuilt", SerializedBlob.booleanValue(isBuilt)));
+    }
+
     protected boolean isBuilt = false;
 
     public boolean getIsBuilt() {

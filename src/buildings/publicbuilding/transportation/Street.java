@@ -18,9 +18,16 @@ public class Street extends PublicTransportation {
         this.speedLimiters = new SpeedLimiters(blob.map().get("speedLimiters"));
     }
 
+    public SerializedBlob toBlob() {
+        return super.toBlob()
+                .extendMap(Map.of(
+                        "plantedTrees", plantedTrees.toBlob(),
+                        "speedLimiters", speedLimiters.toBlob()));
+    }
+
     static {
         Buildable.registry.put(Street.class, Street::new);
-        Buildable.blobRegistry.put(Street.class, Street::fromBlob);
+        Buildable.blobRegistry.put(Street.class, Street::new);
     }
 
     public Upgrade[] getUpgrades() {

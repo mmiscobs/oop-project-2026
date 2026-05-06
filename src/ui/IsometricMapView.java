@@ -515,6 +515,7 @@ public class IsometricMapView extends JComponent {
         repaint();
         return () -> {
             this.overlays.remove(o);
+            repaint();
         };
     }
 

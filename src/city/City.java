@@ -3,6 +3,7 @@ package city;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import buildings.Buildable;
 import buildings.Buildable.BuildableRef;
@@ -38,8 +39,17 @@ public class City {
         this.name = blob.map().get("name").string();
         this.money.set(blob.map().get("money").doubleValue());
         this.grid = new CityGrid(blob.map().get("grid"), this);
-        this.loans.addAll(blob.array().stream().map(Loan::fromBlob).toList());
-        this.homelessPeople.addAll(blob.array().stream().map(b -> Citizen.fromBlob(b, this)).toList());
+        this.loans.addAll(blob.map().get("loans").array().stream().map(Loan::fromBlob).toList());
+        this.homelessPeople
+                .addAll(blob.map().get("homelessPeople").array().stream().map(b -> Citizen.fromBlob(b, this)).toList());
+    }
+
+    public SerializedBlob toBlob() {
+        return SerializedBlob.fromMap(Map.of("name", SerializedBlob.string(name),
+                "money", SerializedBlob.doubleValue(money.get()),
+                "grid", grid.toBlob(),
+                "loans", SerializedBlob.array(loans.stream().map(l -> l.toBlob()).toList()),
+                "homelessPeople", SerializedBlob.array(homelessPeople.stream().map(h -> h.toBlob()).toList())));
     }
 
     public boolean build(PublicBuilding.Upgrade upgrade) {

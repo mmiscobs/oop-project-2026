@@ -21,6 +21,11 @@ public abstract class ResidentialBuilding extends PrivateBuilding {
         residents.addAll(blob.map().get("residents").array().stream().map(b -> Citizen.fromBlob(b, city)).toList());
     }
 
+    public SerializedBlob toBlob() {
+        return super.toBlob()
+                .extendMap(Map.of("residents", SerializedBlob.array(residents.stream().map(r -> r.toBlob()).toList())));
+    }
+
     public abstract int getCapacity();
 
     public static int calculateDemand(City city) {
@@ -57,7 +62,7 @@ public abstract class ResidentialBuilding extends PrivateBuilding {
     public void destroy() {
         super.destroy();
         for (Citizen resident : residents) {
-            resident.home = null;
+            resident.evict();
         }
     }
 
@@ -65,7 +70,7 @@ public abstract class ResidentialBuilding extends PrivateBuilding {
         List<Citizen> evictedResidents = List.copyOf(residents);
         residents.clear();
         for (Citizen citizen : evictedResidents) {
-            citizen.home = null;
+            citizen.evict();
         }
         return evictedResidents;
     }
@@ -73,6 +78,8 @@ public abstract class ResidentialBuilding extends PrivateBuilding {
     public void addResident(Citizen citizen) {
         if (residents.size() < getCapacity())
             residents.add(citizen);
+        if (citizen.location.get() == this)
+            visitors.add(citizen);
     }
 
     private final static int RESIDENT_TAX = 3;

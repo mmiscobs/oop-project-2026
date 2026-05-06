@@ -2,10 +2,21 @@ package buildings.privatebuilding.workplace.commercial;
 
 import buildings.Buildable;
 
+import city.City;
+import utils.SerializedBlob;
+
 public class Mall extends CommercialBuilding {
+    public Mall() {
+        super();
+    }
+
+    protected Mall(SerializedBlob blob, City city) {
+        super(blob, city);
+    }
+
     static {
         Buildable.registry.put(Mall.class, Mall::new);
-        Buildable.blobRegistry.put(Mall.class, Mall::fromBlob);
+        Buildable.blobRegistry.put(Mall.class, Mall::new);
     }
 
     public int getPrice() {

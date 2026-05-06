@@ -18,9 +18,13 @@ public class SmallPoliceStation extends PoliceStation {
         this.policeCarsGarage = new PoliceCarsGarage(blob.map().get("policeCarsGarage"));
     }
 
+    public SerializedBlob toBlob() {
+        return super.toBlob().extendMap(Map.of("policeCarsGarage", policeCarsGarage.toBlob()));
+    }
+
     static {
         Buildable.registry.put(SmallPoliceStation.class, SmallPoliceStation::new);
-        Buildable.blobRegistry.put(SmallPoliceStation.class, SmallPoliceStation::fromBlob);
+        Buildable.blobRegistry.put(SmallPoliceStation.class, SmallPoliceStation::new);
     }
 
     public Upgrade[] getUpgrades() {

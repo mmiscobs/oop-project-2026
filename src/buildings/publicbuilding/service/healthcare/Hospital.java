@@ -18,9 +18,13 @@ public class Hospital extends HealthcareBuilding {
         this.helipad = new Helipad(blob.map().get("helipad"));
     }
 
+    public SerializedBlob toBlob() {
+        return super.toBlob().extendMap(Map.of("helipad", helipad.toBlob()));
+    }
+
     static {
         Buildable.registry.put(Hospital.class, Hospital::new);
-        Buildable.blobRegistry.put(Hospital.class, Hospital::fromBlob);
+        Buildable.blobRegistry.put(Hospital.class, Hospital::new);
     }
 
     public Upgrade[] getUpgrades() {

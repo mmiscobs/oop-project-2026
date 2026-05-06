@@ -10,13 +10,12 @@ import utils.Point;
 import utils.SerializedBlob;
 
 public class CityGrid {
-    public Map<Point, Buildable> buildings;
+    public Map<Point, Buildable> buildings = new HashMap<>();
     public final int sizeX;
     public final int sizeY;
     private PathFinder pathFinder = new PathFinder(this);
 
     public CityGrid(int sizeX, int sizeY) {
-        this.buildings = new HashMap<>();
         this.sizeX = sizeX;
         this.sizeY = sizeY;
     }
@@ -27,6 +26,17 @@ public class CityGrid {
         for (SerializedBlob entry : blob.map().get("buildings").array()) {
             buildings.put(new Point(entry.map().get("key")), Buildable.fromBlob(entry.map().get("value"), city));
         }
+    }
+
+    public SerializedBlob toBlob() {
+        return SerializedBlob.fromMap(Map.of(
+                "sizeX", SerializedBlob.intValue(sizeX),
+                "sizeY", SerializedBlob.intValue(sizeY),
+                "buildings",
+                SerializedBlob.array(buildings.entrySet().stream()
+                        .map(e -> SerializedBlob
+                                .fromMap(Map.of("key", e.getKey().toBlob(), "value", e.getValue().toBlob())))
+                        .toList())));
     }
 
     public Buildable getNextStepFromTo(Buildable from, Buildable to) {

@@ -13,6 +13,7 @@ import org.xml.sax.InputSource;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class SerializedBlob {
     }
 
     private final Type type;
-    private final Map<String, SerializedBlob> map;
+    private Map<String, SerializedBlob> map;
     private final List<SerializedBlob> array;
     private final Object primitive;
 
@@ -36,6 +37,14 @@ public class SerializedBlob {
 
     public static SerializedBlob fromMap(Map<String, SerializedBlob> m) {
         return new SerializedBlob(Type.OBJECT, m, null, null);
+    }
+
+    public SerializedBlob extendMap(Map<String, SerializedBlob> m) {
+        Map<String, SerializedBlob> newMap = new HashMap<>();
+        newMap.putAll(m);
+        newMap.putAll(this.map);
+        this.map = newMap;
+        return this;
     }
 
     public static SerializedBlob array(List<SerializedBlob> l) {

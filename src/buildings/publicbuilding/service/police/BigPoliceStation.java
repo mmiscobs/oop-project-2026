@@ -18,9 +18,13 @@ public class BigPoliceStation extends PoliceStation {
         this.helipad = new Helipad(blob.map().get("helipad"));
     }
 
+    public SerializedBlob toBlob() {
+        return super.toBlob().extendMap(Map.of("helipad", helipad.toBlob()));
+    }
+
     static {
         Buildable.registry.put(BigPoliceStation.class, BigPoliceStation::new);
-        Buildable.blobRegistry.put(BigPoliceStation.class, BigPoliceStation::fromBlob);
+        Buildable.blobRegistry.put(BigPoliceStation.class, BigPoliceStation::new);
     }
 
     public Upgrade[] getUpgrades() {

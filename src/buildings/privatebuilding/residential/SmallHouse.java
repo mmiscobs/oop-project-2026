@@ -15,7 +15,7 @@ public class SmallHouse extends ResidentialBuilding {
 
     static {
         Buildable.registry.put(SmallHouse.class, SmallHouse::new);
-        Buildable.blobRegistry.put(SmallHouse.class, SmallHouse::fromBlob);
+        Buildable.blobRegistry.put(SmallHouse.class, SmallHouse::new);
     }
 
     public int getPrice() {

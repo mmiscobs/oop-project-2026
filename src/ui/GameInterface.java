@@ -5,11 +5,9 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Label;
-import java.util.Vector;
-import java.util.concurrent.Flow;
+import java.io.IOException;
 import java.util.function.Consumer;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -60,10 +58,20 @@ public class GameInterface extends JPanel {
         JMenuItem saveAction = new JMenuItem("Save game");
         JMenuItem saveAndExitAction = new JMenuItem("Save and exit to menu");
         JMenuItem exitAction = new JMenuItem("Exit to menu");
-        saveAction.addActionListener(e -> this.game.createSave());
+        saveAction.addActionListener(e -> {
+            try {
+                this.game.createSave();
+            } catch (IOException err) {
+                System.err.print(err);
+            }
+        });
         exitAction.addActionListener(e -> this.game.simulator.set(null));
         saveAndExitAction.addActionListener(e -> {
-            this.game.createSave();
+            try {
+                this.game.createSave();
+            } catch (IOException err) {
+                System.err.print(err);
+            }
             this.game.simulator.set(null);
         });
         this.game.simulator.subscribe(s -> {
@@ -181,7 +189,24 @@ public class GameInterface extends JPanel {
 
         class LoadGame extends JPanel {
             LoadGame() {
-                // TODO
+                render();
+            }
+
+            private void render() {
+                this.removeAll();
+                for (String save : game.listSaves()) {
+                    JButton loadSaveButton = new JButton(save);
+                    loadSaveButton.addActionListener(e -> {
+                        try {
+                            game.loadSave(save);
+                        } catch (IOException err) {
+                            System.err.print(err);
+                        }
+                    });
+                    this.add(loadSaveButton);
+                }
+                this.revalidate();
+                this.repaint();
             }
         }
 
