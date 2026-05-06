@@ -20,14 +20,12 @@ import city.Citizen;
 public class Simulator {
     public City city;
     public GameSpeed gameSpeed;
-    public CityDatum cityDatum;
     private Reactive<Integer> currentTick = new Reactive<>(0);
     public Observable<Integer> currentTickView = currentTick.readOnly();
 
     public Simulator(City city) {
         this.city = city;
         this.gameSpeed = GameSpeed.Stopped;
-        this.cityDatum = new CityDatum();
     }
 
     public void startSimulation() {

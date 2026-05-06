@@ -9,14 +9,12 @@ import buildings.Buildable;
 import utils.Point;
 
 public class CityGrid {
-    private City city;
     public Map<Point, Buildable> buildings;
     public final int sizeX;
     public final int sizeY;
     private PathFinder pathFinder = new PathFinder(this);
 
-    public CityGrid(City city, int sizeX, int sizeY) {
-        this.city = city;
+    public CityGrid(int sizeX, int sizeY) {
         this.buildings = new HashMap<>();
         this.sizeX = sizeX;
         this.sizeY = sizeY;

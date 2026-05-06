@@ -22,7 +22,7 @@ public class City {
     public Reactive.Observable<Double> moneyView = money.readOnly();
 
     public City(int sizeX, int sizeY, double startingMoney) {
-        this.grid = new CityGrid(this, sizeX, sizeY);
+        this.grid = new CityGrid(sizeX, sizeY);
         this.money.set(startingMoney);
     }
 
