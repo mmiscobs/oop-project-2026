@@ -34,6 +34,7 @@
       - [x] Upkeep
       - [x] Money
       - [x] Population + Homeless
+      - [x] Average crime, health and satisfaction
     - [x] HeatMaps
       - [x] Profit
       - [x] Noise
