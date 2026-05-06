@@ -15,7 +15,7 @@ public class Citizen {
     public Buildable location;
     public ResidentialBuilding home;
     public WorkplaceBuilding work;
-    private int currentHealth;
+    private int currentHealth = 100;
     public final Identity identity;
     public int lastStateUpdateTick = 0;
     private City city;

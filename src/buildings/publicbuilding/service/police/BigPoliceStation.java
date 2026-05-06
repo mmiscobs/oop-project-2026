@@ -32,7 +32,7 @@ public class BigPoliceStation extends PoliceStation {
     }
 
     public int getRange() {
-        return 10 + (hasHelipad ? 2 : 0);
+        return 8 + (hasHelipad ? 2 : 0);
     }
 
     public int getCrimeReduction(int x, int y) {

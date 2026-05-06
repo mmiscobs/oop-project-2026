@@ -12,6 +12,10 @@ public class Point {
         this.y = y;
     }
 
+    public double distFrom(Point other) {
+        return Math.sqrt(Math.pow(y - other.y, 2) + Math.pow(x - other.x, 2));
+    }
+
     public int hashCode() {
         return Integer.hashCode(x) + Integer.hashCode(y);
     }

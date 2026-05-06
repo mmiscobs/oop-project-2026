@@ -7,6 +7,8 @@ import buildings.publicbuilding.PublicBuilding;
 public abstract class PublicServiceBuilding extends PublicBuilding {
     public abstract int getRange();
 
+    public abstract Class<? extends PublicServiceBuilding> getPublicServiceTypeClass();
+
     @Override
     public Map<String, String> getDetailedInfo() {
         Map<String, String> details = super.getDetailedInfo();

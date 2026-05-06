@@ -118,7 +118,7 @@ public class SimulationInterface extends JPanel {
                                     city.build(building, tile);
                                     onEnd.run();
                                     view.render();
-                                });
+                                }, building);
                     } catch (UnregisteredBuildingType e) {
                         System.err.print(e);
                         onEnd.run();

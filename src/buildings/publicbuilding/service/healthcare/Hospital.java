@@ -32,7 +32,7 @@ public class Hospital extends HealthcareBuilding {
     }
 
     public int getRange() {
-        return 11 + (hasHelipad ? 3 : 0);
+        return 8 + (hasHelipad ? 3 : 0);
     }
 
     public int getHealthIncrease(int x, int y) {

@@ -3,7 +3,7 @@
 - [ ] Implement satisfaction
 - [ ] Implement crime
 - [ ] Implement health
-- [ ] Implement range overlay for public buildings
+- [x] Implement range overlay for public buildings
 - [ ] Implement noise health effects
 - [ ] Implement upgrades
 - [x] Implement the buildings hierarchy

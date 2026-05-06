@@ -4,4 +4,9 @@ import buildings.publicbuilding.service.PublicServiceBuilding;
 
 public abstract class HealthcareBuilding extends PublicServiceBuilding {
     public abstract int getHealthIncrease(int x, int y);
+
+    @Override
+    public Class<? extends PublicServiceBuilding> getPublicServiceTypeClass() {
+        return HealthcareBuilding.class;
+    }
 }

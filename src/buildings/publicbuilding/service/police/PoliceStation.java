@@ -4,4 +4,9 @@ import buildings.publicbuilding.service.PublicServiceBuilding;
 
 public abstract class PoliceStation extends PublicServiceBuilding {
     public abstract int getCrimeReduction(int x, int y);
+
+    @Override
+    public Class<? extends PublicServiceBuilding> getPublicServiceTypeClass() {
+        return PoliceStation.class;
+    }
 }

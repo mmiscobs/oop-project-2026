@@ -9,6 +9,7 @@ import javax.swing.border.LineBorder;
 
 import buildings.Buildable;
 import buildings.privatebuilding.PrivateBuilding;
+import buildings.publicbuilding.service.PublicServiceBuilding;
 import buildings.publicbuilding.transportation.PublicTransportation;
 import city.City;
 import utils.Point;
@@ -23,6 +24,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Map.Entry;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class CityView extends IsometricMapView {
@@ -229,7 +233,7 @@ public class CityView extends IsometricMapView {
     }
 
     public static Runnable enableBuildAction(CityView view, FloatingHoverLabelCreator labelCreator, int l, int w,
-            TileListener onTile) {
+            TileListener onTile, Buildable buildable) {
         ReactiveInfoLabel info = view.new ReactiveInfoLabel(null);
         view.attachComponent(info, 0, 0, IsometricMapView.TileAnchor.ABOVE, 0, -8);
         class HoverLoc {
@@ -269,6 +273,32 @@ public class CityView extends IsometricMapView {
             for (Point t : Point.allPointsWithin(currentHoverLoc.loc, l, w)) {
                 Buildable existingBuilding = view.city.grid.getBuildingAt(t);
                 v.drawTileDiamond(g, t.x, t.y, existingBuilding != null ? prohibitedFill : fill, stroke);
+            }
+            if (buildable instanceof PublicServiceBuilding s) {
+                BiFunction<Point, PublicServiceBuilding, Function<Point, Double>> influenceFieldFunction = (origin,
+                        building) -> t -> {
+                            double range = building.getRange();
+                            double distance = t.distFrom(origin);
+                            double val = Math.clamp(1 - distance / range, 0, 1);
+                            return Math.clamp(val * 255, 0, 255);
+                        };
+                ArrayList<Function<Point, Double>> influenceFields = new ArrayList<>();
+                influenceFields.add(influenceFieldFunction.apply(currentHoverLoc.loc, s));
+                for (Entry<Point, Buildable> otherBuildingEntry : view.city.grid.buildings.entrySet()) {
+                    if (otherBuildingEntry.getValue() instanceof PublicServiceBuilding otherService
+                            && s.getPublicServiceTypeClass() == otherService.getPublicServiceTypeClass()) {
+                        influenceFields.add(influenceFieldFunction.apply(otherBuildingEntry.getKey(), otherService));
+                    }
+                }
+                for (Point t : Point.allPointsWithin(new Point(0, 0), view.city.grid.sizeX, view.city.grid.sizeY)) {
+                    int colorVal = (int) Math.clamp(
+                            influenceFields.stream().map(f -> f.apply(t)).reduce(0.0, Double::sum),
+                            0, 255.0);
+
+                    Color valueFill = new Color(255 - colorVal, colorVal, 0,
+                            110);
+                    v.drawTileDiamond(g, t.x, t.y, valueFill, stroke);
+                }
             }
         };
         Runnable removeOverlay = view.addOverlay(routeOverlay);
