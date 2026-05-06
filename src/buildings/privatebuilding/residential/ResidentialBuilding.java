@@ -14,30 +14,28 @@ public abstract class ResidentialBuilding extends PrivateBuilding {
     public abstract int getCapacity();
 
     public static int calculateDemand(City city) {
+        double housingShortage = calculateHousingShortage(city);
+        if (housingShortage == 0)
+            housingShortage = 0.01;
+        double housingDemand = 1 / housingShortage;
+        double easeOfFindingJob = WorkplaceBuilding.calculateLaborShortage(city);
+        return (int) Math.clamp(easeOfFindingJob * housingDemand * 100, 5, 100);
+    }
+
+    public static double calculateHousingShortage(City city) {
         int totalVacancies = 0;
-        int totalJobPositions = 0;
         int totalPopulation = city.homelessPeople.size();
         for (Buildable building : city.builtBuildings()) {
             if (building instanceof ResidentialBuilding r) {
                 totalVacancies += r.getCapacity();
                 totalPopulation += r.residents.size();
             }
-            if (building instanceof WorkplaceBuilding r) {
-                totalJobPositions += r.getWorkersCapacity();
-            }
         }
         int freeVacancies = Math.max(0, totalVacancies - totalPopulation);
-        int freeJobPositions = Math.max(0, totalJobPositions - totalPopulation);
         if (totalPopulation == 0)
-            return 25;
-        double easeOfFindingJob = (double) freeJobPositions / totalPopulation;
-        if (easeOfFindingJob == 0)
-            return 0;
+            return 0.25;
         double easeOfFindingHousing = (double) freeVacancies / totalPopulation;
-        if (easeOfFindingHousing == 0)
-            return 100;
-        double housingDemand = 1 / easeOfFindingHousing;
-        return (int) Math.clamp(easeOfFindingJob * housingDemand * 100, 5, 100);
+        return easeOfFindingHousing;
     }
 
     private ArrayList<Citizen> residents = new ArrayList<>();

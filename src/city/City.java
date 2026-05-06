@@ -186,14 +186,41 @@ public class City {
         }
     }
 
+    private int vacantApartments() {
+        int vacant = 0;
+        for (Buildable building : builtBuildings()) {
+            if (building instanceof ResidentialBuilding) {
+                ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
+                int delta = residentialBuilding.getCapacity() - residentialBuilding.getResidents().size();
+                vacant += delta;
+            }
+        }
+        return vacant;
+    }
+
+    private int totalPop() {
+        int pop = 0;
+        for (Buildable building : builtBuildings()) {
+            if (building instanceof ResidentialBuilding) {
+                ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
+                pop += residentialBuilding.getResidents().size();
+            }
+        }
+        return pop;
+    }
+
     public void accomodateNewImmigrants() {
+        double laborShortage = WorkplaceBuilding.calculateLaborShortage(this);
+        int willingToMoveInto = laborShortage < 1 ? totalPop() == 0 ? 1 : 0
+                : (int) (laborShortage * vacantApartments());
         for (Buildable building : builtBuildings()) {
             if (building instanceof ResidentialBuilding) {
                 ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
                 int delta = residentialBuilding.getCapacity() - residentialBuilding.getResidents().size();
                 int initialDelta = delta;
-                while (delta > (int) (initialDelta * 0.9)) {
+                while (delta > (int) (initialDelta * 0.9) && willingToMoveInto > 0) {
                     residentialBuilding.addResident(new Citizen(this, residentialBuilding, null));
+                    willingToMoveInto--;
                     delta--;
                 }
             }

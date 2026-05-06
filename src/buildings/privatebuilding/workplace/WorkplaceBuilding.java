@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import buildings.Buildable;
 import buildings.privatebuilding.PrivateBuilding;
+import buildings.privatebuilding.residential.ResidentialBuilding;
 import city.Citizen;
+import city.City;
 
 public abstract class WorkplaceBuilding extends PrivateBuilding {
     private ArrayList<Citizen> hiredWorkers = new ArrayList<>();
@@ -54,5 +57,24 @@ public abstract class WorkplaceBuilding extends PrivateBuilding {
         details.put("workers hired", Integer.toString(hiredWorkers.size()));
         details.put("workers capacity", Integer.toString(getWorkersCapacity()));
         return details;
+    }
+
+    public static double calculateLaborShortage(City city) {
+        int totalJobPositions = 0;
+        int totalPopulation = city.homelessPeople.size();
+        for (Buildable building : city.builtBuildings()) {
+            if (building instanceof ResidentialBuilding r) {
+                totalPopulation += r.getResidents().size();
+            }
+            if (building instanceof WorkplaceBuilding r) {
+                totalJobPositions += r.getWorkersCapacity();
+            }
+        }
+        if (totalJobPositions == 0)
+            return 1;
+        double easeOfFindingWorker = (double) totalPopulation / totalJobPositions;
+        if (easeOfFindingWorker == 0)
+            return 1;
+        return 1 / easeOfFindingWorker;
     }
 }

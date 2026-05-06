@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
 import java.util.function.BiFunction;
@@ -275,25 +276,15 @@ public class CityView extends IsometricMapView {
                 v.drawTileDiamond(g, t.x, t.y, existingBuilding != null ? prohibitedFill : fill, stroke);
             }
             if (buildable instanceof PublicServiceBuilding s) {
-                BiFunction<Point, PublicServiceBuilding, Function<Point, Double>> influenceFieldFunction = (origin,
-                        building) -> t -> {
-                            double range = building.getRange();
-                            double distance = t.distFrom(origin);
-                            double val = Math.clamp(1 - distance / range, 0, 1);
-                            return Math.clamp(val * 255, 0, 255);
-                        };
-                ArrayList<Function<Point, Double>> influenceFields = new ArrayList<>();
-                influenceFields.add(influenceFieldFunction.apply(currentHoverLoc.loc, s));
-                for (Entry<Point, Buildable> otherBuildingEntry : view.city.grid.buildings.entrySet()) {
-                    if (otherBuildingEntry.getValue() instanceof PublicServiceBuilding otherService
-                            && s.getPublicServiceTypeClass() == otherService.getPublicServiceTypeClass()) {
-                        influenceFields.add(influenceFieldFunction.apply(otherBuildingEntry.getKey(), otherService));
-                    }
-                }
+                Map<Point, PublicServiceBuilding> publicServiceTypeBuildings = PublicServiceBuilding
+                        .getAllPublicServiceTypeBuildings(view.city,
+                                s.getPublicServiceTypeClass());
+
+                publicServiceTypeBuildings.put(currentHoverLoc.loc, s);
+                Function<Point, Double> combinedField = PublicServiceBuilding
+                        .getCombinedFieldFunctionForBuildings(publicServiceTypeBuildings);
                 for (Point t : Point.allPointsWithin(new Point(0, 0), view.city.grid.sizeX, view.city.grid.sizeY)) {
-                    int colorVal = (int) Math.clamp(
-                            influenceFields.stream().map(f -> f.apply(t)).reduce(0.0, Double::sum),
-                            0, 255.0);
+                    int colorVal = combinedField.apply(t).intValue();
 
                     Color valueFill = new Color(255 - colorVal, colorVal, 0,
                             110);

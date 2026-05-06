@@ -1,10 +1,9 @@
 - [x] Create isometric renderer
-- [ ] Create walking mode
-- [ ] Implement satisfaction
+- [x] Implement satisfaction
 - [ ] Implement crime
-- [ ] Implement health
+- [x] Implement health
 - [x] Implement range overlay for public buildings
-- [ ] Implement noise health effects
+- [x] Implement noise health effects
 - [ ] Implement upgrades
 - [x] Implement the buildings hierarchy
 - [x] Implement tick based time flow

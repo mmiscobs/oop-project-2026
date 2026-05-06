@@ -19,12 +19,14 @@ import buildings.Buildable;
 import buildings.Buildable.UnregisteredBuildingType;
 import buildings.privatebuilding.PrivateBuilding;
 import buildings.privatebuilding.residential.ResidentialBuilding;
+import buildings.privatebuilding.workplace.WorkplaceBuilding;
 import buildings.privatebuilding.workplace.commercial.CommercialBuilding;
 import buildings.privatebuilding.workplace.industrial.IndustrialBuilding;
 import buildings.privatebuilding.workplace.office.OfficeBuilding;
 import buildings.publicbuilding.service.healthcare.HealthcareBuilding;
 import buildings.publicbuilding.service.police.PoliceStation;
 import buildings.publicbuilding.transportation.PublicTransportation;
+import city.Citizen;
 import city.City;
 import simulation.GameSpeed;
 import simulation.Simulator;
@@ -150,11 +152,11 @@ public class SimulationInterface extends JPanel {
         });
         actions.add(new TogglesMenu.Action() {
             public String getName() {
-                return "Info Picker";
+                return "Building Info Picker";
             };
 
             public String getStopName() {
-                return "Close Info Picker";
+                return "Close Building Info Picker";
             }
 
             public Runnable enable(Runnable onEnd) {
@@ -163,6 +165,34 @@ public class SimulationInterface extends JPanel {
 
                     for (Entry<String, String> entry : building.getDetailedInfo().entrySet()) {
                         html += "<b>" + entry.getKey() + ":</b> " + entry.getValue() + "<br/>";
+                    }
+                    return html + "</html>";
+                });
+            }
+        });
+        actions.add(new TogglesMenu.Action() {
+            public String getName() {
+                return "Citizen Info Picker";
+            };
+
+            public String getStopName() {
+                return "Close Citizen Info Picker";
+            }
+
+            public Runnable enable(Runnable onEnd) {
+                return CityView.enableBuildingHoverAction(view, (building) -> () -> {
+                    String html = "<html>";
+
+                    if (building.getVisitors().size() == 0)
+                        html += "Nobody here";
+
+                    int i = 0;
+                    for (Citizen citizen : building.getVisitors()) {
+                        if (i++ != 0)
+                            html += "<hr/>";
+                        for (Entry<String, String> entry : citizen.getDetailedInfo().entrySet()) {
+                            html += "<b>" + entry.getKey() + ":</b> " + entry.getValue() + "<br/>";
+                        }
                     }
                     return html + "</html>";
                 });
@@ -253,7 +283,8 @@ public class SimulationInterface extends JPanel {
                     public Runnable enable(Runnable onEnd) {
                         return view.addOverlay(createBuildingsOverlay.apply(b -> {
                             if (b instanceof ResidentialBuilding p)
-                                return p.getResidents().stream().map(r -> r.getCurrentHealth()).reduce(0, Integer::sum,
+                                return 100 - p.getResidents().stream().map(r -> r.getCurrentHealth()).reduce(0,
+                                        Integer::sum,
                                         Integer::sum) / p.getResidents().size();
                             return null;
                         }));
@@ -315,6 +346,10 @@ public class SimulationInterface extends JPanel {
         }
 
         class DemandStats extends JPanel {
+            private static int shortagePercentage(double val) {
+                return (int) (val * 100 - 100);
+            }
+
             DemandStats() {
                 super(new GridLayout(0, 1));
                 this.add(new ReactiveLabel<>(simulator.currentTickView, t -> "Current tick: " + t));
@@ -326,6 +361,18 @@ public class SimulationInterface extends JPanel {
                         t -> "Office demand: " + OfficeBuilding.calculateDemand(simulator.city)));
                 this.add(new ReactiveLabel<>(simulator.currentTickView,
                         t -> "Industrial demand: " + IndustrialBuilding.calculateDemand(simulator.city)));
+                this.add(new ReactiveLabel<>(simulator.currentTickView,
+                        t -> "Housing shortage: "
+                                + shortagePercentage(ResidentialBuilding.calculateHousingShortage(simulator.city))
+                                + "%"));
+                this.add(new ReactiveLabel<>(simulator.currentTickView,
+                        t -> "Labor shortage: "
+                                + shortagePercentage(WorkplaceBuilding.calculateLaborShortage(simulator.city))
+                                + "%"));
+                this.add(new ReactiveLabel<>(simulator.currentTickView,
+                        t -> "Retail shortage: "
+                                + shortagePercentage(CommercialBuilding.calculateRetailShortage(simulator.city))
+                                + "%"));
             }
         }
 

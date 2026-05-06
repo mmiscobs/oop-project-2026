@@ -17,8 +17,17 @@ public abstract class CommercialBuilding extends WorkplaceBuilding {
     }
 
     public static int calculateDemand(City city) {
+        double retailShortage = calculateRetailShortage(city);
+        double laborShortage = calculateLaborShortage(city);
+        if (retailShortage == 0 || laborShortage == 0)
+            return 100;
+        double easeOfFindingConsumer = (double) 1 / retailShortage;
+        double easeOfFindingWorker = (double) 1 / laborShortage;
+        return (int) Math.clamp(easeOfFindingConsumer * easeOfFindingWorker * 100, 5, 100);
+    }
+
+    public static double calculateRetailShortage(City city) {
         int totalVisitorPlaces = 0;
-        int totalJobPositions = 0;
         int totalPopulation = city.homelessPeople.size();
         for (Buildable building : city.builtBuildings()) {
             if (building instanceof ResidentialBuilding r) {
@@ -27,15 +36,11 @@ public abstract class CommercialBuilding extends WorkplaceBuilding {
             if (building instanceof CommercialBuilding c) {
                 totalVisitorPlaces += c.getVisitorsCapacity();
             }
-            if (building instanceof WorkplaceBuilding r) {
-                totalJobPositions += r.getWorkersCapacity();
-            }
         }
-        if (totalVisitorPlaces == 0 || totalJobPositions == 0)
-            return 100;
+        if (totalVisitorPlaces == 0)
+            return 1;
         double easeOfFindingConsumer = (double) totalPopulation / totalVisitorPlaces;
-        double easeOfFindingWorker = (double) totalPopulation / totalJobPositions;
-        return (int) Math.clamp(easeOfFindingConsumer * easeOfFindingWorker * 100, 5, 100);
+        return 1 / easeOfFindingConsumer;
     }
 
     private final static int SALES_TAX = 3;
