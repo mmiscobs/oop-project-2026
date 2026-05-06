@@ -14,13 +14,17 @@ import buildings.privatebuilding.workplace.industrial.Factory;
 import buildings.privatebuilding.workplace.industrial.Warehouse;
 import buildings.privatebuilding.workplace.office.BankBranch;
 import buildings.privatebuilding.workplace.office.Skyrise;
+import buildings.publicbuilding.service.PublicServiceBuilding;
 import buildings.publicbuilding.service.healthcare.Clinic;
 import buildings.publicbuilding.service.healthcare.Hospital;
 import buildings.publicbuilding.service.police.BigPoliceStation;
+import buildings.publicbuilding.service.police.PoliceStation;
 import buildings.publicbuilding.service.police.SmallPoliceStation;
 import buildings.publicbuilding.transportation.Road;
 import buildings.publicbuilding.transportation.Street;
 import city.Citizen;
+import city.City;
+import utils.Point;
 
 public abstract class Buildable {
     private int crimeRate;
@@ -37,6 +41,21 @@ public abstract class Buildable {
 
     public void removeVisitor(Citizen citizen) {
         visitors.remove(citizen);
+    }
+
+    public void runSimulationTick(City city) {
+        final int MAX_CRIME_RATE_DENSITY = 60;
+        final int PERSENTAGE = 100;
+        final int INCREASE_SPEED = 10;
+        crimeRate += Math
+                .ceil((getVisitors().size() / (double) MAX_CRIME_RATE_DENSITY - crimeRate / 100.0) / INCREASE_SPEED
+                        * PERSENTAGE);
+        crimeRate = Math.clamp(crimeRate, 0, 100);
+        Point locationPoint = city.grid.getBuildingOrigin(this);
+        int policeCoverage = PublicServiceBuilding.getFieldFunctionForPublicServiceType(city, PoliceStation.class)
+                .apply(locationPoint).intValue();
+        crimeRate -= (int) Math.ceilDiv(Math.max(crimeRate, policeCoverage) - crimeRate, 4);
+        crimeRate = Math.clamp(crimeRate, 0, 100);
     }
 
     abstract public int getWidth();

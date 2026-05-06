@@ -137,6 +137,12 @@ public class City {
         while (homelessPeopleIterator.hasNext() && delta > (int) (initialDelta * 0.9)) {
             Citizen homeless = homelessPeopleIterator.next();
             homelessPeopleIterator.remove();
+            if (homeless.location != null) {
+                homeless.location.removeVisitor(homeless);
+            }
+            if (homeless.work != null) {
+                homeless.work.removeHiredWorker(homeless);
+            }
             delta--;
         }
     }

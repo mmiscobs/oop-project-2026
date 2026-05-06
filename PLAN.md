@@ -1,6 +1,6 @@
 - [x] Create isometric renderer
 - [x] Implement satisfaction
-- [ ] Implement crime
+- [x] Implement crime
 - [x] Implement health
 - [x] Implement range overlay for public buildings
 - [x] Implement noise health effects

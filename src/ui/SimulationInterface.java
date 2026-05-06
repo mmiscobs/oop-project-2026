@@ -227,7 +227,8 @@ public class SimulationInterface extends JPanel {
             this.add(new TimeSpeedButtons(), BorderLayout.WEST);
             JPanel stats = new JPanel(new GridLayout(1, 0));
             this.add(stats, BorderLayout.EAST);
-            stats.add(new Overlays());
+            this.add(new Overlays(), BorderLayout.CENTER);
+            stats.add(new AggregateStats());
             stats.add(new NumberStats());
             stats.add(new DemandStats());
         }
@@ -373,6 +374,18 @@ public class SimulationInterface extends JPanel {
                         t -> "Retail shortage: "
                                 + shortagePercentage(CommercialBuilding.calculateRetailShortage(simulator.city))
                                 + "%"));
+            }
+        }
+
+        class AggregateStats extends JPanel {
+            AggregateStats() {
+                super(new GridLayout(0, 1));
+                this.add(new ReactiveLabel<>(simulator.currentTickView,
+                        t -> "Average health: " + simulator.averageCitizenHealth()));
+                this.add(new ReactiveLabel<>(simulator.currentTickView,
+                        t -> "Average crime rate: " + simulator.averageCrimeRate()));
+                this.add(new ReactiveLabel<>(simulator.currentTickView,
+                        t -> "Average satisfaction: " + simulator.averageCitizenSatisfaction()));
             }
         }
 

@@ -134,7 +134,7 @@ public class Citizen {
                 currentHealth,
                 work == null ? 50 : 100,
                 home == null ? 10 : 100,
-                location.getCrimeRate()
+                location == null ? 100 : (int) (Math.pow((100 - location.getCrimeRate()) / 100.0, 2) * 100)
         };
 
         return List.of(satisfactionContributors).stream().reduce(0, Integer::sum) / satisfactionContributors.length;

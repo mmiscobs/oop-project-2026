@@ -54,6 +54,9 @@ public abstract class ResidentialBuilding extends PrivateBuilding {
     public List<Citizen> evictResidents() {
         List<Citizen> evictedResidents = List.copyOf(residents);
         residents.clear();
+        for (Citizen citizen : evictedResidents) {
+            citizen.home = null;
+        }
         return evictedResidents;
     }
 

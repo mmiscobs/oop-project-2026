@@ -10,6 +10,8 @@ import buildings.Buildable;
 import buildings.privatebuilding.PrivateBuilding;
 import buildings.privatebuilding.residential.ResidentialBuilding;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -93,22 +95,33 @@ public class Simulator {
         lastResidentTax.set(city.collectTaxesFromResidents());
         lastBusinessTax.set(city.collectTaxesFromBusinesses());
         lastPurchaseTax.set(city.collectTaxesFromPurchases());
+        runAllBuildings();
         runAllCitizens();
 
         updateCitizensAmount();
     }
 
-    private void runAllCitizens() {
+    private List<Citizen> allCitizens() {
+        ArrayList<Citizen> citizens = new ArrayList<>();
         for (Buildable building : city.grid.buildings.values()) {
             if (building instanceof ResidentialBuilding) {
                 ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
-                for (Citizen citizen : residentialBuilding.getResidents()) {
-                    citizen.runSimulationTick(currentTick.get());
-                }
+                citizens.addAll(residentialBuilding.getResidents());
             }
         }
-        for (Citizen homeless : city.homelessPeople) {
-            homeless.runSimulationTick(currentTick.get());
+        citizens.addAll(city.homelessPeople);
+        return citizens;
+    }
+
+    private void runAllCitizens() {
+        for (Citizen citizen : allCitizens()) {
+            citizen.runSimulationTick(currentTick.get());
+        }
+    }
+
+    private void runAllBuildings() {
+        for (Buildable building : city.grid.buildings.values()) {
+            building.runSimulationTick(city);
         }
     }
 
@@ -127,15 +140,27 @@ public class Simulator {
         return new Random().nextFloat(0, 100) < chance;
     }
 
+    public int averageCitizenSatisfaction() {
+        if (allCitizens().size() == 0)
+            return 100;
+        return allCitizens().stream().map(c -> c.getSatisfaction()).reduce(0, Integer::sum) / allCitizens().size();
+    }
+
+    public int averageCrimeRate() {
+        if (city.grid.buildings.size() == 0)
+            return 0;
+        return city.grid.buildings.values().stream().map(c -> c.getCrimeRate()).reduce(0, Integer::sum)
+                / city.grid.buildings.size();
+    }
+
+    public int averageCitizenHealth() {
+        if (allCitizens().size() == 0)
+            return 100;
+        return allCitizens().stream().map(c -> c.getSatisfaction()).reduce(0, Integer::sum) / allCitizens().size();
+    }
+
     private void updateCitizensAmount() {
-        int recalculatedCitizensAmount = city.homelessPeople.size();
-        for (Buildable building : city.grid.buildings.values()) {
-            if (building instanceof ResidentialBuilding) {
-                ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
-                recalculatedCitizensAmount += residentialBuilding.getResidents().size();
-            }
-        }
-        citizensAmount.set(recalculatedCitizensAmount);
+        citizensAmount.set(allCitizens().size());
         homelessCitizensAmount.set(city.homelessPeople.size());
     }
 }
