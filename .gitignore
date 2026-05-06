@@ -13,7 +13,7 @@
 # test runs saves
 saves/
 
-# Package Files #
+# package com.test.Files #
 *.jar
 *.war
 *.nar
