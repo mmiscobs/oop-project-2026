@@ -5,6 +5,7 @@
 - [x] Implement range overlay for public buildings
 - [x] Implement noise health effects
 - [x] Implement upgrades
+- [x] Loans
 - [x] Implement the buildings hierarchy
 - [x] Implement tick based time flow
   - [x] Draw movable translucent clouds

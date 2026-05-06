@@ -62,7 +62,8 @@ public class Simulator {
     public Observable<Integer> lastBuildingsUpkeepView = lastBuildingsUpkeep.readOnly();
     public Observable<Integer> netIncomeView = new Reactive.Observable<Integer>() {
         public Integer get() {
-            return lastBusinessTax.get() + lastPurchaseTax.get() + lastResidentTax.get() - lastBuildingsUpkeep.get();
+            return lastBusinessTax.get() + lastPurchaseTax.get() + lastResidentTax.get() - lastBuildingsUpkeep.get()
+                    - lastLoansService.get().intValue();
         }
 
         public Runnable subscribe(Consumer<Integer> listener) {
@@ -74,6 +75,7 @@ public class Simulator {
                     lastPurchaseTax.subscribe(onUpdate),
                     lastResidentTax.subscribe(onUpdate),
                     lastBusinessTax.subscribe(onUpdate),
+                    lastLoansService.subscribe(l -> onUpdate.accept(0)),
             };
             return () -> {
                 for (Runnable runnable : cleanups) {
@@ -83,12 +85,19 @@ public class Simulator {
         }
     };
 
+    private Reactive<Double> lastLoansService = new Reactive<>(0.0);
+    public Observable<Double> lastLoansServiceView = lastLoansService.readOnly();
+    private Reactive<Double> totalDebt = new Reactive<>(0.0);
+    public Observable<Double> totalDebtView = totalDebt.readOnly();
+
     public void runSimulationTick() {
         lastBuildingsUpkeep.set(city.payBuildingsUpkeepPerTick());
         city.accomodateHomelessPeople();
         city.accomodateNewImmigrants();
         city.evictHomelessPeople();
         city.employPeople();
+        lastLoansService.set(city.serviceLoans());
+        totalDebt.set(city.getTotalDebt());
         buildPrivateBuildings();
         lastResidentTax.set(city.collectTaxesFromResidents());
         lastBusinessTax.set(city.collectTaxesFromBusinesses());

@@ -8,4 +8,8 @@ public class FederalLoan extends Loan {
     public int getLoanRate() {
         return 5;
     }
+
+    public int getPennyRate() {
+        return 1;
+    }
 }

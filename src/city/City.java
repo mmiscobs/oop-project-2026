@@ -13,10 +13,13 @@ import buildings.publicbuilding.PublicBuilding;
 import loans.Loan;
 import utils.Point;
 import utils.Reactive;
+import utils.Reactive.Observable;
+import utils.Reactive.ReactiveArrayList;
 
 public class City {
     public CityGrid grid;
-    private ArrayList<Loan> loans;
+    private ReactiveArrayList<Loan> loans = new ReactiveArrayList<>();
+    public Observable<List<Loan>> loansView = loans.readOnly();
 
     private Reactive<Double> money = new Reactive<>(0.0);
     public Reactive.Observable<Double> moneyView = money.readOnly();
@@ -59,6 +62,35 @@ public class City {
 
     public void takeOutLoan(Loan loan) {
         this.loans.add(loan);
+        this.money.set(this.money.get() + loan.getLoanSize());
+    }
+
+    public void payOutLoan(Loan loan) {
+        if (loan.paymentLeftView.get() < money.get()) {
+            money.set(money.get() - loan.paymentLeftView.get());
+            loan.payOutLoan(loan.paymentLeftView.get());
+            if (loan.paidOutLoan())
+                loans.remove(loan);
+        }
+    }
+
+    public double serviceLoans() {
+        double totalPaid = 0;
+        Iterator<Loan> loanIter = this.loans.iterator();
+        while (loanIter.hasNext()) {
+            Loan loan = loanIter.next();
+            double paid = Math.min(loan.getPerTickInterest(), money.get());
+            loan.payPerTickInterest((int) paid);
+            money.set(money.get() - paid);
+            totalPaid += paid;
+            if (loan.paidOutLoan())
+                loanIter.remove();
+        }
+        return totalPaid;
+    }
+
+    public double getTotalDebt() {
+        return this.loans.stream().map(l -> l.getPaymentLeft()).reduce(0, Integer::sum);
     }
 
     public static final int TICKS_IN_DAY = 10;

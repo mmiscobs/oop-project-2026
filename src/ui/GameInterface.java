@@ -10,7 +10,7 @@ import simulation.Game;
 import simulation.GameDifficulty;
 
 public class GameInterface extends JPanel {
-    private static final int FRAME_W = 2000;
+    private static final int FRAME_W = 2100;
     private static final int FRAME_H = 1400;
     private static final int COLS = 15;
     private static final int ROWS = 15;

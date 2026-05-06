@@ -2,8 +2,10 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Label;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +13,12 @@ import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
+import javax.swing.Action;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import buildings.Buildable;
 import buildings.Buildable.UnregisteredBuildingType;
@@ -28,6 +33,9 @@ import buildings.publicbuilding.service.police.PoliceStation;
 import buildings.publicbuilding.transportation.PublicTransportation;
 import city.Citizen;
 import city.City;
+import loans.FederalLoan;
+import loans.Loan;
+import loans.PrivateLoan;
 import simulation.GameSpeed;
 import simulation.Simulator;
 import ui.IsometricMapView.OverlayPainter;
@@ -235,16 +243,74 @@ public class SimulationInterface extends JPanel {
 
     class BottomPanel extends JPanel {
         BottomPanel() {
-            super(new BorderLayout());
+            super();
+            this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
             this.setPreferredSize(new Dimension(0, 400));
 
-            this.add(new TimeSpeedButtons(), BorderLayout.WEST);
-            JPanel stats = new JPanel(new GridLayout(1, 0));
-            this.add(stats, BorderLayout.EAST);
-            this.add(new Overlays(), BorderLayout.CENTER);
-            stats.add(new AggregateStats());
-            stats.add(new NumberStats());
-            stats.add(new DemandStats());
+            this.add(new TimeSpeedButtons());
+            this.add(new Overlays());
+            this.add(new Loans());
+            this.add(new AggregateStats());
+            this.add(new NumberStats());
+            this.add(new DemandStats());
+        }
+
+        class Loans extends JPanel {
+            Loans() {
+                super(new BorderLayout());
+                this.add(new ReactiveLabel<>(simulator.lastLoansServiceView,
+                        service -> "Last service: " + service.intValue() + "$"), BorderLayout.NORTH);
+                this.add(new FastScrollPane(new LoansList()), BorderLayout.CENTER);
+                this.add(new LoansAdder(), BorderLayout.SOUTH);
+            }
+
+            static class FastScrollPane extends JScrollPane {
+                FastScrollPane(Component component) {
+                    super(component);
+                    this.getVerticalScrollBar().setUnitIncrement(16);
+                }
+            }
+
+            class LoansAdder extends JPanel {
+                LoansAdder() {
+                    super(new GridLayout(1, 0));
+                    JButton federalLoan = new JButton("New Federal Loan");
+                    federalLoan.addActionListener(e -> simulator.city.takeOutLoan(new FederalLoan()));
+                    this.add(federalLoan);
+                    JButton privateLoan = new JButton("New Private Loan");
+                    privateLoan.addActionListener(e -> simulator.city.takeOutLoan(new PrivateLoan()));
+                    this.add(privateLoan);
+                }
+            }
+
+            class LoansList extends JPanel {
+                LoansList() {
+                    super(new GridLayout(0, 1));
+                    simulator.city.loansView.subscribe(loans -> this.renderList(loans));
+                }
+
+                private void renderList(List<Loan> loans) {
+                    this.removeAll();
+                    for (Loan loan : loans) {
+                        this.add(new LoanComponent(loan));
+                    }
+                    this.revalidate();
+                    this.repaint();
+                }
+
+                class LoanComponent extends JPanel {
+                    LoanComponent(Loan loan) {
+                        super(new GridLayout(1, 0));
+                        this.add(new JLabel(loan.getClass().getSimpleName()));
+                        this.add(new ReactiveLabel<>(loan.paymentLeftView, left -> left + "$"));
+                        JButton payout = new JButton("Payout");
+                        simulator.city.moneyView
+                                .subscribe(money -> payout.setEnabled(money > loan.paymentLeftView.get()));
+                        payout.addActionListener(e -> simulator.city.payOutLoan(loan));
+                        this.add(payout);
+                    }
+                }
+            }
         }
 
         class Overlays extends JPanel {
