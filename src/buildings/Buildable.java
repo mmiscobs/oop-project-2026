@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.WeakHashMap;
+import java.util.Map.Entry;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import buildings.privatebuilding.residential.Condominium;
@@ -25,9 +29,22 @@ import buildings.publicbuilding.transportation.Street;
 import city.Citizen;
 import city.City;
 import utils.Point;
+import utils.SerializedBlob;
 
 public abstract class Buildable {
     private int crimeRate;
+    public final String uuid;
+
+    public Buildable() {
+        uuid = UUID.randomUUID().toString();
+    }
+
+    protected Buildable(SerializedBlob blob, City city) {
+        uuid = blob.map().get("uuid").string();
+        visitors.addAll(blob.map().get("visitors").array().stream().map(b -> Citizen.fromBlob(b, city)).toList());
+        crimeRate = blob.map().get("crimeRate").intValue();
+        isDestroyed = blob.map().get("isDestroyed").booleanValue();
+    }
 
     protected List<Citizen> visitors = new ArrayList<>();
 
@@ -69,7 +86,7 @@ public abstract class Buildable {
     public void destroy() {
         this.isDestroyed = true;
         for (Citizen visitor : visitors) {
-            visitor.location = visitor.home;
+            visitor.location = visitor.home.upcast();
         }
     }
 
@@ -93,8 +110,6 @@ public abstract class Buildable {
         return details;
     }
 
-    public abstract void setCrimeRate(int crimeRateReduction);
-
     static public List<Class<? extends Buildable>> buildables = List.of(
             SmallHouse.class,
             Hospital.class,
@@ -112,6 +127,7 @@ public abstract class Buildable {
             Skyrise.class,
             BankBranch.class);
     static public Map<Class<? extends Buildable>, Supplier<Buildable>> registry = new HashMap<>();
+    static public Map<Class<? extends Buildable>, BiFunction<SerializedBlob, City, Buildable>> blobRegistry = new HashMap<>();
     static {
         for (Class<? extends Buildable> BuildableType : buildables) {
             try {
@@ -132,5 +148,59 @@ public abstract class Buildable {
         public UnregisteredBuildingType(Class<? extends Buildable> Class) {
             super("Unregistered Buildable subclass: " + Class.getCanonicalName());
         }
+    }
+
+    public static class BuildableRef<T extends Buildable> {
+        private final City city;
+        private final String buildableId;
+        private final String buildableType;
+
+        public BuildableRef(Buildable buildable, City city) {
+            if (buildable != null) {
+                buildableId = buildable.uuid;
+                buildableType = buildable.getClass().getSimpleName();
+            } else {
+                buildableId = null;
+                buildableType = null;
+            }
+            this.city = city;
+            cache.put(this, buildable);
+        }
+
+        private static Map<BuildableRef<?>, Buildable> cache = new WeakHashMap<>();
+
+        public BuildableRef(SerializedBlob blob, City city) {
+            this.buildableId = blob.map().get("id").string();
+            this.buildableType = blob.map().get("type").string();
+            this.city = city;
+        }
+
+        public T get() {
+            if (cache.containsKey(this))
+                return (T) cache.get(this);
+            if (buildableId == null)
+                return null;
+            for (Buildable buildable : city.grid.buildings.values())
+                if (buildable.uuid == buildableId && buildable.getClass().getSimpleName() == buildableType) {
+                    cache.put(this, buildable);
+                    return (T) buildable;
+                }
+            cache.put(this, null);
+            return null;
+        }
+
+        public BuildableRef<Buildable> upcast() {
+            return (BuildableRef<Buildable>) this;
+        }
+    }
+
+    public static Buildable fromBlob(SerializedBlob serializedBlob, City city) {
+        for (Entry<Class<? extends Buildable>, BiFunction<SerializedBlob, City, Buildable>> entry : blobRegistry
+                .entrySet()) {
+            if (entry.getKey().getSimpleName() == serializedBlob.map().get("type").string()) {
+                return entry.getValue().apply(serializedBlob, city);
+            }
+        }
+        return null;
     }
 }

@@ -9,7 +9,18 @@ import buildings.privatebuilding.workplace.industrial.IndustrialBuilding;
 import buildings.privatebuilding.workplace.office.OfficeBuilding;
 import city.City;
 
+import utils.SerializedBlob;
+
 public abstract class PrivateBuilding extends Buildable {
+    public PrivateBuilding() {
+        super();
+    }
+
+    protected PrivateBuilding(SerializedBlob blob, City city) {
+        super(blob, city);
+        isBuilt = blob.map().get("isBuilt").booleanValue();
+    }
+
     protected boolean isBuilt = false;
 
     public boolean getIsBuilt() {

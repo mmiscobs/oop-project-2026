@@ -11,7 +11,18 @@ import buildings.publicbuilding.PublicBuilding;
 import city.City;
 import utils.Point;
 
+import city.City;
+import utils.SerializedBlob;
+
 public abstract class PublicServiceBuilding extends PublicBuilding {
+    public PublicServiceBuilding() {
+        super();
+    }
+
+    protected PublicServiceBuilding(SerializedBlob blob, City city) {
+        super(blob, city);
+    }
+
     public abstract int getRange();
 
     public abstract Class<? extends PublicServiceBuilding> getPublicServiceTypeClass();

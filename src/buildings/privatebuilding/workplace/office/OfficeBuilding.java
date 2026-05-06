@@ -3,7 +3,17 @@ package buildings.privatebuilding.workplace.office;
 import buildings.privatebuilding.workplace.WorkplaceBuilding;
 import city.City;
 
+import utils.SerializedBlob;
+
 public abstract class OfficeBuilding extends WorkplaceBuilding {
+    public OfficeBuilding() {
+        super();
+    }
+
+    protected OfficeBuilding(SerializedBlob blob, City city) {
+        super(blob, city);
+    }
+
     public static int calculateDemand(City city) {
         double laborShortage = WorkplaceBuilding.calculateLaborShortage(city);
         if (laborShortage == 0)

@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import buildings.Buildable;
 import utils.Point;
+import utils.SerializedBlob;
 
 public class CityGrid {
     public Map<Point, Buildable> buildings;
@@ -18,6 +19,14 @@ public class CityGrid {
         this.buildings = new HashMap<>();
         this.sizeX = sizeX;
         this.sizeY = sizeY;
+    }
+
+    public CityGrid(SerializedBlob blob, City city) {
+        sizeX = blob.map().get("sizeX").intValue();
+        sizeY = blob.map().get("sizeY").intValue();
+        for (SerializedBlob entry : blob.map().get("buildings").array()) {
+            buildings.put(new Point(entry.map().get("key")), Buildable.fromBlob(entry.map().get("value"), city));
+        }
     }
 
     public Buildable getNextStepFromTo(Buildable from, Buildable to) {

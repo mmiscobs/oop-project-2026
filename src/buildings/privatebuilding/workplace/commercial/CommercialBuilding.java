@@ -8,7 +8,17 @@ import buildings.privatebuilding.workplace.WorkplaceBuilding;
 import city.Citizen;
 import city.City;
 
+import utils.SerializedBlob;
+
 public abstract class CommercialBuilding extends WorkplaceBuilding {
+    public CommercialBuilding() {
+        super();
+    }
+
+    protected CommercialBuilding(SerializedBlob blob, City city) {
+        super(blob, city);
+    }
+
     public abstract int getVisitorsCapacity();
 
     public void addVisitor(Citizen citizen) {

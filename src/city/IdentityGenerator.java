@@ -4,6 +4,8 @@ import java.time.Year;
 import java.util.List;
 import java.util.Random;
 
+import utils.SerializedBlob;
+
 public final class IdentityGenerator {
     private static final List<String> FIRST_NAMES_MALE = List.of(
             "James", "John", "Robert", "Michael", "William", "David", "Richard",
@@ -71,6 +73,11 @@ public final class IdentityGenerator {
         @Override
         public String toString() {
             return fullName() + " (b. " + birthYear + ")";
+        }
+
+        Identity(SerializedBlob blob) {
+            this(blob.map().get("firstName").string(), blob.map().get("lastName").string(),
+                    blob.map().get("birthYear").intValue());
         }
     }
 

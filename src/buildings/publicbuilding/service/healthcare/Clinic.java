@@ -5,9 +5,22 @@ import java.util.Map;
 import buildings.Buildable;
 import buildings.publicbuilding.PublicBuilding;
 
+import city.City;
+import utils.SerializedBlob;
+
 public class Clinic extends HealthcareBuilding {
+    public Clinic() {
+        super();
+    }
+
+    protected Clinic(SerializedBlob blob, City city) {
+        super(blob, city);
+        this.ambulanceGarage = new AmbulanceGarage(blob);
+    }
+
     static {
         Buildable.registry.put(Clinic.class, Clinic::new);
+        Buildable.blobRegistry.put(Clinic.class, Clinic::fromBlob);
     }
 
     public int getPrice() {
@@ -21,12 +34,16 @@ public class Clinic extends HealthcareBuilding {
     private AmbulanceGarage ambulanceGarage = new AmbulanceGarage();
 
     class AmbulanceGarage extends PublicBuilding.Upgrade {
+        AmbulanceGarage() {
+        }
+
+        AmbulanceGarage(SerializedBlob blob) {
+            super(blob);
+        }
+
         public int getPrice() {
             return 3000;
         }
-    }
-
-    public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getMaintanenceCostPerDay() {

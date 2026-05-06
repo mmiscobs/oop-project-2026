@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import buildings.Buildable;
+import buildings.Buildable.BuildableRef;
 import buildings.privatebuilding.PrivateBuilding;
 import buildings.privatebuilding.residential.ResidentialBuilding;
 import buildings.privatebuilding.workplace.WorkplaceBuilding;
@@ -13,6 +14,7 @@ import buildings.publicbuilding.PublicBuilding;
 import loans.Loan;
 import utils.Point;
 import utils.Reactive;
+import utils.SerializedBlob;
 import utils.Reactive.Observable;
 import utils.Reactive.ReactiveArrayList;
 
@@ -30,6 +32,14 @@ public class City {
         this.grid = new CityGrid(sizeX, sizeY);
         this.money.set(startingMoney);
         this.name = name;
+    }
+
+    public City(SerializedBlob blob) {
+        this.name = blob.map().get("name").string();
+        this.money.set(blob.map().get("money").doubleValue());
+        this.grid = new CityGrid(blob.map().get("grid"), this);
+        this.loans.addAll(blob.array().stream().map(Loan::fromBlob).toList());
+        this.homelessPeople.addAll(blob.array().stream().map(b -> Citizen.fromBlob(b, this)).toList());
     }
 
     public boolean build(PublicBuilding.Upgrade upgrade) {
@@ -179,11 +189,11 @@ public class City {
         while (homelessPeopleIterator.hasNext() && delta > (int) (initialDelta * 0.9)) {
             Citizen homeless = homelessPeopleIterator.next();
             homelessPeopleIterator.remove();
-            if (homeless.location != null) {
-                homeless.location.removeVisitor(homeless);
+            if (homeless.location.get() != null) {
+                homeless.location.get().removeVisitor(homeless);
             }
-            if (homeless.work != null) {
-                homeless.work.removeHiredWorker(homeless);
+            if (homeless.work.get() != null) {
+                homeless.work.get().removeHiredWorker(homeless);
             }
             delta--;
         }
@@ -229,7 +239,7 @@ public class City {
             while (vacantWorkplace.hasOpenJobPositions() && unemployedIterator.hasNext()) {
                 Citizen unemployed = unemployedIterator.next();
                 vacantWorkplace.addHiredWorker(unemployed);
-                unemployed.work = vacantWorkplace;
+                unemployed.work = new BuildableRef<>(vacantWorkplace, this);
             }
         }
     }

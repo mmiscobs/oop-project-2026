@@ -5,13 +5,11 @@ import buildings.Buildable;
 public class Skyrise extends OfficeBuilding {
     static {
         Buildable.registry.put(Skyrise.class, Skyrise::new);
+        Buildable.blobRegistry.put(Skyrise.class, Skyrise::fromBlob);
     }
 
     public int getPrice() {
         return 10000;
-    }
-
-    public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getWorkersCapacity() {

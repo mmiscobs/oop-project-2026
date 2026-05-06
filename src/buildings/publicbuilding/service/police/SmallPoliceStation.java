@@ -5,9 +5,22 @@ import java.util.Map;
 import buildings.Buildable;
 import buildings.publicbuilding.PublicBuilding;
 
+import city.City;
+import utils.SerializedBlob;
+
 public class SmallPoliceStation extends PoliceStation {
+    public SmallPoliceStation() {
+        super();
+    }
+
+    protected SmallPoliceStation(SerializedBlob blob, City city) {
+        super(blob, city);
+        this.policeCarsGarage = new PoliceCarsGarage(blob.map().get("policeCarsGarage"));
+    }
+
     static {
         Buildable.registry.put(SmallPoliceStation.class, SmallPoliceStation::new);
+        Buildable.blobRegistry.put(SmallPoliceStation.class, SmallPoliceStation::fromBlob);
     }
 
     public Upgrade[] getUpgrades() {
@@ -17,6 +30,13 @@ public class SmallPoliceStation extends PoliceStation {
     private PoliceCarsGarage policeCarsGarage = new PoliceCarsGarage();
 
     class PoliceCarsGarage extends PublicBuilding.Upgrade {
+        PoliceCarsGarage() {
+        }
+
+        PoliceCarsGarage(SerializedBlob blob) {
+            super(blob);
+        }
+
         public int getPrice() {
             return 3000;
         }
@@ -24,9 +44,6 @@ public class SmallPoliceStation extends PoliceStation {
 
     public int getPrice() {
         return 10000;
-    }
-
-    public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getMaintanenceCostPerDay() {

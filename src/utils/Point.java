@@ -12,6 +12,11 @@ public class Point {
         this.y = y;
     }
 
+    public Point(SerializedBlob blob) {
+        x = blob.map().get("x").intValue();
+        y = blob.map().get("y").intValue();
+    }
+
     public double distFrom(Point other) {
         return Math.sqrt(Math.pow(y - other.y, 2) + Math.pow(x - other.x, 2));
     }

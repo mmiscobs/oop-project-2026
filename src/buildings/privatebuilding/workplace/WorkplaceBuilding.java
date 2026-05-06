@@ -10,7 +10,19 @@ import buildings.privatebuilding.residential.ResidentialBuilding;
 import city.Citizen;
 import city.City;
 
+import utils.SerializedBlob;
+
 public abstract class WorkplaceBuilding extends PrivateBuilding {
+    public WorkplaceBuilding() {
+        super();
+    }
+
+    protected WorkplaceBuilding(SerializedBlob blob, City city) {
+        super(blob, city);
+        hiredWorkers
+                .addAll(blob.map().get("hiredWorkers").array().stream().map(b -> Citizen.fromBlob(b, city)).toList());
+    }
+
     private ArrayList<Citizen> hiredWorkers = new ArrayList<>();
 
     public List<Citizen> getHiredWorkers() {

@@ -5,13 +5,11 @@ import buildings.Buildable;
 public class BankBranch extends OfficeBuilding {
     static {
         Buildable.registry.put(BankBranch.class, BankBranch::new);
+        Buildable.blobRegistry.put(BankBranch.class, BankBranch::fromBlob);
     }
 
     public int getPrice() {
         return 1000;
-    }
-
-    public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getWorkersCapacity() {

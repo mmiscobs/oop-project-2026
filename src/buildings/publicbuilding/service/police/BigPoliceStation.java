@@ -5,9 +5,22 @@ import java.util.Map;
 import buildings.Buildable;
 import buildings.publicbuilding.PublicBuilding;
 
+import city.City;
+import utils.SerializedBlob;
+
 public class BigPoliceStation extends PoliceStation {
+    public BigPoliceStation() {
+        super();
+    }
+
+    protected BigPoliceStation(SerializedBlob blob, City city) {
+        super(blob, city);
+        this.helipad = new Helipad(blob.map().get("helipad"));
+    }
+
     static {
         Buildable.registry.put(BigPoliceStation.class, BigPoliceStation::new);
+        Buildable.blobRegistry.put(BigPoliceStation.class, BigPoliceStation::fromBlob);
     }
 
     public Upgrade[] getUpgrades() {
@@ -17,6 +30,13 @@ public class BigPoliceStation extends PoliceStation {
     private Helipad helipad = new Helipad();
 
     class Helipad extends PublicBuilding.Upgrade {
+        Helipad() {
+        }
+
+        Helipad(SerializedBlob blob) {
+            super(blob);
+        }
+
         public int getPrice() {
             return 3000;
         }
@@ -24,9 +44,6 @@ public class BigPoliceStation extends PoliceStation {
 
     public int getPrice() {
         return 25000;
-    }
-
-    public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getMaintanenceCostPerDay() {

@@ -5,7 +5,17 @@ import java.util.Map;
 import buildings.Buildable;
 import city.City;
 
+import utils.SerializedBlob;
+
 public abstract class PublicBuilding extends Buildable {
+    public PublicBuilding() {
+        super();
+    }
+
+    protected PublicBuilding(SerializedBlob blob, City city) {
+        super(blob, city);
+    }
+
     public abstract int getMaintanenceCostPerDay();
 
     @Override
@@ -25,6 +35,13 @@ public abstract class PublicBuilding extends Buildable {
 
         public String getName() {
             return this.getClass().getSimpleName();
+        }
+
+        protected Upgrade() {
+        }
+
+        protected Upgrade(SerializedBlob blob) {
+            isBuilt = blob.map().get("isBuilt").booleanValue();
         }
 
         protected boolean isBuilt = false;

@@ -1,6 +1,7 @@
 package loans;
 
 import utils.Reactive;
+import utils.SerializedBlob;
 import utils.Reactive.Observable;
 
 public abstract class Loan {
@@ -15,6 +16,14 @@ public abstract class Loan {
 
     Loan() {
         paymentLeft.set(getLoanSize());
+    }
+
+    public static Loan fromBlob(SerializedBlob blob) {
+        return switch (blob.map().get("type").string()) {
+            case "FederalLoan" -> new FederalLoan();
+            case "PrivateLoan" -> new PrivateLoan();
+            default -> null;
+        };
     }
 
     public abstract int getLoanRate();

@@ -4,7 +4,18 @@ import java.util.Map;
 
 import buildings.publicbuilding.PublicBuilding;
 
+import city.City;
+import utils.SerializedBlob;
+
 public abstract class PublicTransportation extends PublicBuilding {
+    public PublicTransportation() {
+        super();
+    }
+
+    protected PublicTransportation(SerializedBlob blob, City city) {
+        super(blob, city);
+    }
+
     public abstract int getCapacity();
 
     public int getCongestion() {

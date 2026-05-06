@@ -5,13 +5,11 @@ import buildings.Buildable;
 public class Factory extends IndustrialBuilding {
     static {
         Buildable.registry.put(Factory.class, Factory::new);
+        Buildable.blobRegistry.put(Factory.class, Factory::fromBlob);
     }
 
     public int getPrice() {
         return 1000;
-    }
-
-    public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getWorkersCapacity() {

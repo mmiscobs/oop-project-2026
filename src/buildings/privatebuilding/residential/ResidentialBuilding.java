@@ -9,8 +9,18 @@ import buildings.privatebuilding.PrivateBuilding;
 import buildings.privatebuilding.workplace.WorkplaceBuilding;
 import city.Citizen;
 import city.City;
+import utils.SerializedBlob;
 
 public abstract class ResidentialBuilding extends PrivateBuilding {
+    public ResidentialBuilding() {
+        super();
+    }
+
+    protected ResidentialBuilding(SerializedBlob blob, City city) {
+        super(blob, city);
+        residents.addAll(blob.map().get("residents").array().stream().map(b -> Citizen.fromBlob(b, city)).toList());
+    }
+
     public abstract int getCapacity();
 
     public static int calculateDemand(City city) {

@@ -1,17 +1,25 @@
 package buildings.privatebuilding.residential;
 
 import buildings.Buildable;
+import city.City;
+import utils.SerializedBlob;
 
 public class SmallHouse extends ResidentialBuilding {
+    public SmallHouse() {
+        super();
+    }
+
+    public SmallHouse(SerializedBlob blob, City city) {
+        super(blob, city);
+    }
+
     static {
         Buildable.registry.put(SmallHouse.class, SmallHouse::new);
+        Buildable.blobRegistry.put(SmallHouse.class, SmallHouse::fromBlob);
     }
 
     public int getPrice() {
         return 1000;
-    }
-
-    public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getCapacity() {

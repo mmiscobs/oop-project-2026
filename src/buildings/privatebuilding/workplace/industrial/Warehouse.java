@@ -5,13 +5,11 @@ import buildings.Buildable;
 public class Warehouse extends IndustrialBuilding {
     static {
         Buildable.registry.put(Warehouse.class, Warehouse::new);
+        Buildable.blobRegistry.put(Warehouse.class, Warehouse::fromBlob);
     }
 
     public int getPrice() {
         return 1500;
-    }
-
-    public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getWorkersCapacity() {

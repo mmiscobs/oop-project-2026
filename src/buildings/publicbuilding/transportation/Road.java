@@ -4,10 +4,22 @@ import java.util.Map;
 
 import buildings.Buildable;
 import buildings.publicbuilding.PublicBuilding;
+import city.City;
+import utils.SerializedBlob;
 
 public class Road extends PublicTransportation {
+    public Road() {
+        super();
+    }
+
+    protected Road(SerializedBlob blob, City city) {
+        super(blob, city);
+        this.plantedTrees = new PlantedTrees(blob.map().get("plantedTrees"));
+    }
+
     static {
         Buildable.registry.put(Road.class, Road::new);
+        Buildable.blobRegistry.put(Road.class, Road::fromBlob);
     }
 
     public Upgrade[] getUpgrades() {
@@ -17,6 +29,13 @@ public class Road extends PublicTransportation {
     private PlantedTrees plantedTrees = new PlantedTrees();
 
     class PlantedTrees extends PublicBuilding.Upgrade {
+        PlantedTrees() {
+        }
+
+        PlantedTrees(SerializedBlob blob) {
+            super(blob);
+        }
+
         public int getPrice() {
             return 3000;
         }
@@ -24,9 +43,6 @@ public class Road extends PublicTransportation {
 
     public int getPrice() {
         return 100;
-    }
-
-    public void setCrimeRate(int crimeRateReduction) {
     }
 
     public int getMaintanenceCostPerDay() {
