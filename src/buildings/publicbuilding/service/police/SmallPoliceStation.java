@@ -3,21 +3,23 @@ package buildings.publicbuilding.service.police;
 import java.util.Map;
 
 import buildings.Buildable;
+import buildings.publicbuilding.PublicBuilding;
 
 public class SmallPoliceStation extends PoliceStation {
     static {
         Buildable.registry.put(SmallPoliceStation.class, SmallPoliceStation::new);
     }
-    public boolean hasExtraPoliceCarsGarage;
 
-    public boolean getHasExtraPoliceCarsGarage() {
-        return hasExtraPoliceCarsGarage;
+    public Upgrade[] getUpgrades() {
+        return new Upgrade[] { this.policeCarsGarage };
     }
 
-    public void buildExtraPoliceCarsGarage() {
-    }
+    private PoliceCarsGarage policeCarsGarage = new PoliceCarsGarage();
 
-    public void removeExtraPoliceCarsGarage() {
+    class PoliceCarsGarage extends PublicBuilding.Upgrade {
+        public int getPrice() {
+            return 3000;
+        }
     }
 
     public int getPrice() {
@@ -28,11 +30,11 @@ public class SmallPoliceStation extends PoliceStation {
     }
 
     public int getMaintanenceCostPerDay() {
-        return 500 + (hasExtraPoliceCarsGarage ? 100 : 0);
+        return 500 + (policeCarsGarage.getIsBuilt() ? 100 : 0);
     }
 
     public int getRange() {
-        return 5 + (hasExtraPoliceCarsGarage ? 1 : 0);
+        return 5 + (policeCarsGarage.getIsBuilt() ? 1 : 0);
     }
 
     public int getCrimeReduction(int x, int y) {
@@ -53,7 +55,7 @@ public class SmallPoliceStation extends PoliceStation {
     public Map<String, String> getDetailedInfo() {
         Map<String, String> details = super.getDetailedInfo();
 
-        details.put("has extra police cars garage", hasExtraPoliceCarsGarage ? "yes" : "no");
+        details.put("has extra police cars garage", policeCarsGarage.getIsBuilt() ? "yes" : "no");
         return details;
     }
 }

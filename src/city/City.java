@@ -26,6 +26,13 @@ public class City {
         this.money.set(startingMoney);
     }
 
+    public boolean build(PublicBuilding.Upgrade upgrade) {
+        if (upgrade.getPrice() > money.get())
+            return false;
+        money.set(money.get() - upgrade.getPrice());
+        return true;
+    }
+
     public void build(Buildable building, Point place) {
         if (building.getPrice() > money.get())
             return;

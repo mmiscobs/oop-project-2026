@@ -1,7 +1,9 @@
 package ui;
 
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -9,6 +11,8 @@ import javax.swing.border.LineBorder;
 
 import buildings.Buildable;
 import buildings.privatebuilding.PrivateBuilding;
+import buildings.publicbuilding.PublicBuilding;
+import buildings.publicbuilding.PublicBuilding.Upgrade;
 import buildings.publicbuilding.service.PublicServiceBuilding;
 import buildings.publicbuilding.transportation.PublicTransportation;
 import city.City;
@@ -16,6 +20,7 @@ import utils.Point;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -25,8 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Map.Entry;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -400,6 +403,118 @@ public class CityView extends IsometricMapView {
                 return;
             onTile.actOnTile(loc, cleanup[0]);
             cleanup[0].run();
+        };
+        view.addTileClickListener(onClick);
+
+        OverlayPainter routeOverlay = (g, v) -> {
+            if (!currentHoverLoc.isWithinGrid())
+                return;
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            Color fill = new Color(255, 220, 90, 110);
+            Color demolishFill = new Color(178, 34, 34, 110);
+            Color stroke = new Color(255, 200, 40, 230);
+            Buildable existingBuilding = view.city.grid.getBuildingAt(currentHoverLoc.loc);
+            if (existingBuilding != null)
+                for (Point t : Point.allPointsWithin(view.city.grid.getBuildingOrigin(existingBuilding),
+                        existingBuilding.getLength(),
+                        existingBuilding.getWidth())) {
+                    v.drawTileDiamond(g, t.x, t.y, demolishFill, stroke);
+                }
+            else
+                v.drawTileDiamond(g, currentHoverLoc.loc.x, currentHoverLoc.loc.y, fill, stroke);
+        };
+        Runnable removeOverlay = view.addOverlay(routeOverlay);
+        cleanup[0] = () -> {
+            SwingUtilities.invokeLater(() -> {
+                view.detachComponent(info);
+                view.removeTileClickListener(onClick);
+                view.removeTileHoverListener(onHover);
+                removeOverlay.run();
+            });
+        };
+        return cleanup[0];
+    }
+
+    public static Runnable enableUpgradeAction(CityView view, Runnable onClose) {
+        ReactiveInfoLabel info = view.new ReactiveInfoLabel(null);
+        view.attachComponent(info, 0, 0, IsometricMapView.TileAnchor.ABOVE, 0, -8);
+        class HoverLoc {
+            Point loc;
+
+            boolean isWithinGrid() {
+                return !(loc == null || loc.x < 0 || loc.x > view.COLS
+                        || loc.y > view.ROWS);
+            }
+        }
+        HoverLoc currentHoverLoc = new HoverLoc();
+
+        FloatingHoverLabelCreator labelCreator = (loc) -> {
+            Buildable existingBuilding = view.city.grid.getBuildingAt(loc);
+            if (existingBuilding != null) {
+                if (existingBuilding instanceof PublicBuilding publicBuilding)
+                    return () -> {
+                        String html = "<html>";
+
+                        if (publicBuilding.getUpgrades().length == 0)
+                            html += "No upgrades";
+                        for (Upgrade upgrade : publicBuilding.getUpgrades()) {
+                            html += "<b>" + upgrade.getName() + "</b>: "
+                                    + (upgrade.getIsBuilt() ? "built" : "not built") + " (" + upgrade.getPrice()
+                                    + "$)<br/>";
+                        }
+
+                        return html + "</html>";
+                    };
+                return () -> "<html>No upgrades for private buildings</html>";
+            }
+            return null;
+
+        };
+
+        TileHoverListener onHover = (loc) -> {
+            currentHoverLoc.loc = loc;
+            view.moveAttachment(info, loc.x, loc.y);
+            info.setLabelCreator(currentHoverLoc.isWithinGrid() ? labelCreator.produceLabelHTML(loc) : null);
+        };
+        view.addTileHoverListener(onHover);
+
+        Runnable[] cleanup = new Runnable[1];
+
+        TileClickListener onClick = (loc, ev) -> {
+            if (!currentHoverLoc.isWithinGrid())
+                return;
+            Buildable buildable = view.city.grid.getBuildingAt(loc);
+            if (buildable instanceof PublicBuilding publicBuilding && publicBuilding.getUpgrades().length > 0) {
+                JPanel panel = new JPanel(new GridLayout(0, 1));
+                Function<Upgrade, String> upgradeLabel = upgrade -> upgrade.getName() + " (" + (!upgrade.getIsBuilt()
+                        ? (upgrade.getPrice()
+                                + "$")
+                        : "Built") + ")";
+                for (Upgrade upgrade : publicBuilding.getUpgrades()) {
+                    JButton upgradeButton = new JButton(upgradeLabel.apply(upgrade));
+                    upgradeButton.setEnabled(!upgrade.getIsBuilt());
+
+                    upgradeButton.addActionListener(e -> {
+                        upgrade.build(view.city);
+                        if (upgrade.getIsBuilt()) {
+                            upgradeButton.setEnabled(false);
+                            upgradeButton.setText(upgradeLabel.apply(upgrade));
+                        }
+                    });
+                    panel.add(upgradeButton);
+                }
+                JButton closeButton = new JButton("Close");
+                closeButton.addActionListener(e -> {
+                    view.detachComponent(panel);
+                    onClose.run();
+                    cleanup[0].run();
+                });
+                panel.add(closeButton);
+                view.attachComponent(panel, currentHoverLoc.loc.x, currentHoverLoc.loc.y,
+                        IsometricMapView.TileAnchor.ABOVE);
+
+            }
+            // cleanup[0].run();
         };
         view.addTileClickListener(onClick);
 

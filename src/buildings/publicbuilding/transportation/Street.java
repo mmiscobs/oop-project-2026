@@ -3,23 +3,31 @@ package buildings.publicbuilding.transportation;
 import java.util.Map;
 
 import buildings.Buildable;
+import buildings.publicbuilding.PublicBuilding;
 
 public class Street extends PublicTransportation {
     static {
         Buildable.registry.put(Street.class, Street::new);
     }
-    public boolean hasSpeedLimiters;
 
-    public boolean getHasSpeedLimiters() {
-        return hasSpeedLimiters;
+    public Upgrade[] getUpgrades() {
+        return new Upgrade[] { speedLimiters, plantedTrees };
     }
 
-    public void buildSpeedLimiters() {
-        this.hasSpeedLimiters = true;
+    private SpeedLimiters speedLimiters = new SpeedLimiters();
+
+    class SpeedLimiters extends PublicBuilding.Upgrade {
+        public int getPrice() {
+            return 5;
+        }
     }
 
-    public void removeSpeedLimiters() {
-        this.hasSpeedLimiters = false;
+    private PlantedTrees plantedTrees = new PlantedTrees();
+
+    class PlantedTrees extends PublicBuilding.Upgrade {
+        public int getPrice() {
+            return 10;
+        }
     }
 
     public int getPrice() {
@@ -30,15 +38,16 @@ public class Street extends PublicTransportation {
     }
 
     public int getMaintanenceCostPerDay() {
-        return 1 + (this.hasSpeedLimiters ? 1 : 0);
+        return 1 + (speedLimiters.getIsBuilt() ? 1 : 0) + (plantedTrees.getIsBuilt() ? 2 : 0);
     }
 
     public int getCapacity() {
-        return this.hasSpeedLimiters ? 3 : 5;
+        return speedLimiters.getIsBuilt() ? 3 : 5;
     }
 
     public int computeNoiseLevel() {
-        return (int) ((this.hasSpeedLimiters ? 20 : 35) * (double) Math.min(getCongestion(), 100) / 100);
+        return (int) (((35 - (speedLimiters.getIsBuilt() ? -15 : 0) - (plantedTrees.getIsBuilt() ? -10 : 0)))
+                * (double) Math.min(getCongestion(), 100) / 100);
     }
 
     public int getWidth() {
@@ -53,7 +62,7 @@ public class Street extends PublicTransportation {
     public Map<String, String> getDetailedInfo() {
         Map<String, String> details = super.getDetailedInfo();
 
-        details.put("has trees", hasSpeedLimiters ? "yes" : "no");
+        details.put("has trees", speedLimiters.getIsBuilt() ? "yes" : "no");
         return details;
     }
 }

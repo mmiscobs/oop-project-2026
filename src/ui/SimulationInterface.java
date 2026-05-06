@@ -151,6 +151,20 @@ public class SimulationInterface extends JPanel {
             }
         });
         actions.add(new TogglesMenu.Action() {
+
+            public String getName() {
+                return "Upgrade";
+            };
+
+            public String getStopName() {
+                return "Stop upgrading";
+            }
+
+            public Runnable enable(Runnable onEnd) {
+                return CityView.enableUpgradeAction(view, onEnd);
+            }
+        });
+        actions.add(new TogglesMenu.Action() {
             public String getName() {
                 return "Building Info Picker";
             };

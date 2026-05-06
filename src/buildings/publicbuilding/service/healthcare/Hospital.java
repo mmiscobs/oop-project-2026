@@ -3,21 +3,23 @@ package buildings.publicbuilding.service.healthcare;
 import java.util.Map;
 
 import buildings.Buildable;
+import buildings.publicbuilding.PublicBuilding;
 
 public class Hospital extends HealthcareBuilding {
     static {
         Buildable.registry.put(Hospital.class, Hospital::new);
     }
-    public boolean hasHelipad;
 
-    public boolean getHasHelipad() {
-        return hasHelipad;
+    public Upgrade[] getUpgrades() {
+        return new Upgrade[] { this.helipad };
     }
 
-    public void buildHelipad() {
-    }
+    private Helipad helipad = new Helipad();
 
-    public void removeHelipad() {
+    class Helipad extends PublicBuilding.Upgrade {
+        public int getPrice() {
+            return 3000;
+        }
     }
 
     public int getPrice() {
@@ -32,7 +34,7 @@ public class Hospital extends HealthcareBuilding {
     }
 
     public int getRange() {
-        return 8 + (hasHelipad ? 3 : 0);
+        return 8 + (helipad.getIsBuilt() ? 3 : 0);
     }
 
     public int getHealthIncrease(int x, int y) {
@@ -53,7 +55,7 @@ public class Hospital extends HealthcareBuilding {
     public Map<String, String> getDetailedInfo() {
         Map<String, String> details = super.getDetailedInfo();
 
-        details.put("has helipad", hasHelipad ? "yes" : "no");
+        details.put("has helipad", helipad.getIsBuilt() ? "yes" : "no");
         return details;
     }
 }

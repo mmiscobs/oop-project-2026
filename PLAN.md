@@ -4,7 +4,7 @@
 - [x] Implement health
 - [x] Implement range overlay for public buildings
 - [x] Implement noise health effects
-- [ ] Implement upgrades
+- [x] Implement upgrades
 - [x] Implement the buildings hierarchy
 - [x] Implement tick based time flow
   - [x] Draw movable translucent clouds

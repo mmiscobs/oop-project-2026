@@ -3,23 +3,23 @@ package buildings.publicbuilding.transportation;
 import java.util.Map;
 
 import buildings.Buildable;
+import buildings.publicbuilding.PublicBuilding;
 
 public class Road extends PublicTransportation {
     static {
         Buildable.registry.put(Road.class, Road::new);
     }
-    public boolean hasPlantedTrees;
 
-    public boolean getHasPlantedTrees() {
-        return hasPlantedTrees;
+    public Upgrade[] getUpgrades() {
+        return new Upgrade[] { this.plantedTrees };
     }
 
-    public void buildPlantedTrees() {
-        hasPlantedTrees = true;
-    }
+    private PlantedTrees plantedTrees = new PlantedTrees();
 
-    public void removePlantedTrees() {
-        hasPlantedTrees = false;
+    class PlantedTrees extends PublicBuilding.Upgrade {
+        public int getPrice() {
+            return 3000;
+        }
     }
 
     public int getPrice() {
@@ -30,7 +30,7 @@ public class Road extends PublicTransportation {
     }
 
     public int getMaintanenceCostPerDay() {
-        return 10 + (hasPlantedTrees ? 2 : 0);
+        return 10 + (plantedTrees.getIsBuilt() ? 2 : 0);
     }
 
     public int getCapacity() {
@@ -53,7 +53,7 @@ public class Road extends PublicTransportation {
     public Map<String, String> getDetailedInfo() {
         Map<String, String> details = super.getDetailedInfo();
 
-        details.put("has trees", hasPlantedTrees ? "yes" : "no");
+        details.put("has trees", plantedTrees.getIsBuilt() ? "yes" : "no");
         return details;
     }
 }

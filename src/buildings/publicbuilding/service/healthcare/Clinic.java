@@ -3,25 +3,27 @@ package buildings.publicbuilding.service.healthcare;
 import java.util.Map;
 
 import buildings.Buildable;
+import buildings.publicbuilding.PublicBuilding;
 
 public class Clinic extends HealthcareBuilding {
     static {
         Buildable.registry.put(Clinic.class, Clinic::new);
     }
-    public boolean hasAmbulanceGarage;
-
-    public boolean getHasAmbulanceGarage() {
-        return hasAmbulanceGarage;
-    }
-
-    public void buildAmbulanceGarage() {
-    }
-
-    public void removeAmbulanceGarage() {
-    }
 
     public int getPrice() {
         return 11000;
+    }
+
+    public Upgrade[] getUpgrades() {
+        return new Upgrade[] { this.ambulanceGarage };
+    }
+
+    private AmbulanceGarage ambulanceGarage = new AmbulanceGarage();
+
+    class AmbulanceGarage extends PublicBuilding.Upgrade {
+        public int getPrice() {
+            return 3000;
+        }
     }
 
     public void setCrimeRate(int crimeRateReduction) {
@@ -53,7 +55,7 @@ public class Clinic extends HealthcareBuilding {
     public Map<String, String> getDetailedInfo() {
         Map<String, String> details = super.getDetailedInfo();
 
-        details.put("has ambulances garage", hasAmbulanceGarage ? "yes" : "no");
+        details.put("has ambulances garage", ambulanceGarage.getIsBuilt() ? "yes" : "no");
         return details;
     }
 }
