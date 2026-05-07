@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -243,13 +245,19 @@ public class SimulationInterface extends JPanel {
         BottomPanel() {
             super();
             this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+            this.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
             this.setPreferredSize(new Dimension(0, 400));
 
             this.add(new TimeSpeedButtons());
+            this.add(Box.createRigidArea(new Dimension(15, 0)));
             this.add(new Overlays());
+            this.add(Box.createRigidArea(new Dimension(15, 0)));
             this.add(new Loans());
+            this.add(Box.createRigidArea(new Dimension(15, 0)));
             this.add(new AggregateStats());
+            this.add(Box.createRigidArea(new Dimension(15, 0)));
             this.add(new NumberStats());
+            this.add(Box.createRigidArea(new Dimension(15, 0)));
             this.add(new DemandStats());
         }
 
@@ -271,7 +279,7 @@ public class SimulationInterface extends JPanel {
 
             class LoansAdder extends JPanel {
                 LoansAdder() {
-                    super(new GridLayout(1, 0));
+                    super(new GridLayout(1, 0, 10, 10));
                     JButton federalLoan = new JButton("New Federal Loan");
                     federalLoan.addActionListener(e -> simulator.city.takeOutLoan(new FederalLoan()));
                     this.add(federalLoan);
@@ -491,7 +499,7 @@ public class SimulationInterface extends JPanel {
 
         class TimeSpeedButtons extends JPanel {
             TimeSpeedButtons() {
-                super(new GridLayout(0, 1));
+                super(new GridLayout(0, 1, 10, 10));
                 // this.setPreferredSize(new Dimension(150, 0));
                 this.add(new JLabel("Simulation Speed"));
                 ArrayList<JButton> buttons = new ArrayList<>();

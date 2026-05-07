@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 
 public class TogglesMenu extends JPanel {
@@ -19,7 +20,8 @@ public class TogglesMenu extends JPanel {
     }
 
     public TogglesMenu(List<Action> actions) {
-        super(new GridLayout(0, 1));
+        super(new GridLayout(0, 1, 10, 10));
+        this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         ArrayList<JButton> buttons = new ArrayList<>();
         for (Action action : actions) {
             JButton button = new JButton(action.getName());

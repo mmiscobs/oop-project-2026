@@ -290,11 +290,11 @@ public class IsometricMapView extends JComponent {
         controls.setOpaque(false);
 
         JButton zoomIn = makeControlButton("+");
-        JButton zoomOut = makeControlButton("−");
-        JButton up = makeControlButton("▲");
-        JButton down = makeControlButton("▼");
-        JButton left = makeControlButton("◀");
-        JButton right = makeControlButton("▶");
+        JButton zoomOut = makeControlButton("-");
+        JButton up = makeControlButton("up");
+        JButton down = makeControlButton("down");
+        JButton left = makeControlButton("left");
+        JButton right = makeControlButton("right");
 
         zoomIn.addActionListener(e -> zoomBy(zoomStep));
         zoomOut.addActionListener(e -> zoomBy(1.0 / zoomStep));

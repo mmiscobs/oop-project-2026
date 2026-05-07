@@ -1,13 +1,19 @@
 package com.project.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.Label;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.function.Consumer;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -19,15 +25,17 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.plaf.FontUIResource;
 
 import com.project.simulation.Game;
 import com.project.simulation.GameDifficulty;
 import com.project.utils.Reactive;
 
 public class GameInterface extends JPanel {
-    private static final int FRAME_W = 2100;
+    private static final int FRAME_W = 2400;
     private static final int FRAME_H = 1400;
 
     public static void main(String[] args) throws Exception {
@@ -35,6 +43,7 @@ public class GameInterface extends JPanel {
             JFrame f = new JFrame("City Map Demo");
             f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+            setGlobalFont();
             GameInterface root = new GameInterface();
 
             f.setJMenuBar(root.createMenuBar());
@@ -43,6 +52,26 @@ public class GameInterface extends JPanel {
             f.setLocationRelativeTo(null);
             f.setVisible(true);
         });
+    }
+
+    private static void setGlobalFont() {
+        try {
+            Font pixel = Font.createFont(Font.TRUETYPE_FONT,
+                    GameInterface.class.getResourceAsStream("./m5x7.ttf"))
+                    .deriveFont(16f);
+            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(pixel);
+            FontUIResource fontRes = new FontUIResource(pixel);
+            Enumeration<Object> keys = UIManager.getDefaults().keys();
+            while (keys.hasMoreElements()) {
+                Object key = keys.nextElement();
+                Object value = UIManager.get(key);
+                if (value instanceof FontUIResource) {
+                    UIManager.put(key, fontRes.deriveFont(fontRes.getSize2D() * 3));
+                }
+            }
+        } catch (Exception e) {
+            System.err.print(e);
+        }
     }
 
     public Game game = new Game();
@@ -117,9 +146,14 @@ public class GameInterface extends JPanel {
                 this.add(new CreditsButton());
                 this.add(new Exit());
             } else {
-                this.setLayout(new BorderLayout());
-                this.add(new BackButton(), BorderLayout.NORTH);
-                this.add(currentSubpage.get(), BorderLayout.CENTER);
+                this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+                JButton back = new BackButton();
+                back.setAlignmentX(Component.CENTER_ALIGNMENT);
+                this.add(back, BorderLayout.NORTH);
+                back.setAlignmentX(Component.CENTER_ALIGNMENT);
+                JPanel currentPanel = currentSubpage.get();
+                currentPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                this.add(currentPanel, BorderLayout.CENTER);
             }
             this.revalidate();
             this.repaint();
@@ -128,6 +162,7 @@ public class GameInterface extends JPanel {
         class BackButton extends JButton {
             BackButton() {
                 super("Back");
+                this.setMaximumSize(new Dimension(300, 60));
                 this.addActionListener(e -> currentSubpage.set(null));
             }
         }
@@ -189,11 +224,14 @@ public class GameInterface extends JPanel {
 
         class LoadGame extends JPanel {
             LoadGame() {
+                super(new GridLayout(0, 1, 10, 10));
+                this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
                 render();
             }
 
             private void render() {
                 this.removeAll();
+                this.setMaximumSize(new Dimension(400, 70 * game.listSaves().size()));
                 for (String save : game.listSaves()) {
                     JButton loadSaveButton = new JButton(save);
                     loadSaveButton.addActionListener(e -> {
