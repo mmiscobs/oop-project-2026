@@ -13,6 +13,10 @@ import com.project.buildings.privatebuilding.residential.ResidentialBuilding;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import com.project.city.Citizen;
@@ -169,5 +173,36 @@ public class Simulator {
     private void updateCitizensAmount() {
         citizensAmount.set(allCitizens().size());
         homelessCitizensAmount.set(city.homelessPeople.size());
+    }
+
+    public Runnable startSimulationCLI() {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "sim-tick");
+            t.setDaemon(true);
+            return t;
+        });
+
+        final int POLL_MS = 200;
+
+        class State {
+            int accumulated = 0;
+        }
+        State state = new State();
+
+        ScheduledFuture<?> future = executor.scheduleAtFixedRate(() -> {
+            GameSpeed speed = this.gameSpeed;
+            if (speed == GameSpeed.Stopped)
+                return;
+            state.accumulated += POLL_MS;
+            if (state.accumulated >= speed.msBetweenTicks) {
+                state.accumulated = 0;
+                runSimulationTick();
+                currentTick.set(currentTick.get() + 1);
+            }
+        }, POLL_MS, POLL_MS, TimeUnit.MILLISECONDS);
+        return () -> {
+            future.cancel(false);
+            executor.shutdownNow();
+        };
     }
 }

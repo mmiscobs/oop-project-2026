@@ -38,7 +38,11 @@ public class GameInterface extends JPanel {
     private static final int FRAME_W = 2400;
     private static final int FRAME_H = 1400;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+        run();
+    }
+
+    public static void run() {
         SwingUtilities.invokeLater(() -> {
             JFrame f = new JFrame("City Map Demo");
             f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
