@@ -297,7 +297,9 @@ public class SimulationInterface extends JPanel {
 
                 private void renderList(List<Loan> loans) {
                     this.removeAll();
-                    for (Loan loan : loans) {
+                    List<Loan> sortedLoans = new ArrayList<>(loans);
+                    sortedLoans.sort(null);
+                    for (Loan loan : sortedLoans) {
                         this.add(new LoanComponent(loan));
                     }
                     this.revalidate();

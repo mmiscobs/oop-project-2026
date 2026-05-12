@@ -6,7 +6,7 @@ import com.project.utils.Reactive;
 import com.project.utils.SerializedBlob;
 import com.project.utils.Reactive.Observable;
 
-public abstract class Loan {
+public abstract class Loan implements Comparable<Loan> {
     protected Reactive<Integer> paymentLeft = new Reactive<>(0);
     public Observable<Integer> paymentLeftView = paymentLeft.readOnly();
 
@@ -57,5 +57,9 @@ public abstract class Loan {
             paymentLeft
                     .set(paymentLeft.get() + (int) ((getPerTickInterest() - money) * ((double) getPennyRate() / 100)));
         }
+    }
+
+    public int compareTo(Loan other) {
+        return other.paymentLeft.get().compareTo(paymentLeft.get());
     }
 }
