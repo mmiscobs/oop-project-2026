@@ -62,6 +62,8 @@ public class FarmGUI extends JFrame {
     private JButton plantBtn, tickBtn, harvestBtn, sellBtn;
     private JTextField sellQtyField;
     private JPanel marketPanel;
+    
+    private JComboBox<String> sellCropBox;
 
     public FarmGUI(int numPlots, int startMoney, Runnable onReturnToMain) {
         this.farm = new Farm(numPlots);
@@ -222,13 +224,39 @@ public class FarmGUI extends JFrame {
         harvestBtn.setForeground(BG_DARK);
         harvestBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         harvestBtn.addActionListener(e -> doHarvest());
-        p.add(harvestBtn); p.add(vgap(10));
+        p.add(harvestBtn); p.add(vgap(4));
 
         JButton harvestAllBtn = styledButton("🌾 Harvest All", new Color(0xB8860B));
         harvestAllBtn.setForeground(TEXT_MAIN);
         harvestAllBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         harvestAllBtn.addActionListener(e -> doHarvestAll());
         p.add(harvestAllBtn); p.add(vgap(10));
+        
+        p.add(rowLabel("Irrigation:")); p.add(vgap(3));
+        JPanel irrRow = new JPanel(new GridLayout(1, 2, 4, 0));
+        irrRow.setBackground(BG_MID);
+        irrRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+
+        JButton irrigateOneBtn = styledButton("💧 Water Plot", BLUE_C);
+        irrigateOneBtn.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        irrigateOneBtn.addActionListener(e -> doIrrigateOne());
+        irrRow.add(irrigateOneBtn);
+
+        JButton irrigateAllBtn = styledButton("💦 Water All", new Color(0x1A6DAF));
+        irrigateAllBtn.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        irrigateAllBtn.addActionListener(e -> doIrrigateAll());
+        irrRow.add(irrigateAllBtn);
+
+        p.add(irrRow); p.add(vgap(3));
+
+        JButton refillBtn = styledButton("🪣 Refill Water (+100)", new Color(0x17547A));
+        refillBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        refillBtn.addActionListener(e -> doRefillWater());
+        p.add(refillBtn); p.add(vgap(10));
+        
+        p.add(rowLabel("Sell crop:")); p.add(vgap(3));
+        sellCropBox = new JComboBox<>(new String[]{"(all crops)"});
+        style(sellCropBox); p.add(sellCropBox); p.add(vgap(4));
 
         p.add(rowLabel("Sell qty:"));
         sellQtyField = new JTextField("10");
@@ -377,15 +405,20 @@ public class FarmGUI extends JFrame {
         else log("✔ Harvested " + totalHarvested + " plots.");
         refreshAll();
     }
-
+    
     private void doSell() {
         int qty;
         try { qty = Integer.parseInt(sellQtyField.getText().trim()); }
         catch (NumberFormatException e) { log("⚠ Enter a valid quantity."); return; }
         Map<String, Integer> inv = market.getInventory();
         if (inv.isEmpty()) { log("⚠ Market inventory is empty."); return; }
+
+        String selected = (String) sellCropBox.getSelectedItem();
+        boolean sellAll = selected == null || selected.equals("(all crops)");
+
         int earned = 0;
         for (Map.Entry<String, Integer> entry : inv.entrySet()) {
+            if (!sellAll && !entry.getKey().equals(selected)) continue;
             int toSell = Math.min(qty, entry.getValue());
             int sold = market.sellCrop(entry.getKey(), toSell);
             earned += sold;
@@ -393,6 +426,32 @@ public class FarmGUI extends JFrame {
         }
         if (earned > 0) { money += earned; log("   Total: $" + earned + "  Balance: $" + money); }
         else log("⚠ Not enough stock.");
+        refreshAll();
+    }
+    
+    private void doIrrigateOne() {
+        if (selectedPlot < 0) { log("⚠ Select a plot first."); return; }
+        FarmPlot plot = farm.getPlot(selectedPlot);
+        if (plot.getCrop() == null) { log("⚠ Plot " + selectedPlot + " is empty — nothing to water."); return; }
+        if (plot.isIrrigated()) { log("💧 Plot " + selectedPlot + " is already watered today."); return; }
+        int before = farm.getIrrigation().getWaterLevel();
+        farm.getIrrigation().irrigateOne(plot);
+        int used = before - farm.getIrrigation().getWaterLevel();
+        log("💧 Watered plot " + selectedPlot + " (used " + used + " water). Tank: " + farm.getIrrigation().getWaterLevel());
+        refreshAll();
+    }
+    
+    private void doIrrigateAll() {
+        int before = farm.getIrrigation().getWaterLevel();
+        farm.getIrrigation().irrigateAll();
+        int used = before - farm.getIrrigation().getWaterLevel();
+        log("💦 Irrigated all plots (used " + used + " water). Tank: " + farm.getIrrigation().getWaterLevel());
+        refreshAll();
+    }
+    
+    private void doRefillWater() {
+        farm.getIrrigation().refill();
+        log("🪣 Water tank refilled to " + farm.getIrrigation().getWaterLevel() + ".");
         refreshAll();
     }
 
@@ -416,6 +475,11 @@ public class FarmGUI extends JFrame {
     private void refreshMarket() {
         marketPanel.removeAll();
         Map<String, Integer> inv = market.getInventory();
+        
+        String prevSelection = (String) sellCropBox.getSelectedItem();
+        sellCropBox.removeAllItems();
+        sellCropBox.addItem("(all crops)");
+
         if (inv.isEmpty()) {
             JLabel empty = new JLabel("  (no stock)");
             empty.setFont(monoFont(11f)); empty.setForeground(TEXT_DIM);
@@ -429,8 +493,19 @@ public class FarmGUI extends JFrame {
                 JLabel row = new JLabel(String.format("  %-14s %-6d $%d", name, qty, price));
                 row.setFont(monoFont(11f)); row.setForeground(TEXT_MAIN);
                 marketPanel.add(row);
+                sellCropBox.addItem(name); 
             });
         }
+        
+        if (prevSelection != null) {
+            for (int i = 0; i < sellCropBox.getItemCount(); i++) {
+                if (sellCropBox.getItemAt(i).equals(prevSelection)) {
+                    sellCropBox.setSelectedItem(prevSelection);
+                    break;
+                }
+            }
+        }
+
         marketPanel.revalidate(); marketPanel.repaint();
     }
 
@@ -622,3 +697,4 @@ public class FarmGUI extends JFrame {
         SwingUtilities.invokeLater(() -> new FarmGUI(plots, money, () -> {}));
     }
 }
+    
