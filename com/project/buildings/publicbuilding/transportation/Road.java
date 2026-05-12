@@ -17,10 +17,10 @@ public class Road extends PublicTransportation {
         this.plantedTrees = new PlantedTrees(blob.map().get("plantedTrees"));
     }
 
-    public SerializedBlob toBlob() {
-        return super.toBlob()
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return super.toBlob(Factory)
                 .extendMap(Map.of(
-                        "plantedTrees", plantedTrees.toBlob()));
+                        "plantedTrees", plantedTrees.toBlob(Factory)));
     }
 
     static {

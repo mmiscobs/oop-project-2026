@@ -28,14 +28,15 @@ public class CityGrid {
         }
     }
 
-    public SerializedBlob toBlob() {
-        return SerializedBlob.fromMap(Map.of(
-                "sizeX", SerializedBlob.intValue(sizeX),
-                "sizeY", SerializedBlob.intValue(sizeY),
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return Factory.fromMap(Map.of(
+                "sizeX", Factory.intValue(sizeX),
+                "sizeY", Factory.intValue(sizeY),
                 "buildings",
-                SerializedBlob.array(buildings.entrySet().stream()
-                        .map(e -> SerializedBlob
-                                .fromMap(Map.of("key", e.getKey().toBlob(), "value", e.getValue().toBlob())))
+                Factory.array(buildings.entrySet().stream()
+                        .map(e -> Factory
+                                .fromMap(Map.of("key", e.getKey().toBlob(Factory), "value",
+                                        e.getValue().toBlob(Factory))))
                         .toList())));
     }
 

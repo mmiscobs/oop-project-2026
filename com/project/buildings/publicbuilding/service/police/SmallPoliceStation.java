@@ -18,8 +18,8 @@ public class SmallPoliceStation extends PoliceStation {
         this.policeCarsGarage = new PoliceCarsGarage(blob.map().get("policeCarsGarage"));
     }
 
-    public SerializedBlob toBlob() {
-        return super.toBlob().extendMap(Map.of("policeCarsGarage", policeCarsGarage.toBlob()));
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return super.toBlob(Factory).extendMap(Map.of("policeCarsGarage", policeCarsGarage.toBlob(Factory)));
     }
 
     static {

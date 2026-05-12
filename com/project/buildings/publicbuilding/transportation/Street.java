@@ -18,11 +18,11 @@ public class Street extends PublicTransportation {
         this.speedLimiters = new SpeedLimiters(blob.map().get("speedLimiters"));
     }
 
-    public SerializedBlob toBlob() {
-        return super.toBlob()
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return super.toBlob(Factory)
                 .extendMap(Map.of(
-                        "plantedTrees", plantedTrees.toBlob(),
-                        "speedLimiters", speedLimiters.toBlob()));
+                        "plantedTrees", plantedTrees.toBlob(Factory),
+                        "speedLimiters", speedLimiters.toBlob(Factory)));
     }
 
     static {

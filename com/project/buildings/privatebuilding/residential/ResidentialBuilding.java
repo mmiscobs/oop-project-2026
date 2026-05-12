@@ -21,9 +21,9 @@ public abstract class ResidentialBuilding extends PrivateBuilding {
         residents.addAll(blob.map().get("residents").array().stream().map(b -> Citizen.fromBlob(b, city)).toList());
     }
 
-    public SerializedBlob toBlob() {
-        return super.toBlob()
-                .extendMap(Map.of("residents", SerializedBlob.array(residents.stream().map(r -> r.toBlob()).toList())));
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return super.toBlob(Factory)
+                .extendMap(Map.of("residents", Factory.array(residents.stream().map(r -> r.toBlob(Factory)).toList())));
     }
 
     public abstract int getCapacity();

@@ -44,8 +44,8 @@ public abstract class PublicBuilding extends Buildable {
             isBuilt = blob.map().get("isBuilt").booleanValue();
         }
 
-        public SerializedBlob toBlob() {
-            return SerializedBlob.fromMap(Map.of("isBuilt", SerializedBlob.booleanValue(isBuilt)));
+        public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+            return Factory.fromMap(Map.of("isBuilt", Factory.booleanValue(isBuilt)));
         }
 
         protected boolean isBuilt = false;

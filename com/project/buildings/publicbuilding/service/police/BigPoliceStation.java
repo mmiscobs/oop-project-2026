@@ -18,8 +18,8 @@ public class BigPoliceStation extends PoliceStation {
         this.helipad = new Helipad(blob.map().get("helipad"));
     }
 
-    public SerializedBlob toBlob() {
-        return super.toBlob().extendMap(Map.of("helipad", helipad.toBlob()));
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return super.toBlob(Factory).extendMap(Map.of("helipad", helipad.toBlob(Factory)));
     }
 
     static {

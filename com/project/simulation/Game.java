@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.project.city.City;
 import com.project.utils.Reactive;
+import com.project.utils.SelfDescribedXML;
 import com.project.utils.SerializedBlob;
 
 public class Game {
@@ -28,7 +29,7 @@ public class Game {
 
     public void loadSave(String gameName) throws IOException {
         String file = Files.readString(Path.of("./saves", gameName + ".xml"));
-        simulator.set(new Simulator(new City(SerializedBlob.parse(file))));
+        simulator.set(new Simulator(new City(SelfDescribedXML.getInstance().parse(file))));
     }
 
     public void createSave() throws IOException {
@@ -36,7 +37,8 @@ public class Game {
         if (!Files.exists(Path.of("./saves"))) {
             Files.createDirectory(Path.of("./saves"));
         }
-        Files.writeString(Path.of("./saves", city.name + ".xml"), city.toBlob().toXml());
+        Files.writeString(Path.of("./saves", city.name + ".xml"),
+                city.toBlob(SelfDescribedXML.getInstance()).toSerialized());
     }
 
     public void startNewSimulation(int mapSizeX, int mapSizeY, GameDifficulty difficulty, String cityName) {

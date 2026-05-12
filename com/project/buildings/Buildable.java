@@ -46,13 +46,13 @@ public abstract class Buildable {
         isDestroyed = blob.map().get("isDestroyed").booleanValue();
     }
 
-    public SerializedBlob toBlob() {
-        return SerializedBlob.fromMap(Map.of(
-                "type", SerializedBlob.string(getClass().getSimpleName()),
-                "uuid", SerializedBlob.string(uuid),
-                "visitors", SerializedBlob.array(visitors.stream().map(v -> v.toBlob()).toList()),
-                "crimeRate", SerializedBlob.intValue(crimeRate),
-                "isDestroyed", SerializedBlob.booleanValue(isDestroyed)));
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return Factory.fromMap(Map.of(
+                "type", Factory.string(getClass().getSimpleName()),
+                "uuid", Factory.string(uuid),
+                "visitors", Factory.array(visitors.stream().map(v -> v.toBlob(Factory)).toList()),
+                "crimeRate", Factory.intValue(crimeRate),
+                "isDestroyed", Factory.booleanValue(isDestroyed)));
     }
 
     protected List<Citizen> visitors = new ArrayList<>();
@@ -176,9 +176,9 @@ public abstract class Buildable {
             cache.put(this, buildable);
         }
 
-        public SerializedBlob toBlob() {
-            return SerializedBlob.fromMap(
-                    Map.of("id", SerializedBlob.string(buildableId), "type", SerializedBlob.string(buildableType)));
+        public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+            return Factory.fromMap(
+                    Map.of("id", Factory.string(buildableId), "type", Factory.string(buildableType)));
         }
 
         private static Map<BuildableRef<?>, Buildable> cache = new WeakHashMap<>();

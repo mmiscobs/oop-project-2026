@@ -28,8 +28,8 @@ public abstract class Loan implements Comparable<Loan> {
         };
     }
 
-    public SerializedBlob toBlob() {
-        return SerializedBlob.fromMap(Map.of("type", SerializedBlob.string(getClass().getSimpleName())));
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return Factory.fromMap(Map.of("type", Factory.string(getClass().getSimpleName())));
     }
 
     public abstract int getLoanRate();

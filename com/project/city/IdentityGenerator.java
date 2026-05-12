@@ -81,11 +81,11 @@ public final class IdentityGenerator {
                     blob.map().get("birthYear").intValue());
         }
 
-        public SerializedBlob toBlob() {
-            return SerializedBlob.fromMap(Map.of(
-                    "firstName", SerializedBlob.string(firstName),
-                    "lastName", SerializedBlob.string(lastName),
-                    "birthYear", SerializedBlob.intValue(birthYear)));
+        public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+            return Factory.fromMap(Map.of(
+                    "firstName", Factory.string(firstName),
+                    "lastName", Factory.string(lastName),
+                    "birthYear", Factory.intValue(birthYear)));
         }
     }
 

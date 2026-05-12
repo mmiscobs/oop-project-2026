@@ -44,12 +44,12 @@ public class City {
                 .addAll(blob.map().get("homelessPeople").array().stream().map(b -> Citizen.fromBlob(b, this)).toList());
     }
 
-    public SerializedBlob toBlob() {
-        return SerializedBlob.fromMap(Map.of("name", SerializedBlob.string(name),
-                "money", SerializedBlob.doubleValue(money.get()),
-                "grid", grid.toBlob(),
-                "loans", SerializedBlob.array(loans.stream().map(l -> l.toBlob()).toList()),
-                "homelessPeople", SerializedBlob.array(homelessPeople.stream().map(h -> h.toBlob()).toList())));
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return Factory.fromMap(Map.of("name", Factory.string(name),
+                "money", Factory.doubleValue(money.get()),
+                "grid", grid.toBlob(Factory),
+                "loans", Factory.array(loans.stream().map(l -> l.toBlob(Factory)).toList()),
+                "homelessPeople", Factory.array(homelessPeople.stream().map(h -> h.toBlob(Factory)).toList())));
     }
 
     public boolean build(PublicBuilding.Upgrade upgrade) {

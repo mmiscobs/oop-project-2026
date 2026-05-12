@@ -18,8 +18,8 @@ public class Point {
         y = blob.map().get("y").intValue();
     }
 
-    public SerializedBlob toBlob() {
-        return SerializedBlob.fromMap(Map.of("x", SerializedBlob.intValue(x), "y", SerializedBlob.intValue(y)));
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return Factory.fromMap(Map.of("x", Factory.intValue(x), "y", Factory.intValue(y)));
     }
 
     public double distFrom(Point other) {

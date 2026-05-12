@@ -14,9 +14,9 @@ public sealed interface CitizenState permits CitizenState.Residing, CitizenState
     };
 
     record Shopping(BuildableRef<CommercialBuilding> shop) implements CitizenState {
-        public SerializedBlob toBlob() {
-            return SerializedBlob
-                    .fromMap(Map.of("type", SerializedBlob.string(getClass().getSimpleName()), "shop", shop.toBlob()));
+        public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+            return Factory
+                    .fromMap(Map.of("type", Factory.string(getClass().getSimpleName()), "shop", shop.toBlob(Factory)));
         }
     };
 
@@ -29,7 +29,7 @@ public sealed interface CitizenState permits CitizenState.Residing, CitizenState
         };
     }
 
-    public default SerializedBlob toBlob() {
-        return SerializedBlob.fromMap(Map.of("type", SerializedBlob.string(getClass().getSimpleName())));
+    public default SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return Factory.fromMap(Map.of("type", Factory.string(getClass().getSimpleName())));
     }
 }

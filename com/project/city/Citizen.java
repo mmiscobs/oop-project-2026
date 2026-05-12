@@ -63,17 +63,17 @@ public class Citizen {
         cache.put(id, this);
     }
 
-    public SerializedBlob toBlob() {
-        return SerializedBlob.fromMap(Map.of(
-                "id", SerializedBlob.string(id),
-                "identity", identity.toBlob(),
-                "home", home.toBlob(),
-                "work", work.toBlob(),
-                "location", location.toBlob(),
-                "state", state.toBlob(),
-                "lastStateUpdateTick", SerializedBlob.intValue(lastStateUpdateTick),
-                "currentHealth", SerializedBlob.intValue(currentHealth),
-                "currentThoughtsSeed", SerializedBlob.intValue(currentThoughtsSeed)));
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return Factory.fromMap(Map.of(
+                "id", Factory.string(id),
+                "identity", identity.toBlob(Factory),
+                "home", home.toBlob(Factory),
+                "work", work.toBlob(Factory),
+                "location", location.toBlob(Factory),
+                "state", state.toBlob(Factory),
+                "lastStateUpdateTick", Factory.intValue(lastStateUpdateTick),
+                "currentHealth", Factory.intValue(currentHealth),
+                "currentThoughtsSeed", Factory.intValue(currentThoughtsSeed)));
     }
 
     public static Citizen fromBlob(SerializedBlob blob, City city) {

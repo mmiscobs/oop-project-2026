@@ -18,8 +18,8 @@ public class Clinic extends HealthcareBuilding {
         this.ambulanceGarage = new AmbulanceGarage(blob);
     }
 
-    public SerializedBlob toBlob() {
-        return super.toBlob().extendMap(Map.of("ambulanceGarage", ambulanceGarage.toBlob()));
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return super.toBlob(Factory).extendMap(Map.of("ambulanceGarage", ambulanceGarage.toBlob(Factory)));
     }
 
     static {

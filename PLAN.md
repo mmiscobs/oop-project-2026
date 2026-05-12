@@ -49,6 +49,16 @@
       - [x] Current profit
       - [x] Amount of workers, residents
       - [x] Capacity of workers, residents
+  - [x] Construction
+  - [x] Inheritance
+  - [x] Polymorphism
+  - [ ] Exceptions
+  - [x] File IO
+  - [x] Interfaces
+  - [x] Abstract Classes
+  - [x] Generics
+  - [ ] Cloneable
+  - [x] Comparable
 - [x] Implement start menu
   - [x] Create game
     - [x] Size of a map

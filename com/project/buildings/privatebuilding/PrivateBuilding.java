@@ -22,8 +22,8 @@ public abstract class PrivateBuilding extends Buildable {
     }
 
     @Override
-    public SerializedBlob toBlob() {
-        return super.toBlob().extendMap(Map.of("isBuilt", SerializedBlob.booleanValue(isBuilt)));
+    public SerializedBlob toBlob(SerializedBlob.Factory Factory) {
+        return super.toBlob(Factory).extendMap(Map.of("isBuilt", Factory.booleanValue(isBuilt)));
     }
 
     protected boolean isBuilt = false;
