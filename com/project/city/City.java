@@ -216,14 +216,14 @@ public class City {
             if (building instanceof ResidentialBuilding) {
                 ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
                 for (Citizen citizen : residentialBuilding.getResidents()) {
-                    if (citizen.work == null) {
+                    if (citizen.work.get() == null) {
                         unemployed.add(citizen);
                     }
                 }
             }
         }
         for (Citizen homeless : homelessPeople) {
-            if (homeless.work == null)
+            if (homeless.work.get() == null)
                 unemployed.add(homeless);
         }
         return unemployed;

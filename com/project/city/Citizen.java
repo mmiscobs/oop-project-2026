@@ -24,13 +24,13 @@ import com.project.utils.SerializedBlob;
 
 public class Citizen {
     public final String id;
-    public BuildableRef<Buildable> location;
-    public BuildableRef<ResidentialBuilding> home;
-    public BuildableRef<WorkplaceBuilding> work;
+    private City city;
+    public BuildableRef<Buildable> location = new BuildableRef<>((Buildable) null, city);
+    public BuildableRef<ResidentialBuilding> home = new BuildableRef<>((Buildable) null, city);;
+    public BuildableRef<WorkplaceBuilding> work = new BuildableRef<>((Buildable) null, city);;
     private int currentHealth = 100;
     public final Identity identity;
     private int lastStateUpdateTick = 0;
-    private City city;
     private int currentThoughtsSeed = new Random().nextInt();
     private CitizenState state = new CitizenState.Residing();
 
@@ -176,8 +176,8 @@ public class Citizen {
     public int getSatisfaction() {
         Integer[] satisfactionContributors = new Integer[] {
                 currentHealth,
-                work == null ? 50 : 100,
-                home == null ? 10 : 100,
+                work.get() == null ? 50 : 100,
+                home.get() == null ? 10 : 100,
                 location.get() == null ? 100 : (int) (Math.pow((100 - location.get().getCrimeRate()) / 100.0, 2) * 100)
         };
 
@@ -197,9 +197,9 @@ public class Citizen {
         details.put("Health", Integer.toString(getCurrentHealth()));
         details.put("Satisfaction", Integer.toString(getSatisfaction()));
         details.put("Current state", getCurrentStateDescription());
-        if (work == null)
+        if (work.get() == null)
             details.put("Unemployed", "yes");
-        if (home == null)
+        if (home.get() == null)
             details.put("Homeless", "yes");
 
         return details;
@@ -208,7 +208,7 @@ public class Citizen {
     public String getCurrentStateDescription() {
         return switch (state) {
             case CitizenState.Residing r ->
-                home == null ? "Homeless" : home.get() == location.get() ? "Residing" : "Going home";
+                home.get() == null ? "Homeless" : home.get() == location.get() ? "Residing" : "Going home";
             case CitizenState.Working w -> work.get() == location.get() ? "Working" : "Going to work";
             case CitizenState.Shopping(BuildableRef<CommercialBuilding> shop) ->
                 shop.get() == location.get() ? "Shopping" : "Going to shop";
