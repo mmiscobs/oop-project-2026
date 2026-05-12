@@ -15,7 +15,7 @@ import com.project.buildings.publicbuilding.transportation.PublicTransportation;
 import com.project.utils.Point;
 
 public class PathFinder {
-    private CityGrid grid;
+    private final CityGrid grid;
 
     PathFinder(CityGrid grid) {
         this.grid = grid;
@@ -68,7 +68,7 @@ public class PathFinder {
         if (tileIndexCache != null)
             return tileIndexCache;
         Map<Point, Buildable> ti = new HashMap<>();
-        for (Map.Entry<Point, Buildable> e : grid.buildings.entrySet()) {
+        for (Map.Entry<Point, Buildable> e : grid.buildingsView.entrySet()) {
             Point o = e.getKey();
             Buildable b = e.getValue();
             for (int dx = 0; dx < b.getWidth(); dx++) {
@@ -84,7 +84,7 @@ public class PathFinder {
         if (originCache != null)
             return originCache;
         Map<Buildable, Point> map = new IdentityHashMap<>();
-        for (Map.Entry<Point, Buildable> e : grid.buildings.entrySet()) {
+        for (Map.Entry<Point, Buildable> e : grid.buildingsView.entrySet()) {
             map.put(e.getValue(), e.getKey());
         }
         return originCache = map;

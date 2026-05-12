@@ -382,7 +382,7 @@ public class CLIInterface {
                     if (n < 1 || n >= speeds.length) {
                         System.out.println(c(RED, "  Speed must be 1–" + (speeds.length - 1)));
                     } else {
-                        sim.gameSpeed = speeds[n];
+                        sim.setGameSpeed(speeds[n]);
                         System.out.println(c(GREEN, "  Speed set to " + speeds[n]));
                     }
                 } catch (NumberFormatException e) {
@@ -391,12 +391,12 @@ public class CLIInterface {
             }
 
             case "pause" -> {
-                sim.gameSpeed = GameSpeed.Stopped;
+                sim.setGameSpeed(GameSpeed.Stopped);
                 System.out.println(c(YELLOW, "  Simulation paused."));
             }
 
             case "resume" -> {
-                sim.gameSpeed = GameSpeed.Normal;
+                sim.setGameSpeed(GameSpeed.Normal);
                 System.out.println(c(GREEN, "  Simulation resumed at Normal speed."));
             }
 
@@ -491,7 +491,7 @@ public class CLIInterface {
 
         Runnable stopTicks = sim.startSimulationCLI();
 
-        sim.gameSpeed = GameSpeed.Normal;
+        sim.setGameSpeed(GameSpeed.Normal);
 
         printMap(sim);
         printHelp(true);

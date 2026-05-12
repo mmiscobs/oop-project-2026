@@ -45,7 +45,7 @@ public abstract class PublicServiceBuilding extends PublicBuilding {
     public static Map<Point, PublicServiceBuilding> getAllPublicServiceTypeBuildings(City city,
             Class<? extends PublicServiceBuilding> publicServiceType) {
         HashMap<Point, PublicServiceBuilding> buildings = new HashMap<>();
-        for (Entry<Point, Buildable> otherBuildingEntry : city.grid.buildings.entrySet()) {
+        for (Entry<Point, Buildable> otherBuildingEntry : city.grid.buildingsView.entrySet()) {
             if (otherBuildingEntry.getValue() instanceof PublicServiceBuilding otherService
                     && publicServiceType == otherService.getPublicServiceTypeClass()) {
                 buildings.put(otherBuildingEntry.getKey(), otherService);

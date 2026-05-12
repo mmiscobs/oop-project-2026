@@ -194,7 +194,7 @@ public abstract class Buildable {
                 return (T) cache.get(this);
             if (buildableId == null)
                 return null;
-            for (Buildable buildable : city.grid.buildings.values())
+            for (Buildable buildable : city.grid.buildingsView.values())
                 if (buildable.uuid.equals(buildableId) && buildable.getClass().getSimpleName().equals(buildableType)) {
                     cache.put(this, buildable);
                     return (T) buildable;

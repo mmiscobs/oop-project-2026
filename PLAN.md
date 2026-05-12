@@ -52,7 +52,7 @@
   - [x] Construction
   - [x] Inheritance
   - [x] Polymorphism
-  - [ ] Exceptions
+  - [?] Exceptions
   - [x] File IO
   - [x] Interfaces
   - [x] Abstract Classes

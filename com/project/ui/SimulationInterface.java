@@ -328,7 +328,7 @@ public class SimulationInterface extends JPanel {
                 Function<Function<Buildable, Integer>, OverlayPainter> createBuildingsOverlay = (stat) -> (g, v) -> {
                     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     Color stroke = new Color(255, 200, 40, 0);
-                    for (Entry<Point, Buildable> entry : simulator.city.grid.buildings.entrySet()) {
+                    for (Entry<Point, Buildable> entry : simulator.city.grid.buildingsView.entrySet()) {
                         Buildable buildable = entry.getValue();
                         Point point = entry.getKey();
                         Integer value = stat.apply(buildable);
@@ -502,12 +502,11 @@ public class SimulationInterface extends JPanel {
         class TimeSpeedButtons extends JPanel {
             TimeSpeedButtons() {
                 super(new GridLayout(0, 1, 10, 10));
-                // this.setPreferredSize(new Dimension(150, 0));
                 this.add(new JLabel("Simulation Speed"));
                 ArrayList<JButton> buttons = new ArrayList<>();
                 for (GameSpeed speed : GameSpeed.values()) {
                     JButton button = new JButton(speed.toString());
-                    if (simulator.gameSpeed == speed)
+                    if (simulator.getGameSpeed() == speed)
                         button.setEnabled(false);
                     this.add(button);
                     buttons.add(button);
@@ -516,7 +515,7 @@ public class SimulationInterface extends JPanel {
                             b.setEnabled(true);
                         }
                         button.setEnabled(false);
-                        simulator.gameSpeed = speed;
+                        simulator.setGameSpeed(speed);
                     });
                 }
             }

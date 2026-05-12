@@ -20,12 +20,12 @@ import com.project.utils.Reactive.Observable;
 import com.project.utils.Reactive.ReactiveArrayList;
 
 public class City {
-    public CityGrid grid;
+    public final CityGrid grid;
     private ReactiveArrayList<Loan> loans = new ReactiveArrayList<>();
-    public Observable<List<Loan>> loansView = loans.readOnly();
+    public final Observable<List<Loan>> loansView = loans.readOnly();
 
     private Reactive<Double> money = new Reactive<>(0.0);
-    public Reactive.Observable<Double> moneyView = money.readOnly();
+    public final Reactive.Observable<Double> moneyView = money.readOnly();
 
     public final String name;
 
@@ -120,7 +120,7 @@ public class City {
 
     public int payBuildingsUpkeepPerTick() {
         double buildingsUpkeep = 0;
-        for (Buildable building : grid.buildings.values()) {
+        for (Buildable building : grid.buildingsView.values()) {
             if (building instanceof PublicBuilding) {
                 PublicBuilding publicBuilding = (PublicBuilding) building;
                 buildingsUpkeep += ((double) publicBuilding.getMaintanenceCostPerDay()) / TICKS_IN_DAY;
@@ -150,7 +150,7 @@ public class City {
     public List<PrivateBuilding> builtBuildings() {
         ArrayList<PrivateBuilding> built = new ArrayList<>();
 
-        for (Buildable building : grid.buildings.values())
+        for (Buildable building : grid.buildingsView.values())
             if (building instanceof PrivateBuilding p && p.getIsBuilt())
                 built.add(p);
         return built;
@@ -158,7 +158,7 @@ public class City {
 
     public int collectTaxesFromResidents() {
         int residentTax = 0;
-        for (Buildable building : grid.buildings.values()) {
+        for (Buildable building : grid.buildingsView.values()) {
             if (building instanceof ResidentialBuilding) {
                 ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
                 residentTax += residentialBuilding.getResidentTax();
@@ -170,7 +170,7 @@ public class City {
 
     public int collectTaxesFromPurchases() {
         int purchaseTax = 0;
-        for (Buildable building : grid.buildings.values()) {
+        for (Buildable building : grid.buildingsView.values()) {
             if (building instanceof CommercialBuilding) {
                 CommercialBuilding commercialBuilding = (CommercialBuilding) building;
                 purchaseTax += commercialBuilding.calculateSalesTax();
@@ -182,7 +182,7 @@ public class City {
 
     public int collectTaxesFromBusinesses() {
         int businessTax = 0;
-        for (Buildable building : grid.buildings.values()) {
+        for (Buildable building : grid.buildingsView.values()) {
             if (building instanceof WorkplaceBuilding) {
                 WorkplaceBuilding workplaceBuilding = (WorkplaceBuilding) building;
                 businessTax += workplaceBuilding.getBusinessTax();
@@ -212,7 +212,7 @@ public class City {
     private List<Citizen> unemployedPeople() {
         ArrayList<Citizen> unemployed = new ArrayList<>();
 
-        for (Buildable building : grid.buildings.values()) {
+        for (Buildable building : grid.buildingsView.values()) {
             if (building instanceof ResidentialBuilding) {
                 ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
                 for (Citizen citizen : residentialBuilding.getResidents()) {

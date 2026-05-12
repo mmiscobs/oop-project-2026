@@ -29,10 +29,10 @@ public class Citizen {
     public BuildableRef<WorkplaceBuilding> work;
     private int currentHealth = 100;
     public final Identity identity;
-    public int lastStateUpdateTick = 0;
+    private int lastStateUpdateTick = 0;
     private City city;
     private int currentThoughtsSeed = new Random().nextInt();
-    public CitizenState state = new CitizenState.Residing();
+    private CitizenState state = new CitizenState.Residing();
 
     public void evict() {
         this.home = new BuildableRef<ResidentialBuilding>((Buildable) null, city);

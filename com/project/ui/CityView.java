@@ -74,16 +74,16 @@ public class CityView extends IsometricMapView {
             }
             for (int r = 0; r < ROWS; r++) {
                 for (int c = 0; c < COLS; c++) {
-                    Buildable building = city.grid.buildings.get(new Point(r, c));
+                    Buildable building = city.grid.buildingsView.get(new Point(r, c));
                     if (building == null)
                         continue;
                     String suffix = "";
                     String traffic = null;
                     if (building instanceof PublicTransportation p) {
-                        Buildable buildingNorth = city.grid.buildings.get(new Point(r, c + 1));
-                        Buildable buildingSouth = city.grid.buildings.get(new Point(r, c - 1));
-                        Buildable buildingEast = city.grid.buildings.get(new Point(r + 1, c));
-                        Buildable buildingWest = city.grid.buildings.get(new Point(r - 1, c));
+                        Buildable buildingNorth = city.grid.buildingsView.get(new Point(r, c + 1));
+                        Buildable buildingSouth = city.grid.buildingsView.get(new Point(r, c - 1));
+                        Buildable buildingEast = city.grid.buildingsView.get(new Point(r + 1, c));
+                        Buildable buildingWest = city.grid.buildingsView.get(new Point(r - 1, c));
                         boolean hasNorthAdjacent = buildingNorth != null
                                 && buildingNorth instanceof PublicTransportation;
                         boolean hasSouthAdjacent = buildingSouth != null

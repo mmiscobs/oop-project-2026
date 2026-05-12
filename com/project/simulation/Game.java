@@ -9,18 +9,9 @@ import java.util.List;
 import com.project.city.City;
 import com.project.utils.Reactive;
 import com.project.utils.SelfDescribedXML;
-import com.project.utils.SerializedBlob;
 
 public class Game {
-    public Reactive<Simulator> simulator = new Reactive<>(null);
-
-    public String[] getSaves() {
-        return null;
-    }
-
-    public Game() {
-
-    }
+    public final Reactive<Simulator> simulator = new Reactive<>(null);
 
     public List<String> listSaves() {
         String[] files = new File("./saves").list((d, f) -> f.endsWith(".xml"));

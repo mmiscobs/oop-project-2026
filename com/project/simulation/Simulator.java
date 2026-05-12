@@ -22,10 +22,19 @@ import java.util.function.Consumer;
 import com.project.city.Citizen;
 
 public class Simulator {
-    public City city;
-    public GameSpeed gameSpeed;
+    public final City city;
+    private GameSpeed gameSpeed;
+
+    public GameSpeed getGameSpeed() {
+        return gameSpeed;
+    }
+
+    public void setGameSpeed(GameSpeed gameSpeed) {
+        this.gameSpeed = gameSpeed;
+    }
+
     private Reactive<Integer> currentTick = new Reactive<>(0);
-    public Observable<Integer> currentTickView = currentTick.readOnly();
+    public final Observable<Integer> currentTickView = currentTick.readOnly();
 
     public Simulator(City city) {
         this.city = city;
@@ -46,10 +55,6 @@ public class Simulator {
             }
         });
         timer.start();
-    }
-
-    public Citizen getRandomCitizen() {
-        return null;
     }
 
     private Reactive<Integer> citizensAmount = new Reactive<>(0);
@@ -114,7 +119,7 @@ public class Simulator {
 
     private List<Citizen> allCitizens() {
         ArrayList<Citizen> citizens = new ArrayList<>();
-        for (Buildable building : city.grid.buildings.values()) {
+        for (Buildable building : city.grid.buildingsView.values()) {
             if (building instanceof ResidentialBuilding) {
                 ResidentialBuilding residentialBuilding = (ResidentialBuilding) building;
                 citizens.addAll(residentialBuilding.getResidents());
@@ -131,13 +136,13 @@ public class Simulator {
     }
 
     private void runAllBuildings() {
-        for (Buildable building : city.grid.buildings.values()) {
+        for (Buildable building : city.grid.buildingsView.values()) {
             building.runSimulationTick(city);
         }
     }
 
     private void buildPrivateBuildings() {
-        for (Buildable building : city.grid.buildings.values()) {
+        for (Buildable building : city.grid.buildingsView.values()) {
             if (building instanceof PrivateBuilding privateBuilding && !privateBuilding.getIsBuilt()) {
                 double changeOfBuildingInTick = PrivateBuilding.calculateDemand(privateBuilding, city) * 0.8;
                 if (flipCoinWithChance(changeOfBuildingInTick)) {
@@ -158,10 +163,10 @@ public class Simulator {
     }
 
     public int averageCrimeRate() {
-        if (city.grid.buildings.size() == 0)
+        if (city.grid.buildingsView.size() == 0)
             return 0;
-        return city.grid.buildings.values().stream().map(c -> c.getCrimeRate()).reduce(0, Integer::sum)
-                / city.grid.buildings.size();
+        return city.grid.buildingsView.values().stream().map(c -> c.getCrimeRate()).reduce(0, Integer::sum)
+                / city.grid.buildingsView.size();
     }
 
     public int averageCitizenHealth() {

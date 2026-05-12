@@ -1,5 +1,6 @@
 package com.project.city;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -10,12 +11,13 @@ import com.project.utils.Point;
 import com.project.utils.SerializedBlob;
 
 public class CityGrid {
-    public Map<Point, Buildable> buildings = new HashMap<>();
+    private final Map<Point, Buildable> buildings = new HashMap<>();
+    public final Map<Point, Buildable> buildingsView = Collections.unmodifiableMap(buildings);
     public final int sizeX;
     public final int sizeY;
     private PathFinder pathFinder = new PathFinder(this);
 
-    public CityGrid(int sizeX, int sizeY) {
+    CityGrid(int sizeX, int sizeY) {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
     }
