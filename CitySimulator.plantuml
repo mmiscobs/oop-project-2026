@@ -1,8 +1,5 @@
 @startuml CitySimulator
 
-' ============================================================
-' Package: com.project.buildings
-' ============================================================
 
 abstract class Buildable {
     +{final} uuid: String
@@ -49,7 +46,6 @@ class "Buildable.BuildableRef<T>" as BuildableRef {
 }
 Buildable +-- BuildableRef
 
-' --- privatebuilding subtree ---
 
 Buildable <|-- PrivateBuilding
 abstract class PrivateBuilding {
@@ -177,7 +173,6 @@ class GroceryStore {
     +getLength(): int
 }
 
-' --- publicbuilding subtree ---
 
 Buildable <|-- PublicBuilding
 abstract class PublicBuilding {
@@ -332,9 +327,6 @@ StreetPlantedTrees --|> Upgrade
 Street +-- SpeedLimiters
 Street +-- StreetPlantedTrees
 
-' ============================================================
-' Package: com.project.city
-' ============================================================
 
 class City {
     +{final} grid: CityGrid
@@ -469,11 +461,8 @@ class PathFinder {
 }
 CityGrid *-- PathFinder
 
-' ============================================================
-' Package: com.project.loans
-' ============================================================
 
-abstract class Loan implements "Comparable<Loan>" {
+abstract class Loan {
     #paymentLeft: Reactive<Integer>
     +paymentLeftView: Observable<Integer>
     +{abstract} getLoanSize(): int
@@ -505,9 +494,9 @@ class PrivateLoan {
 
 City "1" o-- "*" Loan
 
-' ============================================================
-' Package: com.project.simulation
-' ============================================================
+interface "Comparable<Loan>" as ComparableLoan <<java.lang>>
+Loan ..|> ComparableLoan
+
 
 class Game {
     +{final} simulator: Reactive<Simulator>
@@ -570,9 +559,6 @@ Simulator *-- City
 Simulator ..> GameSpeed
 Game ..> GameDifficulty
 
-' ============================================================
-' Package: com.project.utils
-' ============================================================
 
 class Point {
     +{final} x: int
@@ -686,9 +672,6 @@ class "SelfDescribedXML.SelfDescribedXMLBlob" as SelfDescribedXMLBlob implements
 }
 SelfDescribedXML +-- SelfDescribedXMLBlob
 
-' ============================================================
-' Package: com.project (top-level entry point)
-' ============================================================
 
 class Project {
     +{static} main(args: String[]): void
@@ -696,9 +679,6 @@ class Project {
 Project ..> GameInterface
 Project ..> CLIInterface
 
-' ============================================================
-' Package: com.project.cli
-' ============================================================
 
 class CLIInterface {
     -{static} RESET: String
@@ -731,13 +711,16 @@ CLIInterface ..> GameSpeed
 CLIInterface ..> FederalLoan
 CLIInterface ..> PrivateLoan
 
-' ============================================================
-' Package: com.project.farm
-' (note: source files lack `package com.project.farm;` declarations
-'  - they were merged in from a different layout)
-' ============================================================
 
-abstract class Crop {
+class Main {
+    +{static} main(args: String[]): void
+}
+Main ..> FarmCLI
+Main ..> FarmGUI
+Main ..> GameInterface
+
+
+abstract class "farm.core.Crop" as FCrop {
     -{static} DEFAULT_MARKETPRICES_FOR_TYPES: Map<String, Integer>
     -stage: GrowthStage
     -marketPrice: int
@@ -759,8 +742,8 @@ abstract class Crop {
     #appropriateEventYield(usualYield: int): int
 }
 
-Crop <|-- GrainCrop
-class GrainCrop {
+FCrop <|-- FGrainCrop
+class "farm.core.GrainCrop" as FGrainCrop {
     -{static} DEFAULT_YIELD: int
     +GrainCrop(name: String, marketPrice: int)
     +GrainCrop(name: String)
@@ -768,8 +751,8 @@ class GrainCrop {
     +getType(): String
 }
 
-Crop <|-- VegetableCrop
-class VegetableCrop {
+FCrop <|-- FVegetableCrop
+class "farm.core.VegetableCrop" as FVegetableCrop {
     -{static} DEFAULT_YIELD: int
     +VegetableCrop(name: String, marketPrice: int)
     +VegetableCrop(name: String)
@@ -777,8 +760,8 @@ class VegetableCrop {
     +getType(): String
 }
 
-Crop <|-- OrchardCrop
-class OrchardCrop {
+FCrop <|-- FOrchardCrop
+class "farm.core.OrchardCrop" as FOrchardCrop {
     -{static} DEFAULT_YIELD: int
     +OrchardCrop(name: String, marketPrice: int)
     +OrchardCrop(name: String)
@@ -786,7 +769,78 @@ class OrchardCrop {
     +getType(): String
 }
 
-enum GrowthStage {
+FOrchardCrop <|-- AppleCrop
+class AppleCrop {
+    -{static} TICKS_PER_STAGE: int
+    -{static} APPLE_YIELD: int
+    -tickCounter: int
+    +AppleCrop()
+    +grow(): void
+    +getYield(): int
+    +{static} getTicksPerStage(): int
+    +getCropKey(): String
+}
+
+FOrchardCrop <|-- SunflowerCrop
+class SunflowerCrop {
+    -{static} TICKS_PER_STAGE: int
+    -{static} SUNFLOWER_YIELD: int
+    -tickCounter: int
+    +SunflowerCrop()
+    +grow(): void
+    +getYield(): int
+    +{static} getTicksPerStage(): int
+    +getCropKey(): String
+}
+
+FGrainCrop <|-- CornCrop
+class CornCrop {
+    -{static} TICKS_PER_STAGE: int
+    -{static} CORN_YIELD: int
+    -tickCounter: int
+    +CornCrop()
+    +grow(): void
+    +getYield(): int
+    +{static} getTicksPerStage(): int
+    +getCropKey(): String
+}
+
+FGrainCrop <|-- WheatCrop
+class WheatCrop {
+    -ticksToGrow: int
+    -tickCounter: int
+    -{static} TICKS_PER_STAGE: int
+    +WheatCrop()
+    +grow(): void
+    +{static} getTicksPerStage(): int
+    +getCropKey(): String
+}
+
+FVegetableCrop <|-- PotatoCrop
+class PotatoCrop {
+    -{static} TICKS_PER_STAGE: int
+    -{static} POTATO_YIELD: int
+    -tickCounter: int
+    +PotatoCrop()
+    +grow(): void
+    +getYield(): int
+    +{static} getTicksPerStage(): int
+    +getCropKey(): String
+}
+
+FVegetableCrop <|-- TomatoCrop
+class TomatoCrop {
+    -{static} TICKS_PER_STAGE: int
+    -{static} TOMATO_YIELD: int
+    -tickCounter: int
+    +TomatoCrop()
+    +grow(): void
+    +getYield(): int
+    +{static} getTicksPerStage(): int
+    +getCropKey(): String
+}
+
+enum "farm.core.GrowthStage" as FGrowthStage {
     SEED
     SPROUT
     GROWING
@@ -795,18 +849,20 @@ enum GrowthStage {
     DEAD
 }
 
-enum FarmEvent {
+enum "farm.core.FarmEvent" as FFarmEvent {
     FRUITFUL_HARVEST
     DROUGHT
     BIRD_ATTACK
     PEST
 }
 
-class FarmPlot {
+class "farm.core.FarmPlot" as FFarmPlot {
     -crop: Crop
     -soilQuality: int
     -isIrrigated: boolean
     -event: FarmEvent
+    -daysSinceMature: int
+    -cropJustVanished: boolean
     +FarmPlot()
     +plant(crop: Crop): void
     +tick(): void
@@ -815,12 +871,14 @@ class FarmPlot {
     +setIrrigated(irrigationStatus: boolean): void
     +applyEvent(e: FarmEvent): void
     +waterAmount(): int
+    +getCrop(): Crop
     +harvest(): int
     +centralBankInterferenceOrBrokeCitizenAlert(): void
     +getEvent(): FarmEvent
+    +didCropJustVanish(): boolean
 }
 
-class IrrigationSystem {
+class "farm.core.IrrigationSystem" as FIrrigationSystem {
     -waterLevel: int
     -coverage: FarmPlot[]
     -{static} COST_FOR_REFILL: int
@@ -831,8 +889,7 @@ class IrrigationSystem {
     +getWaterLevel(): int
 }
 
-WorkplaceBuilding <|-- Farm
-class Farm {
+class "farm.core.Farm" as FFarm {
     -plots: FarmPlot[]
     -irrigation: IrrigationSystem
     -farmEvents: ArrayList<FarmEvent>
@@ -841,39 +898,147 @@ class Farm {
     +tick(): void
     +activeEvents(): void
     +getActiveEvents(): ArrayList<FarmEvent>
-    +getWorkersCapacity(): int
-    +getWidth(): int
-    +getLength(): int
-    +getPrice(): int
+    +getPlots(): FarmPlot[]
+    +getPlot(i: int): FarmPlot
+    +getNumberOfPlots(): int
+    +getIrrigation(): IrrigationSystem
+    +calculateProfitPerTick(): int
 }
 
-CommercialBuilding <|-- FarmMarket
-class FarmMarket {
-    -inventory: Map<String, Integer>
+class "farm.core.FarmMarket" as FFarmMarket {
+    -{final} inventory: Map<String, Integer>
+    -{final} priceIndex: Map<String, Integer>
+    +FarmMarket()
+    +addToInventory(cropName: String, quantity: int, pricePerUnit: int): void
+    +sellCrop(cropName: String, quantity: int): int
     +sellCrop(crop: Crop, quantity: int): int
+    +getPriceOf(cropName: String): int
     +getPriceOf(crop: Crop): int
+    +getInventory(): Map<String, Integer>
+    +getPriceIndex(): Map<String, Integer>
     +getVisitorsCapacity(): int
-    +getWorkersCapacity(): int
-    +getWidth(): int
-    +getLength(): int
-    +getPrice(): int
 }
 
-' Farm internal composition
-Farm "1" *-- "*" FarmPlot
-Farm "1" *-- "1" IrrigationSystem
-Farm "1" o-- "*" FarmEvent
-FarmPlot "0..1" o-- "1" Crop
-FarmPlot ..> GrowthStage
-FarmPlot ..> FarmEvent
-IrrigationSystem o-- FarmPlot
-Crop ..> GrowthStage
-Crop ..> FarmEvent
-FarmMarket ..> Crop
+FFarm "1" *-- "*" FFarmPlot
+FFarm "1" *-- "1" FIrrigationSystem
+FFarm "1" o-- "*" FFarmEvent
+FFarmPlot "0..1" o-- "1" FCrop
+FFarmPlot ..> FGrowthStage
+FFarmPlot ..> FFarmEvent
+FIrrigationSystem o-- FFarmPlot
+FCrop ..> FGrowthStage
+FCrop ..> FFarmEvent
+FFarmMarket ..> FCrop
 
-' ============================================================
-' Package: com.project.ui (Swing-based)
-' ============================================================
+
+class FarmCLI {
+    -{static} RESET: String
+    -{static} BOLD: String
+    -{static} GREEN: String
+    -{static} YELLOW: String
+    -{static} CYAN: String
+    -{static} RED: String
+    -{static} BLUE: String
+    -{static} DIM: String
+    -{static} MAGENTA: String
+    -{final} farm: Farm
+    -{final} market: FarmMarket
+    -money: int
+    -day: int
+    -{final} scanner: Scanner
+    +FarmCLI(plots: int, startMoney: int)
+    +run(): void
+    -cmdPlant(parts: String[]): void
+    -cmdTick(): void
+    -cmdHarvest(parts: String[]): void
+    -cmdSell(parts: String[]): void
+    -cmdEvent(parts: String[]): void
+    -cmdWater(parts: String[]): void
+    -printBanner(): void
+    -printStatus(): void
+    -printMarket(): void
+    -printHelp(): void
+    -validatePlotIndex(idx: int): void
+    -findCropByName(name: String): Crop
+    +{static} main(args: String[]): void
+}
+FarmCLI *-- FFarm
+FarmCLI *-- FFarmMarket
+FarmCLI ..> FCrop
+FarmCLI ..> FFarmEvent
+
+
+class FarmGUI {
+    -{static} STAGE_COLORS: Color[]
+    -{static} CROP_OPTIONS: String[][]
+    -{final} farm: Farm
+    -{final} market: FarmMarket
+    -money: int
+    -day: int
+    -selectedPlot: int
+    -{final} onReturnToMain: Runnable
+    -tilledDirtImg: Image
+    -grassImg: Image
+    -{final} plotPanels: PlotPanel[]
+    -dayLabel: JLabel
+    -moneyLabel: JLabel
+    -waterLabel: JLabel
+    -logArea: JTextArea
+    -cropTypeBox: JComboBox<String>
+    -selectedLabel: JLabel
+    -plantBtn: JButton
+    -tickBtn: JButton
+    -harvestBtn: JButton
+    -sellBtn: JButton
+    -sellQtyField: JTextField
+    -marketPanel: JPanel
+    +FarmGUI(numPlots: int, startMoney: int, onReturnToMain: Runnable)
+    -loadSprites(): void
+    -loadRes(name: String): Image
+    -getSpriteFor(crop: Crop, stage: GrowthStage): Image
+    -getCropKey(crop: Crop): String
+    -buildUI(): void
+    -buildHeader(): JPanel
+    -buildCenter(): JPanel
+    -buildSidebar(): JPanel
+    -buildActionPanel(): JPanel
+    -buildCropLegend(): JPanel
+    -buildMarketPanel(): JPanel
+    -buildLog(): JPanel
+    -doPlant(): void
+    -doTick(): void
+    -doHarvest(): void
+    -doHarvestAll(): void
+    -doSell(): void
+    -doEvent(e: FarmEvent): void
+    -refreshAll(): void
+    -refreshMarket(): void
+    -log(msg: String): void
+    -miniEventBtn(label: String, event: FarmEvent): JButton
+    -hudLabel(text: String): JLabel
+    -styledButton(label: String, bg: Color): JButton
+    -style(box: JComboBox<?>): void
+    -style(tf: JTextField): void
+    -rowLabel(text: String): JLabel
+    -panelBorder(title: String): Border
+    -selectPlot(i: int): void
+    +{static} main(args: String[]): void
+}
+FarmGUI --|> JFrame
+
+class "FarmGUI.PlotPanel" as FarmGUIPlotPanel {
+    -{final} index: int
+    #paintComponent(g: Graphics): void
+    -drawSoilBar(g2: Graphics2D, plot: FarmPlot, w: int, h: int): void
+    -drawCenteredString(g2: Graphics2D, s: String, cx: int, cy: int, f: Font, c: Color): void
+}
+FarmGUIPlotPanel --|> JPanel
+FarmGUI +-- FarmGUIPlotPanel
+FarmGUI *-- FFarm
+FarmGUI *-- FFarmMarket
+FarmGUI ..> FCrop
+FarmGUI ..> FFarmEvent
+FarmGUI ..> FGrowthStage
 
 class GameInterface {
     -{static} FRAME_W: int
@@ -890,14 +1055,18 @@ class "GameInterface.MainMenu" as MainMenu
 class "GameInterface.NewGame" as NewGame
 class "GameInterface.LoadGame" as LoadGame
 class "GameInterface.Credits" as Credits
+class "GameInterface.MainMenu.FarmButton" as FarmButton
 MainMenu --|> JPanel
 NewGame --|> JPanel
 LoadGame --|> JPanel
 Credits --|> JPanel
+FarmButton --|> JButton
 GameInterface +-- MainMenu
 MainMenu +-- NewGame
 MainMenu +-- LoadGame
 MainMenu +-- Credits
+MainMenu +-- FarmButton
+FarmButton ..> FarmGUI
 
 class SimulationInterface {
     -view: CityView
@@ -1070,7 +1239,6 @@ interface "TogglesMenu.Action" as Action {
 }
 TogglesMenu +-- Action
 
-' --- UI composition / usage ---
 
 GameInterface ..> Game
 SimulationInterface *-- CityView
@@ -1087,9 +1255,6 @@ CityView ..> PublicBuilding
 CityView ..> Upgrade
 CityView ..> Point
 
-' ============================================================
-' Cross-package dependencies
-' ============================================================
 
 Buildable ..> SerializedBlob
 Buildable ..> Citizen
