@@ -33,6 +33,7 @@ import javax.swing.plaf.FontUIResource;
 import com.project.simulation.Game;
 import com.project.simulation.GameDifficulty;
 import com.project.utils.Reactive;
+import farm.ui.FarmGUI;
 
 public class GameInterface extends JPanel {
     private static final int FRAME_W = 2400;
@@ -148,6 +149,7 @@ public class GameInterface extends JPanel {
                 this.add(new NewGameButton());
                 this.add(new LoadGameButton());
                 this.add(new CreditsButton());
+                this.add(new FarmButton());
                 this.add(new Exit());
             } else {
                 this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -264,7 +266,24 @@ public class GameInterface extends JPanel {
                 this.add(new JLabel("Daniil Poliakov, Lia Bulghadaryan, Mariam Sargsyan 2025 (C)"));
             }
         }
-
+        class FarmButton extends JButton {
+            FarmButton() {
+                super("Go to Farm");
+                this.addActionListener(e -> {
+                    JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(MainMenu.this);
+                    if (topFrame != null) topFrame.dispose();
+                    SwingUtilities.invokeLater(() ->
+                            new FarmGUI(6, 500, () -> {
+                                try {
+                                    GameInterface.main(new String[]{});
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            })
+                    );
+                });
+            }
+        }
         class Exit extends JButton {
             Exit() {
                 super("Exit");
