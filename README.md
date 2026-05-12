@@ -1,6 +1,6 @@
 # oop-project-2026
 
 ```bash
-javac com/project/ui/GameInterface.java
-java com.project.ui.GameInterface
+javac com/project/Project.java
+java com.project.Project
 ```

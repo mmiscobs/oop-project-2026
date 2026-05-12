@@ -1,0 +1,1112 @@
+@startuml CitySimulator
+
+' ============================================================
+' Package: com.project.buildings
+' ============================================================
+
+abstract class Buildable {
+    +{final} uuid: String
+    -crimeRate: int
+    #visitors: List<Citizen>
+    -isDestroyed: boolean
+    +{static} buildables: List<Class<? extends Buildable>>
+    +{static} registry: Map<Class<? extends Buildable>, Supplier<Buildable>>
+    +{static} blobRegistry: Map<Class<? extends Buildable>, BiFunction<SerializedBlob, City, Buildable>>
+    +Buildable()
+    #Buildable(blob: SerializedBlob, city: City)
+    +toBlob(factory: SerializedBlob.Factory): SerializedBlob
+    +getVisitors(): List<Citizen>
+    +addVisitor(citizen: Citizen): void
+    +removeVisitor(citizen: Citizen): void
+    +runSimulationTick(city: City): void
+    +{abstract} getWidth(): int
+    +{abstract} getLength(): int
+    +{abstract} getPrice(): int
+    +destroy(): void
+    +getIsDestroyed(): boolean
+    +getCrimeRate(): int
+    +getDetailedInfo(): Map<String, String>
+    +{static} createBuilding(Class<? extends Buildable>): Buildable
+    +{static} fromBlob(blob: SerializedBlob, city: City): Buildable
+}
+
+class "Buildable.UnregisteredBuildingType" as UnregisteredBuildingType {
+    +UnregisteredBuildingType(Class<? extends Buildable>)
+}
+UnregisteredBuildingType --|> Exception
+Buildable +-- UnregisteredBuildingType
+
+class "Buildable.BuildableRef<T>" as BuildableRef {
+    -{final} city: City
+    -{final} buildableId: String
+    -{final} buildableType: String
+    -{static} cache: Map<BuildableRef<?>, Buildable>
+    +BuildableRef(buildable: Buildable, city: City)
+    +BuildableRef(blob: SerializedBlob, city: City)
+    +toBlob(factory: SerializedBlob.Factory): SerializedBlob
+    +get(): T
+    +upcast(): BuildableRef<Buildable>
+}
+Buildable +-- BuildableRef
+
+' --- privatebuilding subtree ---
+
+Buildable <|-- PrivateBuilding
+abstract class PrivateBuilding {
+    #isBuilt: boolean
+    +getIsBuilt(): boolean
+    +build(): void
+    +{abstract} calculateProfitPerTick(): int
+    +{static} calculateDemand(building: PrivateBuilding, city: City): int
+}
+
+PrivateBuilding <|-- ResidentialBuilding
+abstract class ResidentialBuilding {
+    -{final} RESIDENT_TAX: int
+    -residents: ArrayList<Citizen>
+    +{abstract} getCapacity(): int
+    +getResidents(): List<Citizen>
+    +addResident(citizen: Citizen): void
+    +evictResidents(): List<Citizen>
+    +destroy(): void
+    +getResidentTax(): int
+    +calculateProfitPerTick(): int
+    +{static} calculateDemand(city: City): int
+    +{static} calculateHousingShortage(city: City): double
+}
+
+ResidentialBuilding <|-- SmallHouse
+class SmallHouse {
+    +getPrice(): int
+    +getCapacity(): int
+    +getWidth(): int
+    +getLength(): int
+}
+
+ResidentialBuilding <|-- Condominium
+class Condominium {
+    +getPrice(): int
+    +getCapacity(): int
+    +getWidth(): int
+    +getLength(): int
+}
+
+PrivateBuilding <|-- WorkplaceBuilding
+abstract class WorkplaceBuilding {
+    -{final} BUSINESS_TAX: int
+    -hiredWorkers: ArrayList<Citizen>
+    +getHiredWorkers(): List<Citizen>
+    +addHiredWorker(worker: Citizen): void
+    +removeHiredWorker(worker: Citizen): void
+    +destroy(): void
+    +getBusinessTax(): int
+    +calculateProfitPerTick(): int
+    +{abstract} getWorkersCapacity(): int
+    +hasOpenJobPositions(): boolean
+    +{static} calculateLaborShortage(city: City): double
+}
+
+WorkplaceBuilding <|-- IndustrialBuilding
+abstract class IndustrialBuilding {
+    +{static} calculateDemand(city: City): int
+}
+
+IndustrialBuilding <|-- Factory
+class Factory {
+    +getPrice(): int
+    +getWorkersCapacity(): int
+    +getWidth(): int
+    +getLength(): int
+}
+
+IndustrialBuilding <|-- Warehouse
+class Warehouse {
+    +getPrice(): int
+    +getWorkersCapacity(): int
+    +getWidth(): int
+    +getLength(): int
+}
+
+WorkplaceBuilding <|-- OfficeBuilding
+abstract class OfficeBuilding {
+    +{static} calculateDemand(city: City): int
+}
+
+OfficeBuilding <|-- Skyrise
+class Skyrise {
+    +getPrice(): int
+    +getWorkersCapacity(): int
+    +getWidth(): int
+    +getLength(): int
+}
+
+OfficeBuilding <|-- BankBranch
+class BankBranch {
+    +getPrice(): int
+    +getWorkersCapacity(): int
+    +getWidth(): int
+    +getLength(): int
+}
+
+WorkplaceBuilding <|-- CommercialBuilding
+abstract class CommercialBuilding {
+    -{final} SALES_TAX: int
+    +{abstract} getVisitorsCapacity(): int
+    +addVisitor(citizen: Citizen): void
+    +calculateSalesTax(): int
+    +calculateProfitPerTick(): int
+    +{static} calculateDemand(city: City): int
+    +{static} calculateRetailShortage(city: City): double
+}
+
+CommercialBuilding <|-- Mall
+class Mall {
+    +getPrice(): int
+    +getWorkersCapacity(): int
+    +getVisitorsCapacity(): int
+    +getWidth(): int
+    +getLength(): int
+}
+
+CommercialBuilding <|-- GroceryStore
+class GroceryStore {
+    +getPrice(): int
+    +getWorkersCapacity(): int
+    +getVisitorsCapacity(): int
+    +getWidth(): int
+    +getLength(): int
+}
+
+' --- publicbuilding subtree ---
+
+Buildable <|-- PublicBuilding
+abstract class PublicBuilding {
+    +{abstract} getMaintanenceCostPerDay(): int
+    +getUpgrades(): Upgrade[]
+}
+
+abstract class "PublicBuilding.Upgrade" as Upgrade {
+    #isBuilt: boolean
+    +{abstract} getPrice(): int
+    +getName(): String
+    +getIsBuilt(): boolean
+    +build(city: City): void
+    +toBlob(factory: SerializedBlob.Factory): SerializedBlob
+}
+PublicBuilding +-- Upgrade
+
+PublicBuilding <|-- PublicServiceBuilding
+abstract class PublicServiceBuilding {
+    +{abstract} getRange(): int
+    +{abstract} getPublicServiceTypeClass(): Class<? extends PublicServiceBuilding>
+    +{static} getFieldFunctionForPublicServiceType(city: City, type: Class): Function<Point, Double>
+    +{static} getAllPublicServiceTypeBuildings(city: City, type: Class): Map<Point, PublicServiceBuilding>
+    +{static} getCombinedFieldFunctionForBuildings(buildings: Map): Function<Point, Double>
+    +{static} getFieldFunctionForBuilding(origin: Point, building: PublicServiceBuilding): Function<Point, Double>
+}
+
+PublicServiceBuilding <|-- HealthcareBuilding
+abstract class HealthcareBuilding {
+    +{abstract} getHealthIncrease(x: int, y: int): int
+    +getPublicServiceTypeClass(): Class<? extends PublicServiceBuilding>
+}
+
+HealthcareBuilding <|-- Clinic
+class Clinic {
+    -ambulanceGarage: AmbulanceGarage
+    +getPrice(): int
+    +getUpgrades(): Upgrade[]
+    +getMaintanenceCostPerDay(): int
+    +getRange(): int
+    +getHealthIncrease(x: int, y: int): int
+    +getWidth(): int
+    +getLength(): int
+}
+class "Clinic.AmbulanceGarage" as AmbulanceGarage {
+    +getPrice(): int
+}
+AmbulanceGarage --|> Upgrade
+Clinic +-- AmbulanceGarage
+
+HealthcareBuilding <|-- Hospital
+class Hospital {
+    -helipad: Helipad
+    +getPrice(): int
+    +getUpgrades(): Upgrade[]
+    +getMaintanenceCostPerDay(): int
+    +getRange(): int
+    +getHealthIncrease(x: int, y: int): int
+    +getWidth(): int
+    +getLength(): int
+}
+class "Hospital.Helipad" as HospitalHelipad {
+    +getPrice(): int
+}
+HospitalHelipad --|> Upgrade
+Hospital +-- HospitalHelipad
+
+PublicServiceBuilding <|-- PoliceStation
+abstract class PoliceStation {
+    +{abstract} getCrimeReduction(x: int, y: int): int
+    +getPublicServiceTypeClass(): Class<? extends PublicServiceBuilding>
+}
+
+PoliceStation <|-- SmallPoliceStation
+class SmallPoliceStation {
+    -policeCarsGarage: PoliceCarsGarage
+    +getPrice(): int
+    +getUpgrades(): Upgrade[]
+    +getMaintanenceCostPerDay(): int
+    +getRange(): int
+    +getCrimeReduction(x: int, y: int): int
+    +getWidth(): int
+    +getLength(): int
+}
+class "SmallPoliceStation.PoliceCarsGarage" as PoliceCarsGarage {
+    +getPrice(): int
+}
+PoliceCarsGarage --|> Upgrade
+SmallPoliceStation +-- PoliceCarsGarage
+
+PoliceStation <|-- BigPoliceStation
+class BigPoliceStation {
+    -helipad: Helipad
+    +getPrice(): int
+    +getUpgrades(): Upgrade[]
+    +getMaintanenceCostPerDay(): int
+    +getRange(): int
+    +getCrimeReduction(x: int, y: int): int
+    +getWidth(): int
+    +getLength(): int
+}
+class "BigPoliceStation.Helipad" as BigPoliceHelipad {
+    +getPrice(): int
+}
+BigPoliceHelipad --|> Upgrade
+BigPoliceStation +-- BigPoliceHelipad
+
+PublicBuilding <|-- PublicTransportation
+abstract class PublicTransportation {
+    +{abstract} getCapacity(): int
+    +{abstract} computeNoiseLevel(): int
+    +getCongestion(): int
+}
+
+PublicTransportation <|-- Road
+class Road {
+    -plantedTrees: PlantedTrees
+    +getUpgrades(): Upgrade[]
+    +getPrice(): int
+    +getMaintanenceCostPerDay(): int
+    +getCapacity(): int
+    +computeNoiseLevel(): int
+    +getWidth(): int
+    +getLength(): int
+}
+class "Road.PlantedTrees" as RoadPlantedTrees {
+    +getPrice(): int
+}
+RoadPlantedTrees --|> Upgrade
+Road +-- RoadPlantedTrees
+
+PublicTransportation <|-- Street
+class Street {
+    -speedLimiters: SpeedLimiters
+    -plantedTrees: PlantedTrees
+    +getUpgrades(): Upgrade[]
+    +getPrice(): int
+    +getMaintanenceCostPerDay(): int
+    +getCapacity(): int
+    +computeNoiseLevel(): int
+    +getWidth(): int
+    +getLength(): int
+}
+class "Street.SpeedLimiters" as SpeedLimiters {
+    +getPrice(): int
+}
+class "Street.PlantedTrees" as StreetPlantedTrees {
+    +getPrice(): int
+}
+SpeedLimiters --|> Upgrade
+StreetPlantedTrees --|> Upgrade
+Street +-- SpeedLimiters
+Street +-- StreetPlantedTrees
+
+' ============================================================
+' Package: com.project.city
+' ============================================================
+
+class City {
+    +{final} grid: CityGrid
+    -loans: ReactiveArrayList<Loan>
+    +{final} loansView: Observable<List<Loan>>
+    -money: Reactive<Double>
+    +{final} moneyView: Observable<Double>
+    +{final} name: String
+    +homelessPeople: ArrayList<Citizen>
+    +{static} DEMOLISHMENT_COEF: double
+    +{static} TICKS_IN_DAY: int
+    +City(sizeX: int, sizeY: int, startingMoney: double, name: String)
+    +City(blob: SerializedBlob)
+    +toBlob(factory: SerializedBlob.Factory): SerializedBlob
+    +build(upgrade: PublicBuilding.Upgrade): boolean
+    +build(building: Buildable, place: Point): void
+    +demolish(place: Point): void
+    +takeOutLoan(loan: Loan): void
+    +payOutLoan(loan: Loan): void
+    +serviceLoans(): double
+    +getTotalDebt(): double
+    +payBuildingsUpkeepPerTick(): int
+    +accomodateHomelessPeople(): void
+    +builtBuildings(): List<PrivateBuilding>
+    +collectTaxesFromResidents(): int
+    +collectTaxesFromPurchases(): int
+    +collectTaxesFromBusinesses(): int
+    +evictHomelessPeople(): void
+    +employPeople(): void
+    +accomodateNewImmigrants(): void
+}
+
+class CityGrid {
+    -{final} buildings: Map<Point, Buildable>
+    +{final} buildingsView: Map<Point, Buildable>
+    +{final} sizeX: int
+    +{final} sizeY: int
+    -pathFinder: PathFinder
+    ~CityGrid(sizeX: int, sizeY: int)
+    +CityGrid(blob: SerializedBlob, city: City)
+    +toBlob(factory: SerializedBlob.Factory): SerializedBlob
+    +getNextStepFromTo(from: Buildable, to: Buildable): Buildable
+    +getBuildingAt(place: Point): Buildable
+    +getBuildingOrigin(building: Buildable): Point
+    +placeBuildingAt(place: Point, building: Buildable): void
+    +removeBuildingAt(place: Point): void
+}
+City *-- CityGrid
+CityGrid o-- Buildable
+
+class Citizen {
+    +{final} id: String
+    +location: BuildableRef<Buildable>
+    +home: BuildableRef<ResidentialBuilding>
+    +work: BuildableRef<WorkplaceBuilding>
+    -currentHealth: int
+    +{final} identity: Identity
+    -lastStateUpdateTick: int
+    -city: City
+    -currentThoughtsSeed: int
+    -state: CitizenState
+    -{static} cache: WeakHashMap<String, Citizen>
+    +Citizen(city: City, home: ResidentialBuilding, work: WorkplaceBuilding)
+    +evict(): void
+    +toBlob(factory: SerializedBlob.Factory): SerializedBlob
+    +{static} fromBlob(blob: SerializedBlob, city: City): Citizen
+    +runSimulationTick(tick: int): void
+    +getLocation(): Buildable
+    +getCurrentHealth(): int
+    +setCurrentHealth(health: int): void
+    +getSatisfaction(): int
+    +getDetailedInfo(): Map<String, String>
+    +getCurrentStateDescription(): String
+    +getCurrentThoughts(): String
+}
+City "1" *-- "*" Citizen
+
+interface CitizenState <<sealed>> {
+    +toBlob(factory: SerializedBlob.Factory): SerializedBlob
+    +{static} fromBlob(blob: SerializedBlob, city: City): CitizenState
+}
+class "CitizenState.Residing" as Residing <<record>>
+class "CitizenState.Working" as Working <<record>>
+class "CitizenState.Shopping" as Shopping <<record>> {
+    +shop: BuildableRef<CommercialBuilding>
+    +toBlob(factory: SerializedBlob.Factory): SerializedBlob
+}
+CitizenState <|.. Residing
+CitizenState <|.. Working
+CitizenState <|.. Shopping
+Citizen ..> CitizenState
+
+class IdentityGenerator <<final>> {
+    -{static} FIRST_NAMES_MALE: List<String>
+    -{static} FIRST_NAMES_FEMALE: List<String>
+    -{static} LAST_NAMES: List<String>
+    +{static} DEFAULT_MIN_YEAR: int
+    +{static} DEFAULT_MAX_YEAR: int
+    -{final} random: Random
+    -{final} minYear: int
+    -{final} maxYear: int
+    +{static} generator: IdentityGenerator
+    +IdentityGenerator()
+    +IdentityGenerator(seed: long)
+    +IdentityGenerator(random: Random, minYear: int, maxYear: int)
+    +nextIdentity(): Identity
+}
+
+class "IdentityGenerator.Identity" as Identity <<record>> {
+    +firstName: String
+    +lastName: String
+    +birthYear: int
+    +fullName(): String
+    +toBlob(factory: SerializedBlob.Factory): SerializedBlob
+}
+IdentityGenerator +-- Identity
+Citizen ..> Identity
+Citizen ..> IdentityGenerator
+
+class PathFinder {
+    -{final} grid: CityGrid
+    -tileIndexCache: Map<Point, Buildable>
+    -originCache: Map<Buildable, Point>
+    -adjacencyCache: Map<Buildable, List<Buildable>>
+    -flowFieldCache: Map<Buildable, Map<Buildable, Buildable>>
+    ~PathFinder(grid: CityGrid)
+    +invalidateCache(): void
+    +buildingAt(p: Point): Buildable
+    +nextStep(from: Buildable, to: Buildable): Buildable
+    +findPath(from: Buildable, to: Buildable): Deque<Buildable>
+    +isStillWalkable(b: Buildable, target: Buildable): boolean
+}
+CityGrid *-- PathFinder
+
+' ============================================================
+' Package: com.project.loans
+' ============================================================
+
+abstract class Loan implements "Comparable<Loan>" {
+    #paymentLeft: Reactive<Integer>
+    +paymentLeftView: Observable<Integer>
+    +{abstract} getLoanSize(): int
+    +getPaymentLeft(): int
+    +{abstract} getLoanRate(): int
+    +{abstract} getPennyRate(): int
+    +payOutLoan(money: int): void
+    +paidOutLoan(): boolean
+    +getPerTickInterest(): int
+    +payPerTickInterest(money: int): void
+    +compareTo(other: Loan): int
+    +toBlob(factory: SerializedBlob.Factory): SerializedBlob
+    +{static} fromBlob(blob: SerializedBlob): Loan
+}
+
+Loan <|-- FederalLoan
+class FederalLoan {
+    +getLoanSize(): int
+    +getLoanRate(): int
+    +getPennyRate(): int
+}
+
+Loan <|-- PrivateLoan
+class PrivateLoan {
+    +getLoanSize(): int
+    +getLoanRate(): int
+    +getPennyRate(): int
+}
+
+City "1" o-- "*" Loan
+
+' ============================================================
+' Package: com.project.simulation
+' ============================================================
+
+class Game {
+    +{final} simulator: Reactive<Simulator>
+    +listSaves(): List<String>
+    +loadSave(gameName: String): void
+    +createSave(): void
+    +startNewSimulation(mapSizeX: int, mapSizeY: int, difficulty: GameDifficulty, cityName: String): void
+}
+
+enum GameDifficulty {
+    EASY
+    MEDIUM
+    HARD
+    +{final} startingMoney: int
+}
+
+enum GameSpeed {
+    Stopped
+    Slow
+    Normal
+    Fast
+    +{final} msBetweenTicks: int
+}
+
+class Simulator {
+    +{final} city: City
+    -gameSpeed: GameSpeed
+    -currentTick: Reactive<Integer>
+    +{final} currentTickView: Observable<Integer>
+    -citizensAmount: Reactive<Integer>
+    +citizensAmountView: Observable<Integer>
+    -homelessCitizensAmount: Reactive<Integer>
+    +homelessCitizensAmountView: Observable<Integer>
+    -lastResidentTax: Reactive<Integer>
+    +lastResidentTaxView: Observable<Integer>
+    -lastBusinessTax: Reactive<Integer>
+    +lastBusinessTaxView: Observable<Integer>
+    -lastPurchaseTax: Reactive<Integer>
+    +lastPurchaseTaxView: Observable<Integer>
+    -lastBuildingsUpkeep: Reactive<Integer>
+    +lastBuildingsUpkeepView: Observable<Integer>
+    +netIncomeView: Observable<Integer>
+    -lastLoansService: Reactive<Double>
+    +lastLoansServiceView: Observable<Double>
+    -totalDebt: Reactive<Double>
+    +totalDebtView: Observable<Double>
+    +Simulator(city: City)
+    +getGameSpeed(): GameSpeed
+    +setGameSpeed(gameSpeed: GameSpeed): void
+    +startSimulation(): void
+    +startSimulationCLI(): Runnable
+    +runSimulationTick(): void
+    +averageCitizenSatisfaction(): int
+    +averageCrimeRate(): int
+    +averageCitizenHealth(): int
+}
+
+Game *-- Simulator
+Simulator *-- City
+Simulator ..> GameSpeed
+Game ..> GameDifficulty
+
+' ============================================================
+' Package: com.project.utils
+' ============================================================
+
+class Point {
+    +{final} x: int
+    +{final} y: int
+    +Point(x: int, y: int)
+    +Point(blob: SerializedBlob)
+    +toBlob(factory: SerializedBlob.Factory): SerializedBlob
+    +distFrom(other: Point): double
+    +hashCode(): int
+    +equals(obj: Object): boolean
+    +isWithin(from: Point, l: int, w: int): boolean
+    +{static} allPointsWithin(from: Point, l: int, w: int): Iterable<Point>
+}
+
+class "Reactive<T>" as Reactive {
+    -value: T
+    -{final} listeners: CopyOnWriteArrayList<Consumer<T>>
+    +Reactive()
+    +Reactive(initial: T)
+    +get(): T
+    +set(newValue: T): void
+    +subscribe(listener: Consumer<T>): Runnable
+    +readOnly(): Observable<T>
+}
+
+interface "Reactive.Observable<T>" as Observable {
+    +get(): T
+    +subscribe(listener: Consumer<T>): Runnable
+}
+Reactive +-- Observable
+
+class "Reactive.ReactiveArrayList<T>" as ReactiveArrayList {
+    -{final} listeners: CopyOnWriteArrayList<Consumer<List<T>>>
+    +add(e: T): boolean
+    +remove(o: Object): boolean
+    +addAll(c: Collection<? extends T>): boolean
+    +clear(): void
+    +set(index: int, element: T): T
+    +get(): List<T>
+    +subscribe(listener: Consumer<List<T>>): Runnable
+    +readOnly(): Observable<List<T>>
+}
+ReactiveArrayList --|> ArrayList
+ReactiveArrayList ..|> Observable
+Reactive +-- ReactiveArrayList
+
+interface SerializedBlob {
+    +extendMap(m: Map<String, SerializedBlob>): SerializedBlob
+    +type(): Factory.Type
+    +map(): Map<String, SerializedBlob>
+    +array(): List<SerializedBlob>
+    +primitive(): Object
+    +string(): String
+    +intValue(): Integer
+    +booleanValue(): Boolean
+    +doubleValue(): Double
+    +toSerialized(): String
+}
+
+interface "SerializedBlob.Factory" as SerializedBlobFactory {
+    +fromMap(m: Map<String, SerializedBlob>): SerializedBlob
+    +array(l: List<SerializedBlob>): SerializedBlob
+    +string(s: String): SerializedBlob
+    +intValue(i: int): SerializedBlob
+    +doubleValue(d: double): SerializedBlob
+    +booleanValue(b: boolean): SerializedBlob
+    +nullValue(): SerializedBlob
+    +primitive(o: Object): SerializedBlob
+    +parse(serialized: String): SerializedBlob
+}
+SerializedBlob +-- SerializedBlobFactory
+
+enum "SerializedBlob.Factory.Type" as SerializedBlobType {
+    OBJECT
+    ARRAY
+    PRIMITIVE
+}
+SerializedBlobFactory +-- SerializedBlobType
+
+class SelfDescribedXML implements SerializedBlobFactory {
+    -{static} singleton: SelfDescribedXML
+    +{static} getInstance(): SelfDescribedXML
+    +fromMap(m: Map<String, SerializedBlob>): SelfDescribedXMLBlob
+    +array(l: List<SerializedBlob>): SelfDescribedXMLBlob
+    +string(s: String): SelfDescribedXMLBlob
+    +intValue(i: int): SelfDescribedXMLBlob
+    +doubleValue(d: double): SelfDescribedXMLBlob
+    +booleanValue(d: boolean): SelfDescribedXMLBlob
+    +nullValue(): SelfDescribedXMLBlob
+    +primitive(o: Object): SelfDescribedXMLBlob
+    +parse(xml: String): SelfDescribedXMLBlob
+    -toEl(blob: SerializedBlob, doc: Document): Element
+    -from(el: Element): SelfDescribedXMLBlob
+}
+
+class "SelfDescribedXML.SelfDescribedXMLBlob" as SelfDescribedXMLBlob implements SerializedBlob {
+    -{final} type: Type
+    -map: Map<String, SerializedBlob>
+    -{final} array: List<SerializedBlob>
+    -{final} primitive: Object
+    +extendMap(m: Map<String, SerializedBlob>): SerializedBlob
+    +type(): Type
+    +map(): Map<String, SerializedBlob>
+    +array(): List<SerializedBlob>
+    +primitive(): Object
+    +string(): String
+    +intValue(): Integer
+    +booleanValue(): Boolean
+    +doubleValue(): Double
+    +toSerialized(): String
+}
+SelfDescribedXML +-- SelfDescribedXMLBlob
+
+' ============================================================
+' Package: com.project (top-level entry point)
+' ============================================================
+
+class Project {
+    +{static} main(args: String[]): void
+}
+Project ..> GameInterface
+Project ..> CLIInterface
+
+' ============================================================
+' Package: com.project.cli
+' ============================================================
+
+class CLIInterface {
+    -{static} RESET: String
+    -{static} BOLD: String
+    -{static} CYAN: String
+    -{static} GREEN: String
+    -{static} YELLOW: String
+    -{static} RED: String
+    -{static} GREY: String
+    -{static} WHITE: String
+    +{static} main(args: String[]): void
+    +{static} run(): void
+    -{static} c(colour: String, text: String): String
+    -{static} iconFor(b: Buildable): String
+    -{static} printMap(sim: Simulator): void
+    -{static} printStats(sim: Simulator): void
+    -{static} buildableList(): List<Class<? extends Buildable>>
+    -{static} printBuildingList(): void
+    -{static} printHelp(inGame: boolean): void
+    -{static} handleSimCommand(line: String, sim: Simulator, game: Game, sc: Scanner): boolean
+    -{static} runSimulationSession(game: Game): void
+    -{static} mainMenuLoop(game: Game, sc: Scanner): void
+}
+CLIInterface ..> Game
+CLIInterface ..> Simulator
+CLIInterface ..> City
+CLIInterface ..> Buildable
+CLIInterface ..> GameDifficulty
+CLIInterface ..> GameSpeed
+CLIInterface ..> FederalLoan
+CLIInterface ..> PrivateLoan
+
+' ============================================================
+' Package: com.project.farm
+' (note: source files lack `package com.project.farm;` declarations
+'  - they were merged in from a different layout)
+' ============================================================
+
+abstract class Crop {
+    -{static} DEFAULT_MARKETPRICES_FOR_TYPES: Map<String, Integer>
+    -stage: GrowthStage
+    -marketPrice: int
+    -name: String
+    -cropType: String
+    -fEvent: FarmEvent
+    +Crop(name: String, marketPrice: int, cropType: String)
+    +Crop(name: String, cropType: String)
+    +getName(): String
+    +getStage(): GrowthStage
+    +setStage(gs: GrowthStage): void
+    +FarmEventHappened(e: FarmEvent): void
+    +getFEvent(): FarmEvent
+    +grow(): void
+    +isReady(): boolean
+    +{abstract} getYield(): int
+    +{abstract} getType(): String
+    +getMarketprice(): int
+    #appropriateEventYield(usualYield: int): int
+}
+
+Crop <|-- GrainCrop
+class GrainCrop {
+    -{static} DEFAULT_YIELD: int
+    +GrainCrop(name: String, marketPrice: int)
+    +GrainCrop(name: String)
+    +getYield(): int
+    +getType(): String
+}
+
+Crop <|-- VegetableCrop
+class VegetableCrop {
+    -{static} DEFAULT_YIELD: int
+    +VegetableCrop(name: String, marketPrice: int)
+    +VegetableCrop(name: String)
+    +getYield(): int
+    +getType(): String
+}
+
+Crop <|-- OrchardCrop
+class OrchardCrop {
+    -{static} DEFAULT_YIELD: int
+    +OrchardCrop(name: String, marketPrice: int)
+    +OrchardCrop(name: String)
+    +getYield(): int
+    +getType(): String
+}
+
+enum GrowthStage {
+    SEED
+    SPROUT
+    GROWING
+    MATURE
+    HARVESTED
+    DEAD
+}
+
+enum FarmEvent {
+    FRUITFUL_HARVEST
+    DROUGHT
+    BIRD_ATTACK
+    PEST
+}
+
+class FarmPlot {
+    -crop: Crop
+    -soilQuality: int
+    -isIrrigated: boolean
+    -event: FarmEvent
+    +FarmPlot()
+    +plant(crop: Crop): void
+    +tick(): void
+    +getSoilQuality(): int
+    +isIrrigated(): boolean
+    +setIrrigated(irrigationStatus: boolean): void
+    +applyEvent(e: FarmEvent): void
+    +waterAmount(): int
+    +harvest(): int
+    +centralBankInterferenceOrBrokeCitizenAlert(): void
+    +getEvent(): FarmEvent
+}
+
+class IrrigationSystem {
+    -waterLevel: int
+    -coverage: FarmPlot[]
+    -{static} COST_FOR_REFILL: int
+    +IrrigationSystem(plots: FarmPlot[])
+    +irrigateAll(): void
+    +irrigateOne(p: FarmPlot): void
+    +refill(): boolean
+    +getWaterLevel(): int
+}
+
+WorkplaceBuilding <|-- Farm
+class Farm {
+    -plots: FarmPlot[]
+    -irrigation: IrrigationSystem
+    -farmEvents: ArrayList<FarmEvent>
+    +Farm(numberOfPlots: int)
+    +addPlot(p: FarmPlot): void
+    +tick(): void
+    +activeEvents(): void
+    +getActiveEvents(): ArrayList<FarmEvent>
+    +getWorkersCapacity(): int
+    +getWidth(): int
+    +getLength(): int
+    +getPrice(): int
+}
+
+CommercialBuilding <|-- FarmMarket
+class FarmMarket {
+    -inventory: Map<String, Integer>
+    +sellCrop(crop: Crop, quantity: int): int
+    +getPriceOf(crop: Crop): int
+    +getVisitorsCapacity(): int
+    +getWorkersCapacity(): int
+    +getWidth(): int
+    +getLength(): int
+    +getPrice(): int
+}
+
+' Farm internal composition
+Farm "1" *-- "*" FarmPlot
+Farm "1" *-- "1" IrrigationSystem
+Farm "1" o-- "*" FarmEvent
+FarmPlot "0..1" o-- "1" Crop
+FarmPlot ..> GrowthStage
+FarmPlot ..> FarmEvent
+IrrigationSystem o-- FarmPlot
+Crop ..> GrowthStage
+Crop ..> FarmEvent
+FarmMarket ..> Crop
+
+' ============================================================
+' Package: com.project.ui (Swing-based)
+' ============================================================
+
+class GameInterface {
+    -{static} FRAME_W: int
+    -{static} FRAME_H: int
+    +{static} main(args: String[]): void
+    +{static} run(): void
+    -{static} setGlobalFont(): void
+    -createMenuBar(): JMenuBar
+    -render(): void
+}
+GameInterface --|> JPanel
+
+class "GameInterface.MainMenu" as MainMenu
+class "GameInterface.NewGame" as NewGame
+class "GameInterface.LoadGame" as LoadGame
+class "GameInterface.Credits" as Credits
+MainMenu --|> JPanel
+NewGame --|> JPanel
+LoadGame --|> JPanel
+Credits --|> JPanel
+GameInterface +-- MainMenu
+MainMenu +-- NewGame
+MainMenu +-- LoadGame
+MainMenu +-- Credits
+
+class SimulationInterface {
+    -view: CityView
+    -simulator: Simulator
+    -getBuildActionsPanel(city: City): JPanel
+    -getBuildableClassesSortedByType(): ArrayList<Class<? extends Buildable>>
+}
+SimulationInterface --|> JPanel
+
+class "SimulationInterface.BottomPanel" as BottomPanel
+class "SimulationInterface.Loans" as LoansPanel
+class "SimulationInterface.Overlays" as Overlays
+class "SimulationInterface.DemandStats" as DemandStats
+class "SimulationInterface.AggregateStats" as AggregateStats
+class "SimulationInterface.NumberStats" as NumberStats
+class "SimulationInterface.TimeSpeedButtons" as TimeSpeedButtons
+class "SimulationInterface.ReactiveLabel<T>" as ReactiveLabel
+BottomPanel --|> JPanel
+LoansPanel --|> JPanel
+Overlays --|> JPanel
+DemandStats --|> JPanel
+AggregateStats --|> JPanel
+NumberStats --|> JPanel
+TimeSpeedButtons --|> JPanel
+ReactiveLabel --|> JLabel
+SimulationInterface +-- BottomPanel
+BottomPanel +-- LoansPanel
+BottomPanel +-- Overlays
+BottomPanel +-- DemandStats
+BottomPanel +-- AggregateStats
+BottomPanel +-- NumberStats
+BottomPanel +-- TimeSpeedButtons
+BottomPanel +-- ReactiveLabel
+
+class IsometricMapView {
+    -tiles: Image[][]
+    -cols: int
+    -rows: int
+    -tileW: int
+    -tileH: int
+    -zoom: double
+    -surfaceOffset: int
+    -originX: int
+    -originY: int
+    -hoverCol: int
+    -hoverRow: int
+    -drawHoverHighlight: boolean
+    -dragState: int
+    -dragStartCol: int
+    -dragStartRow: int
+    -dragCurCol: int
+    -dragCurRow: int
+    -controls: JPanel
+    -controlsVisible: boolean
+    -minZoom: double
+    -maxZoom: double
+    -zoomStep: double
+    +IsometricMapView()
+    -installKeyBindings(): void
+    -buildControls(): void
+    +panBy(dx: int, dy: int): void
+    +zoomBy(factor: double): void
+    +setZoomLimits(min: double, max: double): void
+    +setControlsVisible(visible: boolean): void
+    +isControlsVisible(): boolean
+    +getControlsPanel(): JPanel
+    +setTiles(grid: Image[][]): void
+    +setTile(col: int, row: int, image: Image): void
+    +setTileSize(tileWidth: int, tileHeight: int): void
+    +setOrigin(x: int, y: int): void
+    +setZoom(zoom: double): void
+    +getZoom(): double
+    +setTileSurfaceOffset(offsetPixels: int): void
+    +setHoverHighlightVisible(visible: boolean): void
+    +getColumns(): int
+    +getRows(): int
+    +getTileWidth(): int
+    +getTileHeight(): int
+    +getHoveredCol(): int
+    +getHoveredRow(): int
+    +addTileHoverListener(l: TileHoverListener): void
+    +removeTileHoverListener(l: TileHoverListener): void
+    +addTileClickListener(l: TileClickListener): void
+    +removeTileClickListener(l: TileClickListener): void
+    +addTileDragListener(l: TileDragListener): void
+    +removeTileDragListener(l: TileDragListener): void
+    +addOverlay(o: OverlayPainter): Runnable
+    +drawTileDiamond(g: Graphics2D, col: int, row: int, fill: Color, stroke: Color): void
+    +attachComponent(comp: Component, col: int, row: int, anchor: TileAnchor): void
+    +moveAttachment(comp: Component, col: int, row: int): void
+    +detachComponent(comp: Component): void
+    +addSprite(s: Sprite): void
+    +removeSprite(s: Sprite): boolean
+    +clearSprites(): void
+    +getSprites(): List<Sprite>
+    +tileToScreen(col: int, row: int): Point
+    +tileAt(sx: int, sy: int): int[]
+    #paintComponent(g: Graphics): void
+}
+IsometricMapView --|> JComponent
+
+interface "IsometricMapView.TileHoverListener" as TileHoverListener
+interface "IsometricMapView.TileClickListener" as TileClickListener
+interface "IsometricMapView.TileDragListener" as TileDragListener
+interface "IsometricMapView.OverlayPainter" as OverlayPainter
+enum "IsometricMapView.TileAnchor" as TileAnchor
+class "IsometricMapView.Sprite" as Sprite <<static final>> {
+    +{final} image: Image
+    +{final} anchorCol: int
+    +{final} anchorRow: int
+    +{final} footprintCols: int
+    +{final} footprintRows: int
+    +{final} isOverlay: boolean
+    +Sprite(image: Image, anchorCol: int, anchorRow: int, footprintCols: int, footprintRows: int)
+}
+class "IsometricMapView.Attachment" as Attachment <<private static final>>
+IsometricMapView +-- TileHoverListener
+IsometricMapView +-- TileClickListener
+IsometricMapView +-- TileDragListener
+IsometricMapView +-- OverlayPainter
+IsometricMapView +-- TileAnchor
+IsometricMapView +-- Sprite
+IsometricMapView +-- Attachment
+
+class CityView {
+    -{static} TILE_W: int
+    -{static} TILE_H: int
+    -{final} COLS: int
+    -{final} ROWS: int
+    -city: City
+    +tick: int
+    +CityView(city: City)
+    +render(): void
+    -buildView(): void
+    +{static} enableUpgradeAction(view: CityView, onClose: Runnable): Runnable
+    +{static} manhattanPath(from: Point, to: Point): List<Point>
+    +{static} loadImage(Class: Class<?>, filename: String): BufferedImage
+}
+CityView --|> IsometricMapView
+
+class "CityView.DragVisual" as DragVisual <<static>>
+interface "CityView.TilesListener" as TilesListener
+interface "CityView.TileListener" as TileListener
+interface "CityView.FloatingDragLabelCreator" as FloatingDragLabelCreator
+interface "CityView.FloatingHoverLabelCreator" as FloatingHoverLabelCreator
+interface "CityView.FloatingBuildingHoverLabelCreator" as FloatingBuildingHoverLabelCreator
+class "CityView.ReactiveInfoLabel" as ReactiveInfoLabel {
+    -labelCreator: Supplier<String>
+    -render: Runnable
+    +setLabelCreator(labelCreator: Supplier<String>): void
+}
+ReactiveInfoLabel --|> JLabel
+CityView +-- DragVisual
+CityView +-- TilesListener
+CityView +-- TileListener
+CityView +-- FloatingDragLabelCreator
+CityView +-- FloatingHoverLabelCreator
+CityView +-- FloatingBuildingHoverLabelCreator
+CityView +-- ReactiveInfoLabel
+
+class TogglesMenu {
+    +TogglesMenu(actions: List<Action>)
+}
+TogglesMenu --|> JPanel
+
+interface "TogglesMenu.Action" as Action {
+    +getName(): String
+    +getStopName(): String
+    +enable(onEnd: Runnable): Runnable
+}
+TogglesMenu +-- Action
+
+' --- UI composition / usage ---
+
+GameInterface ..> Game
+SimulationInterface *-- CityView
+SimulationInterface ..> Simulator
+SimulationInterface ..> City
+SimulationInterface ..> Buildable
+SimulationInterface ..> FederalLoan
+SimulationInterface ..> PrivateLoan
+SimulationInterface ..> GameSpeed
+SimulationInterface ..> TogglesMenu
+CityView ..> City
+CityView ..> Buildable
+CityView ..> PublicBuilding
+CityView ..> Upgrade
+CityView ..> Point
+
+' ============================================================
+' Cross-package dependencies
+' ============================================================
+
+Buildable ..> SerializedBlob
+Buildable ..> Citizen
+Buildable ..> City
+Citizen ..> BuildableRef
+Citizen ..> Point
+City ..> Reactive
+City ..> ReactiveArrayList
+CityGrid ..> Point
+CityGrid ..> SerializedBlob
+Point ..> SerializedBlob
+Loan ..> Reactive
+Loan ..> Observable
+Simulator ..> Reactive
+Simulator ..> Observable
+Simulator ..> Buildable
+Simulator ..> PrivateBuilding
+Simulator ..> ResidentialBuilding
+
+@enduml
