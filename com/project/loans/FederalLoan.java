@@ -1,0 +1,15 @@
+package com.project.loans;
+
+public class FederalLoan extends Loan {
+    public int getLoanSize() {
+        return 100000;
+    }
+
+    public int getLoanRate() {
+        return 5;
+    }
+
+    public int getPennyRate() {
+        return 1;
+    }
+}

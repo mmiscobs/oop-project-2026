@@ -1,0 +1,69 @@
+- [x] Create isometric renderer
+- [x] Implement satisfaction
+- [x] Implement crime
+- [x] Implement health
+- [x] Implement range overlay for public buildings
+- [x] Implement noise health effects
+- [x] Implement upgrades
+- [x] Loans
+- [x] Implement the buildings hierarchy
+- [x] Implement tick based time flow
+  - [x] Draw movable translucent clouds
+  - [x] Money income per citizen associated with building
+    - [x] Residential Tax
+    - [x] Purchases Tax
+    - [x] Busineses Tax
+  - [x] Immigration
+  - [x] Residential demand
+    - [x] Unbuilt homes
+  - [x] Eviction and emmigration
+  - [x] Expendatures per building
+  - [x] Citizens moving through city
+    - [x] Traffic congestion
+- [x] Implement UI
+  - [x] Placing buildings
+    - [x] Show obstructing tiles
+    - [x] Charging for placement
+  - [x] Placing roads
+    - [x] Charging for placement
+  - [x] Demolishing buildings
+    - [x] Show the demolished building outline
+    - [x] Charging for demolishment
+  - [x] Looking at the stats
+    - [x] Amounts
+      - [x] Taxes
+      - [x] Upkeep
+      - [x] Money
+      - [x] Population + Homeless
+      - [x] Average crime, health and satisfaction
+    - [x] HeatMaps
+      - [x] Profit
+      - [x] Noise
+      - [x] Satisfaction
+      - [x] Health
+      - [x] Traffic Congestion
+      - [x] Crime Level
+    - [x] Picker Info Dialog
+      - [x] Amount of citizens in building
+      - [x] Upkeep cost
+      - [x] Current profit
+      - [x] Amount of workers, residents
+      - [x] Capacity of workers, residents
+  - [x] Construction
+  - [x] Inheritance
+  - [x] Polymorphism
+  - [?] Exceptions
+  - [x] File IO
+  - [x] Interfaces
+  - [x] Abstract Classes
+  - [x] Generics
+  - [ ] Cloneable
+  - [x] Comparable
+- [x] Implement start menu
+  - [x] Create game
+    - [x] Size of a map
+    - [x] Difficulty (starting money)
+  - [x] Load game
+  - [x] Save game
+  - [x] Exit
+  - [x] Credits
